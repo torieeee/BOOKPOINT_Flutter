@@ -1,8 +1,10 @@
 import 'package:book_point/components/login_form.dart';
+import 'package:book_point/components/sign_up_form.dart';
+import 'package:book_point/components/social_button.dart';
 import 'package:book_point/utils/config.dart';
 import 'package:book_point/utils/text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 
 class Authentication extends StatefulWidget {
   const Authentication({super.key});
@@ -12,8 +14,10 @@ class Authentication extends StatefulWidget {
 }
 
 class _AuthenticationState extends State<Authentication> {
+  bool isSignIn = true;
   @override
   Widget build(BuildContext context) {
+     Config.init(context);
     //build login text field
     return Scaffold(
         body: Padding(
@@ -35,7 +39,9 @@ class _AuthenticationState extends State<Authentication> {
                 ),
                 Config.spaceSmall,
                 Text(
-                  AppText.enText['signIn_text']!,
+                  isSignIn
+                  ? AppText.enText['signIn_text']!
+                  : AppText.enText['register_text']!,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -43,9 +49,10 @@ class _AuthenticationState extends State<Authentication> {
                 ),
                 Config.spaceSmall,
                 //login
-                LoginForm(),
+                isSignIn ? LoginForm():SignUpForm(),
                 Config.spaceSmall,
-                Center(
+                isSignIn
+                ?Center(
                   child: TextButton(
                     onPressed:(){},
                     child:Text(
@@ -54,10 +61,66 @@ class _AuthenticationState extends State<Authentication> {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
+                      ),
                   ),
-                    ) ,),
+                    ) ,
+                    )
+                :Container(),
+                //social button
+                const Spacer(),
+                Center(
+                  child: Text(
+                    AppText.enText['social_login']!,
+                    style: TextStyle(
+                      fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.grey.shade500,
+                  ),
+                  ),
+                ),
+                Config.spaceSmall,
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: const <Widget>[
+                    //social button
+                    SocialButton(social:'google'),
+                    SocialButton(social: 'facebook'),
+                  ],
+                  ),
+                  Config.spaceSmall,
+                   Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  isSignIn
+                      ? AppText.enText['signUp_text']!
+                      : AppText.enText['registered_text']!,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      isSignIn = !isSignIn;
+                    });
+                  },
+                  child: Text(
+                    isSignIn ? 'Sign Up' : 'Sign In',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
                 )
               ],
-            ))));
+            )
+          ],
+        ),
+      ),
+    ));
   }
 }
