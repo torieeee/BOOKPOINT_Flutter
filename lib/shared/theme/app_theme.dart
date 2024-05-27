@@ -77,5 +77,29 @@ class AppTheme{
     );
   }
 
-  static FilledButtonThemeData
+  static FilledButtonThemeData get  _filledButtonTheme{
+    return FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+    );
+  }
+
+  static InputBorder get _enabledBorder => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8.0),
+    borderSide: const BorderSide(color: Colors.transparent),
+  );
+
+  static InputBorder get _focusedBorder => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8.0),
+    borderSide: BorderSide.none,
+  );
+
+  static InputBorder get _disabledBorder => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8.0),
+    borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+  );
 }

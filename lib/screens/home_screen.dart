@@ -1,5 +1,9 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:models/models.dart';
+import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
+import '../shared/theme/widgets/titles/section_title.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -77,21 +81,79 @@ class HomeView extends StatelessWidget {
               style: GoogleFonts.spaceGrotesk(),
               decoration: InputDecoration(
                 hintText: 'Search for doctors...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 suffixIcon: Container(
-                  margin:EdgeInsets.all(4.0),
-                  padding: EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.all(4.0),
+                  padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
                     color: colorScheme.onSurfaceVariant,
                     borderRadius: BorderRadius.circular(8.0)
                   ),
-                  child: Icon(Icons.filter_alt_outlined),
+                  child: const Icon(Icons.filter_alt_outlined),
                 ),
               ),
             ),
             )
           ),
       ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+            children: [
+              _DoctorCategories(),
+              SizedBox(height: 16.0),
+              _MySchedule(),
+            ],
+          ),
+        ),
+    );
+  }
+}
+
+class _MySchedule extends StatelessWidget {
+  const _MySchedule({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SectionTitle(
+          title: 'My Sce',
+          action: 'See all',
+          onPressed: () {},
+          ),
+      ],
+    );
+  }
+}
+
+class _DoctorCategories extends StatelessWidget{
+  const _DoctorCategories({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SectionTitle(
+          title: 'Categories',
+          action: 'See all',
+          onPressed: () {},
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: DoctorCategory.values
+              .take(5)
+              .map<Widget>(
+                (category) => Expanded(
+                  child: CircleAvatarWithTextLabel(
+                  icon: category.icon,
+                  label: category.name,
+                ),
+              ),
+            )
+          .toList(),
+        ),
+      ],
     );
   }
 }
