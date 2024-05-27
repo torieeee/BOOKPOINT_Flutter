@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-//import 'package:doctor_appointment_app/components/button.dart';
-//import 'package:doctor_appointment_app/main.dart';
-//import 'package:doctor_appointment_app/models/auth_model.dart';
-//import 'package:/providers/dioprovider.dart';
+import 'package:book_point/components/button.dart';
+import 'package:book_point/main.dart';
+import 'package:book_point/models/auth_model.dart';
+import 'package:providers/dioprovider.dart';
 import 'package:book_point/screens/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -71,7 +71,7 @@ class _LoginFormState extends State<LoginForm> {
                           ))),
           ),
           Config.spaceSmall,
-          Consumer<Authentication>(
+          Consumer<AuthModel>(
             builder: (context, auth, child) {
               return Button(
                 width: double.infinity,

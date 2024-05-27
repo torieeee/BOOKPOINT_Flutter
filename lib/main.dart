@@ -1,8 +1,9 @@
 //import 'package:doctor_appointment_app/main_layout.dart';
-//import 'package:doctor_appointment_app/models/auth_model.dart';
-//import 'package:doctor_appointment_app/screens/auth_page.dart';
+//import 'package:book_point/models/auth_model.dart';
+import 'package:book_point/screens/Authentication.dart';
 //import 'package:doctor_appointment_app/screens/booking_page.dart';
 //import 'package:doctor_appointment_app/screens/success_booked.dart';
+import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     //define ThemeData here
     
-      return MaterialApp(
+      return ChangeNotifierProvider<AuthModel>(
+        create: (context)=>AuthModel(),
+        child: MaterialApp(
         navigatorKey: navigatorKey,
         title: 'Bookpoint',
         debugShowCheckedModeBanner: false,
@@ -53,10 +56,11 @@ class MyApp extends StatelessWidget {
           //routes that will be used by the app
           //authentication is the sign_up and sign_in
           '/': (context) => const Authentication(),
-          'main': (context) => const MainLayout(),
-          'booking_page': (context) => BookingPage(),
-          'success_booking': (context) => const AppointmentBooked(),
+         // 'main': (context) => const MainLayout(),
+         // 'booking_page': (context) => BookingPage(),
+          //'success_booking': (context) => const AppointmentBooked(),
         },
+        ),
       );
     
   }
