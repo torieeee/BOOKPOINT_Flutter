@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:book_point/components/button.dart';
 import 'package:book_point/main.dart';
 import 'package:book_point/models/auth_model.dart';
-import 'package:providers/dioprovider.dart';
+import 'package:book_point/providers/dio_provider.dart';
 import 'package:book_point/screens/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
