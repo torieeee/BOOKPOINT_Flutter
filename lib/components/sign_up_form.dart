@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:book_point/components/button.dart';
 import 'package:book_point/main.dart';
-//import 'package:book_point/models/auth_model.dart';
-import 'package:providers/dioprovider.dart';
+import 'package:book_point/models/auth_model.dart';
+import 'package:book_point/providers/dio_provider.dart';
 import 'package:book_point/screens/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/config.dart';
 
 
@@ -19,13 +19,13 @@ class SignUpForm extends StatefulWidget {
 }
 class _SignUpFormState extends State<SignUpForm>{
   final _formKey=GlobalKey<FormState>();
-  final _IdController=TextEditingController();
+  final _idController=TextEditingController();
   final _fnameController=TextEditingController();
   final _lnameController=TextEditingController();
   final _emailController=TextEditingController();
   final _passController=TextEditingController();
   final _confirmPassController=TextEditingController();
-  bool obsecurePass=true;
+  bool obscurePass=true;
   @override
   Widget build(BuildContext context){
     return Form(
@@ -41,7 +41,7 @@ class _SignUpFormState extends State<SignUpForm>{
               hintText: 'First name',
               labelText: 'Name',
               alignLabelWithHint: true,
-              prefixIcon: Icon(Icons.email_outlined),
+              prefixIcon: Icon(Icons.person_outlined),
               prefixIconColor: Config.primaryColor,
             ),
           ),
@@ -55,7 +55,7 @@ class _SignUpFormState extends State<SignUpForm>{
               hintText: 'Last name',
               labelText: 'last name',
               alignLabelWithHint: true,
-              prefixIcon: Icon(Icons.email_outlined),
+              prefixIcon: Icon(Icons.person_outlined),
               prefixIconColor: Config.primaryColor,
             ),
           ),
@@ -74,14 +74,14 @@ class _SignUpFormState extends State<SignUpForm>{
           ),
           Config.spaceSmall,
           TextFormField(
-            controller: _IdController,
+            controller: _idController,
             keyboardType: TextInputType.number,
             cursorColor: Config.primaryColor,
             decoration: const InputDecoration(
               hintText: 'ID number',
               labelText: 'ID',
               alignLabelWithHint: true,
-              prefixIcon: Icon(Icons.email_outlined),
+              prefixIcon: Icon(Icons.badge_outlined),
               prefixIconColor: Config.primaryColor,
             ),
           ),
@@ -90,7 +90,7 @@ class _SignUpFormState extends State<SignUpForm>{
             controller: _passController,
             keyboardType: TextInputType.visiblePassword,
             cursorColor: Config.primaryColor,
-            obscureText: obsecurePass,
+            obscureText: obscurePass,
             decoration: InputDecoration(
                 hintText: 'Password',
                 labelText: 'Password',
@@ -100,10 +100,10 @@ class _SignUpFormState extends State<SignUpForm>{
                 suffixIcon: IconButton(
                     onPressed: () {
                       setState(() {
-                        obsecurePass = !obsecurePass;
+                        obscurePass = !obscurePass;
                       });
                     },
-                    icon: obsecurePass
+                    icon: obscurePass
                         ? const Icon(
                             Icons.visibility_off_outlined,
                             color: Colors.black38,
@@ -118,7 +118,7 @@ class _SignUpFormState extends State<SignUpForm>{
             controller: _confirmPassController,
             keyboardType: TextInputType.visiblePassword,
             cursorColor: Config.primaryColor,
-            obscureText: obsecurePass,
+            obscureText: obscurePass,
             decoration: InputDecoration(
                 hintText: 'Confirm password',
                 labelText: 'Confirm Password',
@@ -128,10 +128,10 @@ class _SignUpFormState extends State<SignUpForm>{
                 suffixIcon: IconButton(
                     onPressed: () {
                       setState(() {
-                        obsecurePass = !obsecurePass;
+                        obscurePass = !obscurePass;
                       });
                     },
-                    icon: obsecurePass
+                    icon: obscurePass
                         ? const Icon(
                             Icons.visibility_off_outlined,
                             color: Colors.black38,
@@ -143,17 +143,18 @@ class _SignUpFormState extends State<SignUpForm>{
           ),
 
         Config.spaceSmall,
-          Consumer<Authentication>(
+          Consumer<AuthModel>(
             builder: (context, auth, child) {
               return Button(
                 width: double.infinity,
                 title: 'Sign Up',
                 onPressed: () async {
+                  if(_formKey.currentState!.validate()){
                   final userRegistration = await DioProvider().registerUser(
-                      _fnameController.text,
-                      _lnameController.text,
+                     // _fnameController.text,
+                     // _lnameController.text,
                       _emailController.text,
-                      _IdController.text,
+                      //_idController.text,
                       _passController.text,
                       _confirmPassController.text
                       );
@@ -171,6 +172,7 @@ class _SignUpFormState extends State<SignUpForm>{
                   } else {
                     print('register not successful');
                   }
+                }
                 },
                 disable: false,
               );

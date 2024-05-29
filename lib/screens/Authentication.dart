@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:book_point/components/login_form.dart';
 import 'package:book_point/components/sign_up_form.dart';
 import 'package:book_point/components/social_button.dart';
 import 'package:book_point/utils/config.dart';
 import 'package:book_point/utils/text.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class Authentication extends StatefulWidget {
@@ -15,6 +18,21 @@ class Authentication extends StatefulWidget {
 
 class _AuthenticationState extends State<Authentication> {
   bool isSignIn = true;
+
+   void loginSuccess(Map<String, dynamic> userData, Map<String, dynamic> tokenData) async {
+    // Update authentication state
+    // Here you would typically update some state management system,
+    // like a Provider, Bloc, or setState. For simplicity, let's assume
+    // you are using SharedPreferences to store the token and user data.
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userData', json.encode(userData));
+    await prefs.setString('token', json.encode(tokenData));
+
+    // Navigate to the main part of the app
+    Navigator.pushNamed(context, 'main');
+  }
+  
   @override
   Widget build(BuildContext context) {
      Config.init(context);
