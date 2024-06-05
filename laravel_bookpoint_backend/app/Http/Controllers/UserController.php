@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Doctor;
+use App\Models\PatientDetails;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facade\Hash;
+use Illuminate\Support\Facade\Auth;
 
 class UserController extends Controller
 {
@@ -14,7 +17,25 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $user=array();//returns aet of user and doctor data
+        $user=Auth::user();
+        $doctor=User::where('type','doctor')->get();
+        $doctorData=Doctor::all();
+
+        //collect user data and all doctor details
+        foreach($doctorData as $data){
+            foreach($doctor as $info){
+                if($data['doc_id']==$info['id']){
+                    $data['doctor_name']=$info['name'];
+                    $data['doctor_profile']=$info['profile_photo_url'];
+
+                }
+            }
+        }
+        $user['doctor']=$doctorData;
+        
+        return $user;
+
     }
 
     public function login()

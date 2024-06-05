@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:models/models.dart';
+//import 'package:book_point/models/auth_model.dart';
 
 import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
 import '../shared/theme/widgets/titles/section_title.dart';
@@ -22,6 +23,7 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    
 
     return Scaffold(
       appBar: AppBar(
