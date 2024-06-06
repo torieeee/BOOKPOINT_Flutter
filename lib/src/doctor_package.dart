@@ -1,4 +1,4 @@
-import 'package:models/models.dart';
+import 'consultation_mode.dart';
 
 class DoctorPackage{
   final String id;
