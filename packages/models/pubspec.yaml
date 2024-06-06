@@ -20,6 +20,8 @@ dependencies:
   provider: ^6.0.4
   flutter_launcher_icons: ^0.13.1
   google_fonts: ^6.2.1
+  equatable: ^2.0.5
+  google_maps_flutter: ^2.6.1
 
   cupertino_icons: ^1.0.6
 

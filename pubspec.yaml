@@ -31,14 +31,19 @@ dependencies:
   flutter:
     sdk: flutter
   font_awesome_flutter: ^10.2.1
+  uuid: ^4.4.0
   table_calendar: ^3.0.8
+  equatable: ^2.0.5
+  google_maps_flutter: ^2.6.1
   lottie: ^3.1.2
   dio: ^5.4.3
   rating_dialog: ^2.0.4
   shared_preferences: ^2.0.15
   provider: ^6.0.4
+  built_value: ^8.9.2
   flutter_launcher_icons: ^0.13.1
   google_fonts: ^6.2.1
+  salomon_bottom_bar: ^3.3.2
 
   models:
     path: packages/models
@@ -51,6 +56,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  build_runner: ^2.4.10
+  built_value_generator: ^8.9.2
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
