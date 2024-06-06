@@ -17,10 +17,14 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user=array();//returns aet of user and doctor data
+        $user=array();//returns a set of user and doctor data
         $user=Auth::user();
         $doctor=User::where('type','doctor')->get();
         $doctorData=Doctor::all();
+
+        //return today's appointment and user details
+        $date=now()->format('m/d/Y');
+        $appointment=Appointments::where('date',$date)->first();
 
         //collect user data and all doctor details
         foreach($doctorData as $data){
@@ -28,7 +32,9 @@ class UserController extends Controller
                 if($data['doc_id']==$info['id']){
                     $data['doctor_name']=$info['name'];
                     $data['doctor_profile']=$info['profile_photo_url'];
-
+                    if(isset($appointment)&& $appointment['doc_id']==$info['id']){
+                        $data['appointments']=$appointment;
+                    }
                 }
             }
         }

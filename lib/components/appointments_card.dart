@@ -6,8 +6,7 @@ import 'package:rating_dialog/rating_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppointmentCard extends StatefulWidget {
-  AppointmentCard({Key? key, required this.doctor, required this.color})
-      : super(key: key);
+  const AppointmentCard({super.key, required this.doctor, required this.color});
 
   final Map<String, dynamic> doctor;
   final Color color;
