@@ -7,6 +7,10 @@ import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'screens/booking_page.dart';
+import 'screens/doctor_details.dart';
+import 'screens/main_layout.dart';
+import 'screens/success_booked.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,9 +60,10 @@ class MyApp extends StatelessWidget {
           //routes that will be used by the app
           //authentication is the sign_up and sign_in
           '/': (context) => const Authentication(),
-         // 'main': (context) => const MainLayout(),
-         // 'booking_page': (context) => BookingPage(),
-          //'success_booking': (context) => const AppointmentBooked(),
+         'main': (context) => const MainLayout(),
+         //'doc_details': (context) => const DoctorDetails(),
+         'booking_page': (context) => BookingPage(),
+         'success_booking': (context) => const AppointmentBooked(),
         },
         ),
       );

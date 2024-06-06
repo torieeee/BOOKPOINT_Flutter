@@ -36,16 +36,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 'email' => $input['email'],
             ])->save();
         }
-        $doctor = Doctor::where('doc_id', $user->id)
-        ->update([
-            'experience' => $input['experience'],
-            'bio_data' => $input['bio_data'],
-            'category' => $input['category'],
-        ]);
-
     }
-
-    
 
     /**
      * Update the given verified user's profile information.
