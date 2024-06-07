@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('doctors', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('doc_id')->unique();
+            $table->id('doc_id')->unique();
             $table->string('category')->nullable();
             $table->unsignedInteger('patients')->nullable();
             $table->unsignedInteger('experience')->nullable();

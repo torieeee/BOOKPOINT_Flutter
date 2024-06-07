@@ -132,6 +132,7 @@ class _BookingPageState extends State<BookingPage> {
                 width: double.infinity,
                 title: 'Make Appointment',
                 onPressed: () async {
+                  Navigator.of(context).pushNamed('success_booking');
                   //convert date/day/time into string first
                   final getDate = DateConverted.getDate(_currentDay);
                   final getDay = DateConverted.getDay(_currentDay.weekday);

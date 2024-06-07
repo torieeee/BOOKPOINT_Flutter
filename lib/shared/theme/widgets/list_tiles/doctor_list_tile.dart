@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:models/models.dart';
+import '../../../../src/doctor.dart';
 
 class DoctorListTile extends StatelessWidget {
   const DoctorListTile({
