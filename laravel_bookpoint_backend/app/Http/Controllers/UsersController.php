@@ -2,99 +2,154 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Doctor;
+use App\Models\UserDetails;
+use App\Models\Appointments;
+use Illuminate\Http\Request;
 use App\Models\PatientDetails;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facade\Hash;
-use Illuminate\Support\Facade\Auth;
 
-class UserController extends Controller
+class UsersController extends Controller
 {
     /**
      * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $user=array();//returns a set of user and doctor data
-        $user=Auth::user();
-        $doctor=User::where('type','doctor')->get();
-        $doctorData=Doctor::all();
+        $user = array(); //this will return a set of user and doctor data
+        $user = Auth::user();
+        $doctor = User::where('type', 'doctor')->get();
+        $details = $user->user_details;
+        $doctorData = Doctor::all();
+        //this is the date format without leading
+        $date = now()->format('n/j/Y'); //change date format to suit the format in database
 
-        //return today's appointment and user details
-        $date=now()->format('m/d/Y');
-        $appointment=Appointments::where('date',$date)->first();
+        //make this appointment filter only status is "upcoming"
+        $appointment = Appointments::where('status', 'upcoming')->where('date', $date)->first();
 
         //collect user data and all doctor details
         foreach($doctorData as $data){
+            //sorting doctor name and doctor details
             foreach($doctor as $info){
-                if($data['doc_id']==$info['id']){
-                    $data['doctor_name']=$info['name'];
-                    $data['doctor_profile']=$info['profile_photo_url'];
-                    if(isset($appointment)&& $appointment['doc_id']==$info['id']){
-                        $data['appointments']=$appointment;
+                if($data['doc_id'] == $info['id']){
+                    $data['doctor_name'] = $info['name'];
+                    $data['doctor_profile'] = $info['profile_photo_url'];
+                    if(isset($appointment) && $appointment['doc_id'] == $info['id']){
+                        $data['appointments'] = $appointment;
                     }
                 }
             }
         }
-        $user['doctor']=$doctorData;
-        
-        return $user;
 
+        $user['doctor'] = $doctorData;
+        $user['details'] = $details; //return user details here together with doctor list
+
+        return $user; //return all data
     }
 
-    public function login()
+    /**
+     * loign.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function login(Request $reqeust)
     {
         //validate incoming inputs
-        $request->validate([
+        $reqeust->validate([
             'email'=>'required|email',
             'password'=>'required',
         ]);
 
         //check matching user
-        $user= User::where('email',$request->email)->first();
+        $user = User::where('email', $reqeust->email)->first();
 
         //check password
-        if(!user || !Hash::check($request->password,$user->password)){
-            throw ValidationException::withMessage([
+        if(!$user || ! Hash::check($reqeust->password, $user->password)){
+            throw ValidationException::withMessages([
                 'email'=>['The provided credentials are incorrect'],
             ]);
         }
 
-        //return generated token
-        return $user->createToken($request->email)->plainTextToken;
-        //
+        //then return generated token
+        return $user->createToken($reqeust->email)->plainTextToken;
     }
 
-    public function registerUser(Request $request)
+    /**
+     * register.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function register(Request $request)
     {
         //validate incoming inputs
         $request->validate([
-            'name'=>'required|String',
+            'name'=>'required|string',
             'email'=>'required|email',
             'password'=>'required',
         ]);
 
-        $user=User::create([
+        $user = User::create([
             'name'=>$request->name,
             'email'=>$request->email,
-            'type'=>'patient',
+            'type'=>'user',
             'password'=>Hash::make($request->password),
-        
         ]);
 
-        $patientInfo=PatientDetails::create([
-            'patient_id'=>$user->id,
+        $userInfo = PatientDetails::create([
+            'user_id'=>$user->id,
             'status'=>'active',
         ]);
+
         return $user;
 
-        
+
+    }
+
+    /**
+     * update favorite doctor list
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function storeFavDoc(Request $request)
+    {
+
+        $saveFav = PatientDetails::where('user_id',Auth::user()->id)->first();
+
+        $docList = json_encode($request->get('favList'));
+
+        //update fav list into database
+        $saveFav->fav = $docList;  //and remember update this as well
+        $saveFav->save();
+
+        return response()->json([
+            'success'=>'The Favorite List is updated',
+        ], 200);
+    }
+
+    /**
+     * logout.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function logout(){
+        $user = Auth::user();
+        $user->currentAccessToken->delete();
+
+        return response()->json([
+            'success'=>'Logout successfully!',
+        ], 200);
     }
 
     /**
      * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function create()
     {
@@ -103,6 +158,9 @@ class UserController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -111,32 +169,45 @@ class UserController extends Controller
 
     /**
      * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function show(string $id)
+    public function show($id)
     {
         //
     }
 
     /**
      * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function edit(string $id)
+    public function edit($id)
     {
         //
     }
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         //
     }
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         //
     }

@@ -11,16 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Ensure the users table and id column exists and has the correct data type before running this migration
+
+        // Create the doctors table
         Schema::create('doctors', function (Blueprint $table) {
             $table->increments('id');
-            $table->id('doc_id')->unique();
+            $table->unsignedInteger('doc_id')->unique();
             $table->string('category')->nullable();
             $table->unsignedInteger('patients')->nullable();
             $table->unsignedInteger('experience')->nullable();
-            $table->longtext('bio_data')->nullable();
+            $table->longText('bio_data')->nullable();
             $table->string('status')->nullable();
-            $table->foreign('doc_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
+        });
+
+        // Add the foreign key constraint in a separate step
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->foreign('doc_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -29,6 +36,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Drop the foreign key constraint first
+        Schema::table('doctors', function (Blueprint $table) {
+            $table->dropForeign(['doc_id']);
+        });
+
+        // Drop the doctors table
         Schema::dropIfExists('doctors');
     }
 };
