@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'main_layout.dart';
 import 'screens/booking_page.dart';
-import 'screens/doctor_details.dart';
+//import 'screens/doctor_details.dart';
+
 import 'screens/success_booked.dart';
 
 void main() {

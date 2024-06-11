@@ -1,5 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:equatable/equatable.dart';
+//import 'package:models/models.dart';
 
 class DoctorAddress extends Equatable {
   final String id;
