@@ -50,6 +50,22 @@ class User extends Authenticatable
         'profile_photo_url',
     ];
 
+    public function doctor(){
+        return $this->hasOne(Doctor::class, 'doc_id');
+    }
+
+    public function user_details(){
+        return $this->hasOne(UserDetails::class, 'user_id');
+    }
+
+    public function appointments(){
+        return $this->hasMany(Appointments::class, 'user_id');
+    }
+
+    public function reviews(){
+        return $this->hasMany(Reviews::class, 'user_id');
+    }
+
     /**
      * Get the attributes that should be cast.
      *
