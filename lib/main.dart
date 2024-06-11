@@ -1,8 +1,4 @@
-//import 'package:doctor_appointment_app/main_layout.dart';
-//import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/screens/Authentication.dart';
-//import 'package:doctor_appointment_app/screens/booking_page.dart';
-//import 'package:doctor_appointment_app/screens/success_booked.dart';
 import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/utils/config.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'main_layout.dart';
 import 'screens/booking_page.dart';
 import 'screens/doctor_details.dart';
-
 import 'screens/success_booked.dart';
 
 void main() {

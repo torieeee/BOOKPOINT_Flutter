@@ -30,7 +30,7 @@ class DocsController extends Controller
     {
         //
     }
-    
+
     /**
      * Store a newly created resource in storage.
      * @param \Illuminate\Http\Response $request
@@ -44,7 +44,7 @@ class DocsController extends Controller
 
         //save the ratings and reviews from user
         $reviews->user_id = Auth::user()->id;
-        $reviews->doc_id = $request->get('doctor_id');
+        $reviews->doc_id = $request->get('doHctor_id');
         $reviews->ratings = $request->get('ratings');
         $reviews->reviews = $request->get('reviews');
         $reviews->reviewed_by = Auth::user()->name;
@@ -58,7 +58,7 @@ class DocsController extends Controller
         return response()->json([
             'success'=>'The appointment has been complete'
         ], 200);
-    
+
     }
 
     /**
@@ -76,7 +76,7 @@ class DocsController extends Controller
     public function edit($id){
         //
     }
-    
+
     /**
      * Update the specified resource in storage.
      * @param \Illuminate\Http\Response $request

@@ -11,6 +11,7 @@ class PatientDetails extends Model
     protected $fillable =[
         'patient_id',
         'bio_data',
+        'fav',
         'status',
     ];
 
