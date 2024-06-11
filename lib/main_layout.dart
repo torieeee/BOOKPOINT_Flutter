@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import 'screens/appointment_page.dart';
+import 'screens/fav_page.dart';
+import 'screens/profile_page.dart';
+
 class MainLayout extends StatefulWidget {
   const MainLayout({Key? key}) : super(key: key);
 

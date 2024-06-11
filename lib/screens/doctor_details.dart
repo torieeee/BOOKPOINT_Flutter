@@ -36,7 +36,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
         appTitle: 'Doctor Details',
         icon: const FaIcon(Icons.arrow_back_ios),
         actions: [
-          //Favarite Button
+          //Favorite Button
           IconButton(
             //press this button to add/remove favorite doctor
             onPressed: () async {
