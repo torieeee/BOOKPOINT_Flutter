@@ -8,7 +8,7 @@ import 'package:book_point/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/booking_page.dart';
-import 'screens/doctor_details.dart';
+//import 'screens/doctor_details.dart';
 import 'screens/main_layout.dart';
 import 'screens/success_booked.dart';
 
