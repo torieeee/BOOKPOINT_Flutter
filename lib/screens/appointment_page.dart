@@ -1,8 +1,9 @@
-import 'package:book_point/providers/dio_provider.dart';
-import 'package:book_point/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
+import '../providers/dio_provider.dart';
+import '../utils/config.dart';
 
 class AppointmentPage extends StatefulWidget {
   const AppointmentPage({Key? key}) : super(key: key);
@@ -245,7 +246,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
 class ScheduleCard extends StatelessWidget {
   const ScheduleCard(
-      {super.key, required this.date, required this.day, required this.time});
+      {Key? key, required this.date, required this.day, required this.time})
+      : super(key: key);
   final String date;
   final String day;
   final String time;

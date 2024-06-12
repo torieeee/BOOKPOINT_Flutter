@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class DioProvider {
   //get token
-  Future<dynamic> getToken(String email, String password) async {
+  Future<bool> getToken(String email, String password) async {
     try {
       var response = await Dio().post('http://127.0.0.1:8000/api/login',
           data: {'email': email, 'password': password});
@@ -18,7 +18,7 @@ class DioProvider {
         return false;
       }
     } catch (error) {
-      return error;
+      return false;
     }
   }
 
@@ -36,7 +36,7 @@ class DioProvider {
   }
 
   //register new user
-  Future<dynamic> registerUser(
+  Future<bool> registerUser(
       String username, String email, String password) async {
     try {
       var user = await Dio().post('http://127.0.0.1:8000/api/register',
@@ -47,7 +47,7 @@ class DioProvider {
         return false;
       }
     } catch (error) {
-      return error;
+      return false;
     }
   }
 

@@ -1,19 +1,22 @@
-import 'package:book_point/main.dart';
-import 'package:book_point/screens/doctor_details.dart';
-import 'package:book_point/utils/config.dart';
 import 'package:flutter/material.dart';
 
-class DoctorCard extends StatelessWidget{
-  const DoctorCard({
-      Key? key,
-      required this.doctor,
-      required this.isFav,
-  }):super(key: key);
+import '../main.dart';
+import '../screens/doctor_details.dart';
+import '../utils/config.dart';
 
-  final Map<String, dynamic>doctor;
+class DoctorCard extends StatelessWidget {
+  const DoctorCard({
+    Key? key,
+    required this.doctor,
+    required this.isFav,
+  }) : super(key: key);
+
+  final Map<String, dynamic> doctor;
   final bool isFav;
-  Widget build(BuildContext context){
-    Config.init(context);
+
+  @override
+  Widget build(BuildContext context) {
+    Config().init(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       height: 150,
@@ -95,6 +98,4 @@ class DoctorCard extends StatelessWidget{
       ),
     );
   }
-  
-  
 }

@@ -17,7 +17,7 @@ class _AuthenticationState extends State<Authentication> {
   bool isSignIn = true;
   @override
   Widget build(BuildContext context) {
-    Config.init(context);
+    Config().init(context);
     //build login text field
     return Scaffold(
         body: Padding(
