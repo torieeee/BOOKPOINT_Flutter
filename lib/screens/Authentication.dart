@@ -1,6 +1,5 @@
 import 'package:book_point/components/login_form.dart';
 import 'package:book_point/components/sign_up_form.dart';
-import 'package:book_point/components/social_button.dart';
 import 'package:book_point/utils/text.dart';
 import 'package:flutter/material.dart';
 
@@ -77,13 +76,6 @@ class _AuthenticationState extends State<Authentication> {
               ),
             ),
             Config.spaceSmall,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const <Widget>[
-                SocialButton(social: 'google'),
-                SocialButton(social: 'facebook'),
-              ],
-            ),
             Config.spaceSmall,
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

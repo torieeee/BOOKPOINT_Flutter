@@ -106,8 +106,6 @@ class UsersController extends Controller
         ]);
 
         return $user;
-
-
     }
 
     /**
