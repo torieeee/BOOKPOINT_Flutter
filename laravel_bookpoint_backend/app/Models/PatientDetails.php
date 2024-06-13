@@ -10,7 +10,7 @@ class PatientDetails extends Model
     use HasFactory;
     protected $table = 'patient_details';
     protected $fillable =[
-        'patient_id',
+        'user_id',
         'bio_data',
         'fav',
         'status',

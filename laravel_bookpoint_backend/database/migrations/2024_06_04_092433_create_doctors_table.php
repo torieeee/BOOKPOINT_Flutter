@@ -16,7 +16,7 @@ return new class extends Migration
         // Create the doctors table
         Schema::create('doctors', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('doc_id')->unique();
+            $table->unsignedBigInteger('doc_id')->unique();
             $table->string('category')->nullable();
             $table->unsignedInteger('patients')->nullable();
             $table->unsignedInteger('experience')->nullable();
