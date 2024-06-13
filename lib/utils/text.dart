@@ -1,12 +1,12 @@
-//predefined text
 class AppText {
-  static final Map<String, String> enText = {
-    'welcomeText': 'Welcome to Bookpoint.',
-    'signInText': 'Sign in to your account',
-    'registeredText': 'Already have an account?',
-    'registerText': 'You can sign up as a doctor or patient',
-    'signUpText': 'No account yet?',
-    'socialLogin': 'Use your social account',
-    'forgotPassword': 'Can\'t remember your password?',
+  static final enText = {
+    'welcome_text': 'Welcome',
+    'signIn_text': 'Sign in to your account',
+    'registered_text': 'Already have an account?',
+    'register_text':
+        'You can easily sign up, and connect to the Doctors nearby you',
+    'signUp_text': 'Don\'t have an account?',
+    'social-login': 'Or continue with social account',
+    'forgot-password': 'Forgot Your Password?',
   };
 }

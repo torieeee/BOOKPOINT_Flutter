@@ -40,7 +40,7 @@ class _BookingPageState extends State<BookingPage> {
 
   @override
   Widget build(BuildContext context) {
-    Config.init(context);
+    Config().init(context);
     final doctor = ModalRoute.of(context)!.settings.arguments as Map;
     return Scaffold(
       appBar: CustomAppBar(
@@ -132,7 +132,6 @@ class _BookingPageState extends State<BookingPage> {
                 width: double.infinity,
                 title: 'Make Appointment',
                 onPressed: () async {
-                  Navigator.of(context).pushNamed('success_booking');
                   //convert date/day/time into string first
                   final getDate = DateConverted.getDate(_currentDay);
                   final getDay = DateConverted.getDay(_currentDay.weekday);

@@ -4,7 +4,6 @@ import 'package:book_point/components/button.dart';
 import 'package:book_point/main.dart';
 import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/providers/dio_provider.dart';
-//import 'package:book_point/screens/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -80,10 +79,10 @@ class _LoginFormState extends State<LoginForm> {
                   //login here
                   final token = await DioProvider()
                       .getToken(_emailController.text, _passController.text);
-
+                      print(token);
                   if (token) {
-                    auth.loginSuccess({},{}); //update login status
-                    //rediret to main page
+                    //auth.loginSuccess(); //update login status
+                    //redirect to main page
 
                     //grab user data here
                     final SharedPreferences prefs =

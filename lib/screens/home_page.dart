@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-
 import '../components/appointments_card.dart';
 import '../components/doctor_card.dart';
 import '../models/auth_model.dart';
@@ -47,7 +46,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Config.init(context);
+    Config().init(context);
     user = Provider.of<AuthModel>(context, listen: false).getUser;
     doctor = Provider.of<AuthModel>(context, listen: false).getAppointment;
     favList = Provider.of<AuthModel>(context, listen: false).getFav;

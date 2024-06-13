@@ -114,7 +114,7 @@ class AboutDoctor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Config.init(context);
+    Config().init(context);
     return Container(
       width: double.infinity,
       child: Column(
@@ -174,7 +174,7 @@ class DetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Config.init(context);
+    Config().init(context);
     return Container(
       padding: const EdgeInsets.all(10),
       child: Column(
