@@ -1,12 +1,15 @@
-import 'dart:convert';
+//import 'dart:convert';
 
 import 'package:book_point/components/button.dart';
 import 'package:book_point/main.dart';
 import 'package:book_point/models/auth_model.dart';
-import 'package:book_point/providers/dio_provider.dart';
+//import 'package:book_point/providers/dio_provider.dart';
+//import 'package:book_point/screens/Authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:providers:database_connection.dart';
+import '../providers/database_connection.dart';
 
 import '../utils/config.dart';
 
@@ -22,6 +25,26 @@ class _LoginFormState extends State<LoginForm> {
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
   bool obsecurePass = true;
+  late DatabaseHelper _dbHelper;
+  @override
+  void initState() {
+    super.initState();
+    
+    _dbHelper = DatabaseHelper(
+      host: 'localhost',
+      port: 3306,
+      user: 'root',
+      password: '',
+      databaseName: 'book_point',
+    );
+    _dbHelper.openConnection(); 
+  }
+
+  @override
+  void dispose() {
+    _dbHelper.closeConnection(); // Close database connection
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -76,8 +99,8 @@ class _LoginFormState extends State<LoginForm> {
                 width: double.infinity,
                 title: 'Sign In',
                 onPressed: () async {
-                  //login here
-                  final token = await DioProvider()
+                  /*
+                 final token = await DioProvider()
                       .getToken(_emailController.text, _passController.text);
                       print(token);
                   if (token) {
@@ -112,6 +135,24 @@ class _LoginFormState extends State<LoginForm> {
                         });
                       }
                     }
+                  }
+                  try{*/
+                    final email =_emailController.text;
+                    final password=_passController.text;
+                    try{
+                    final isAuthenticated=await _dbHelper.authService(email,password);
+                    if (isAuthenticated) {
+      // Update login status
+      auth.loginSuccess(email,password);
+
+      // Redirect to the main page
+      MyApp.navigatorKey.currentState!.pushNamed('main');
+    } else {
+      print('Invalid credentials');
+    }
+  } catch (e) {
+    print('Error during login: $e');
+  
                   }
                 },
                 disable: false,

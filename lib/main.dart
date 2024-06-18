@@ -5,11 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'main_layout.dart';
 import 'screens/booking_page.dart';
+import 'package:book_point/providers/database_connection.dart';
 //import 'screens/doctor_details.dart';
 
 import 'screens/success_booked.dart';
 
-void main() {
+
+void main() async {
+  final dbHelper = DatabaseHelper(
+    host: '',
+    port: 3306,
+    user: 'your_username',
+    password: 'your_password',
+    databaseName: 'your_database_name',
+  );
+
+  await dbHelper.openConnection();
   runApp(const MyApp());
 }
 
@@ -67,3 +78,20 @@ class MyApp extends StatelessWidget {
     
   }
 }
+/*
+  final dbHelper = DatabaseHelper(
+    host: '',
+    port: 3306,
+    user: 'your_username',
+    password: 'your_password',
+    databaseName: 'your_database_name',
+  );
+
+  await dbHelper.openConnection();
+
+  // Example usage:
+  //await dbHelper.authService('user@example.com', 'password123');
+  //await dbHelper.registerUser('John Doe', 'john@example.com', 'securePassword');
+
+  //await dbHelper.closeConnection();
+}*/
