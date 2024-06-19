@@ -109,7 +109,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 title: 'Sign Up',
                 onPressed: () async {
 
-                  final username=_nameController.text;
+                 /* final username=_nameController.text;
                   final email=_emailController.text;
                   final password=_passController.text;
 
@@ -132,7 +132,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   }catch(e){
                     print('Error during registration');
 
-                  }
+                  }*/
             
                   /*final userRegistration = await DioProvider().registerUser(
                       _nameController.text,

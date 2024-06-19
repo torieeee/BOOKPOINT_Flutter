@@ -136,7 +136,7 @@ class _LoginFormState extends State<LoginForm> {
                       }
                     }
                   }
-                  try{*/
+                  try{
                     final email =_emailController.text;
                     final password=_passController.text;
                     try{
@@ -153,7 +153,7 @@ class _LoginFormState extends State<LoginForm> {
   } catch (e) {
     print('Error during login: $e');
   
-                  }
+                  }*/
                 },
                 disable: false,
               );
