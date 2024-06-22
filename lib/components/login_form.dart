@@ -101,6 +101,19 @@ class _LoginFormState extends State<LoginForm> {
                 title: 'Sign In',
                 
                 onPressed: () async {
+
+                  if (_formKey.currentState!.validate()){
+                    await auth.login(_emailController.text,_passController.text);
+                    if(auth.isLogin){
+                      MyApp.navigatorKey.currentState!.pushNamed('main');
+
+                    } else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Login Failed')),
+                      );
+                    }
+                  }
+                
                   /*
                  final token = await DioProvider()
                       .getToken(_emailController.text, _passController.text);
@@ -137,8 +150,9 @@ class _LoginFormState extends State<LoginForm> {
                         });
                       }
                     }
-                  }
-                  try{
+                  }*/
+                  
+                   /*try{
                     final email =_emailController.text;
                     final password=_passController.text;
                     try{
@@ -157,6 +171,7 @@ class _LoginFormState extends State<LoginForm> {
   
                   }*/
                 },
+                //child:Text('Sign In')
                 disable: false,
               );
             },

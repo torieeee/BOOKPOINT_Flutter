@@ -1,14 +1,21 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
+//import 'dart:convert';
+/*import 'package:flutter/material.dart';
 import '../providers/database_connection.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthModel extends ChangeNotifier {
   bool _isLogin = false;
-  Map<String, dynamic> user = {}; //update user details when login
+  Map<String, dynamic> user = {};
+
+  //Map<String, dynamic> user = {}; //update user details when login
   Map<String, dynamic> appointment ={}; //update upcoming appointment when login
   List<Map<String, dynamic>> favDoc = []; //get latest favorite doctor
   List<dynamic> _fav = []; //get all fav doctor id in list
   late DatabaseHelper _dbHelper;
+   late User? _firebaseUser;
+   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth  _firebaseAuth=FirebaseAuth.instance;
 
   AuthModel(){
     _dbHelper=DatabaseHelper(
@@ -55,7 +62,7 @@ class AuthModel extends ChangeNotifier {
 
     //list out doctor list according to favorite list
     for (var num in _fav) {
-      for (var doc in user['doctor']) {
+      for (var doc in user ['doctor']) {
         if (num == doc['doc_id']) {
           favDoc.add(doc);
         }
@@ -63,6 +70,104 @@ class AuthModel extends ChangeNotifier {
     }
     return favDoc;
   }
+
+  /*Future <void> login(String email,String password) async{
+    try{
+      UserCredential userCredential= await _firebaseAuth.signInWithEmailAndPassword(
+        email:email,
+        password:password,
+      );
+      user =userCredential.user as Map<String, dynamic>;
+      _isLogin=true;
+      notifyListeners();
+    }catch(e){
+      _isLogin=false;
+      //print("Error during login: $e");
+
+    }
+  }*/
+  Future<void> login(String email, String password) async {
+    try {
+      UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        user = {
+          'uid': userCredential.user!.uid,
+          'email': userCredential.user!.email,
+          'displayName': userCredential.user!.displayName,
+          
+
+          // Add any other relevant user information
+        };
+        _isLogin = true;
+      } else {
+        user = {};
+        _isLogin = false;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      _isLogin = false;
+      // Handle error (e.g., log it or show a message to the user)
+    }
+  }
+
+  /*Future <void> register(String username, String email, String password) async{
+    try{
+      UserCredential userCredential=await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      user = userCredential.user as Map<String, dynamic>;
+      await user.updateProfile(displayName: username);
+      _isLogin = true;
+      notifyListeners();
+    }catch (e) {
+      _isLogin = false;
+      print("Error during registration: $e");
+    }
+  }*/
+
+  Future<void> register(String username, String email, String password) async {
+  try {
+    UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    
+    if (userCredential.user != null) {
+      await userCredential.user!.updateProfile(displayName: username);
+      user = {
+        //'uid': userCredential.user!.uid,
+        'email': userCredential.user!.email,
+        'displayName': userCredential.user!.displayName,
+        'password':userCredential.user!.updatePassword(password),
+        // Add any other relevant user information
+      };
+      _isLogin = true;
+    } else {
+      user = {};
+      _isLogin = false;
+    }
+    
+    notifyListeners();
+  } catch (e) {
+    _isLogin = false;
+    print("Error during registration: $e");
+  }
+}
+
+
+  Future<void> logout() async {
+    await _firebaseAuth.signOut();
+    _isLogin = false;
+    user = {};
+    notifyListeners();
+  }
+}
 
 //when login success, update the status
   /*void loginSuccess(
@@ -99,4 +204,143 @@ class AuthModel extends ChangeNotifier {
     }
 
   }*/
+*/
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class AuthModel extends ChangeNotifier {
+  bool _isLogin = false;
+  late User? _firebaseUser; // Firebase User object
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  
+
+  // Data related to user appointments and favorites
+ Map<String, dynamic> _user = {}; // Define user data
+  Map<String, dynamic> _appointment = {}; // Define appointment data
+  final List <dynamic> _favList = []; // Define favorite list data
+ final Set _favDoc = {};
+ Set _fav = {};
+
+
+
+  // Getter for user data
+ Map<String, dynamic> get user => _user;
+
+  // Getter for appointment data
+  Map<String, dynamic> get appointment => _appointment;
+
+  // Getter for favorite list data
+  List<dynamic> get getFav => _favList.toList();
+
+  AuthModel() {
+    // Initialize Firebase Auth
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user == null) {
+        _isLogin = false;
+        _firebaseUser = null;
+        _appointment ;
+        _favDoc.clear();
+        _fav.clear();
+      } else {
+        _firebaseUser = user;
+        _isLogin = true;
+        _fetchUserData();
+      }
+      notifyListeners();
+    });
+  }
+
+  bool get isLogin => _isLogin;
+  User? get firebaseUser => _firebaseUser;
+  //Map<String, dynamic>? get appointment => _appointment;
+  //List<Map<String, dynamic>> get favDoc => _favDoc;
+  Set get fav => _fav;
+
+  get getFavDoc => null;
+
+  Future<void> login(String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      _firebaseUser = userCredential.user;
+    } catch (e) {
+      print("Error during login: $e");
+      _firebaseUser = null;
+    }
+  }
+
+  Future<void> register(String username, String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Store additional user data in Firestore
+      await _firestore.collection('users').doc(userCredential.user!.uid).set({
+        'username': username,
+        'email': email,
+        // Add any other relevant user information
+      });
+
+      _firebaseUser = userCredential.user;
+    } catch (e) {
+      print("Error during registration: $e");
+      _firebaseUser = null;
+    }
+  }
+
+  Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
+    _firebaseUser = null;
+    _appointment ;
+    _favDoc.clear();
+    _fav.clear();
+  }
+
+  // Fetch user data from Firestore
+  Future<void> _fetchUserData() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+          await _firestore.collection('users').doc(_firebaseUser!.uid).get();
+
+      // Fetch appointment data
+      if (userSnapshot.data() != null && userSnapshot.data()!['appointment'] != null) {
+        _appointment = userSnapshot.data()!['appointment'];
+      } else {
+        _appointment;
+      }
+
+      // Fetch favorite doctors
+      _favDoc.clear();
+      _fav.clear();
+      if (userSnapshot.data() != null && userSnapshot.data()!['fav'] != null) {
+        _fav = Set.from(userSnapshot.data()!['fav']);
+        // Fetch details of favorite doSctors
+        for (var docId in _fav) {
+          DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+              await _firestore.collection('doctors').doc(docId as String?).get();
+          if (docSnapshot.exists) {
+            _favDoc.add(docSnapshot.data()!);
+          }
+        }
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      _appointment ;
+      _favDoc.clear();
+      _fav.clear();
+    }
+    notifyListeners();
+  }
+
+  // Method to update favorite list and notify listeners
+  void setFavList(Set list) {
+    _fav = list;
+    notifyListeners();
+  }
 }
