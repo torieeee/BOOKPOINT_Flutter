@@ -19,6 +19,7 @@ class _SignUpFormState extends State<SignUpForm> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
+  bool _isSigningUp = false;
   bool obsecurePass = true;
 
   late DatabaseHelper _dbHelper;

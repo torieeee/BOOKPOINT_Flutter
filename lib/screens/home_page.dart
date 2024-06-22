@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     Config().init(context);
     user = Provider.of<AuthModel>(context, listen: false).getUser;
-    doctor = Provider.of<AuthModel>(context, listen: false).getAppointment;
+    //doctor = Provider.of<AuthModel>(context, listen: false).getAppointment;
     favList = Provider.of<AuthModel>(context, listen: false).getFav;
 
     return Scaffold(

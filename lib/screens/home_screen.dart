@@ -1,7 +1,7 @@
 import 'package:book_point/shared/theme/widgets/cards/appointment_preview_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+ 
 import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
 import '../shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
@@ -23,6 +23,8 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> user = {};
+    Map<String, dynamic> doctor = {};
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -118,6 +120,7 @@ class _NearbyDoctors extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Column(
       children: [
         SectionTitle(
@@ -147,10 +150,15 @@ class _NearbyDoctors extends StatelessWidget {
 }
 
 class _MySchedule extends StatelessWidget {
+  
   const _MySchedule({super.key});
 
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> user = {};
+    Map<String, dynamic> doctor = {};
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         SectionTitle(
@@ -158,7 +166,38 @@ class _MySchedule extends StatelessWidget {
           action: 'See all',
           onPressed: () {},
         ),
-        const AppointmentPreviewCard(),
+        doctor.isNotEmpty
+        ?AppointmentPreviewCard(
+           doctor: doctor,
+        ):
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.0),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                colorScheme.primary,
+                colorScheme.tertiary,
+              ],
+            ),
+          ),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 100,
+                child: Center(
+                    child: Text(
+                  'No appointment yet',
+                  style: textTheme.bodyMedium!.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )),
+              ), 
+            ],  
+          ),
+        ),
       ],
     );
   }

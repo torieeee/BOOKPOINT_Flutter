@@ -24,6 +24,7 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
+  bool _isSigningIn = false;
   bool obsecurePass = true;
   late DatabaseHelper _dbHelper;
   @override
@@ -98,6 +99,7 @@ class _LoginFormState extends State<LoginForm> {
               return Button(
                 width: double.infinity,
                 title: 'Sign In',
+                
                 onPressed: () async {
                   /*
                  final token = await DioProvider()
