@@ -250,7 +250,7 @@ class _HomePageState extends State<HomePage> {
     final authProvider = Provider.of<AuthModel>(context);
     user = authProvider.user;
     appointment = authProvider.appointment!;
-    favList = authProvider.getFav;
+     List favList = authProvider.getFav;
 
     return Scaffold(
       body: user.isEmpty

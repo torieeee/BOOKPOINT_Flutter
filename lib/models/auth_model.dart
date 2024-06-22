@@ -212,14 +212,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AuthModel extends ChangeNotifier {
   bool _isLogin = false;
   late User? _firebaseUser; // Firebase User object
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   
 
   // Data related to user appointments and favorites
  Map<String, dynamic> _user = {}; // Define user data
   Map<String, dynamic> _appointment = {}; // Define appointment data
-  List<dynamic> _favList = []; // Define favorite list data
+  final List <dynamic> _favList = []; // Define favorite list data
  final Set _favDoc = {};
  Set _fav = {};
 
@@ -232,7 +232,7 @@ class AuthModel extends ChangeNotifier {
   Map<String, dynamic> get appointment => _appointment;
 
   // Getter for favorite list data
-  List<dynamic> get getFav => _favList;
+  List<dynamic> get getFav => _favList.toList();
 
   AuthModel() {
     // Initialize Firebase Auth
@@ -257,6 +257,8 @@ class AuthModel extends ChangeNotifier {
   //Map<String, dynamic>? get appointment => _appointment;
   //List<Map<String, dynamic>> get favDoc => _favDoc;
   Set get fav => _fav;
+
+  get getFavDoc => null;
 
   Future<void> login(String email, String password) async {
     try {
