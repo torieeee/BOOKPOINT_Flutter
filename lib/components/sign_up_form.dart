@@ -6,6 +6,7 @@ import '../models/auth_model.dart';
 import '../utils/config.dart';
 import 'button.dart';
 import 'package:book_point/providers/database_connection.dart';
+//import 'login_form.dart';
 
 class SignUpForm extends StatefulWidget {
   SignUpForm({Key? key}) : super(key: key);
@@ -109,6 +110,32 @@ class _SignUpFormState extends State<SignUpForm> {
                 title: 'Sign Up',
                 onPressed: () async {
 
+                  if(_formKey.currentState!.validate()){
+                    await auth.register(
+                      _nameController.text,
+                      _emailController.text,
+                      _passController.text,
+                    );
+                    if(auth.isLogin){
+                      MyApp.navigatorKey.currentState!.pushNamed('main');
+                    }else{
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Registration failed')),
+                      );
+                    }
+                  }
+                  },
+                  disable: false,
+                  );
+                  },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
                  /* final username=_nameController.text;
                   final email=_emailController.text;
                   final password=_passController.text;
@@ -152,7 +179,12 @@ class _SignUpFormState extends State<SignUpForm> {
                   } else {
                     print('register not successful');
                   }*/
-                },
+                  /*GestureDetector(
+                    OnTap(){
+                      Navigator.push(context, MaterialPageRoute(builder:(context)=>LoginForm()))
+                    }
+                  );*/
+                /*},
                 disable: false,
               );
             },
@@ -161,6 +193,6 @@ class _SignUpFormState extends State<SignUpForm> {
       ),
     );
   }
-}
+}*/
 
 //now, let's get all doctor details and display on Mobile screen
