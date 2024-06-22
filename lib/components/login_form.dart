@@ -1,12 +1,15 @@
-import 'dart:convert';
+//import 'dart:convert';
 
 import 'package:book_point/components/button.dart';
 import 'package:book_point/main.dart';
 import 'package:book_point/models/auth_model.dart';
-import 'package:book_point/providers/dio_provider.dart';
+//import 'package:book_point/providers/dio_provider.dart';
+//import 'package:book_point/screens/Authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:providers:database_connection.dart';
+import '../providers/database_connection.dart';
 
 import '../utils/config.dart';
 
@@ -22,6 +25,26 @@ class _LoginFormState extends State<LoginForm> {
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
   bool obsecurePass = true;
+  late DatabaseHelper _dbHelper;
+  @override
+  void initState() {
+    super.initState();
+    
+    _dbHelper = DatabaseHelper(
+      host: 'localhost',
+      port: 3306,
+      user: 'root',
+      password: '',
+      databaseName: 'book_point',
+    );
+    _dbHelper.openConnection(); 
+  }
+
+  @override
+  void dispose() {
+    _dbHelper.closeConnection(); // Close database connection
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -76,44 +99,61 @@ class _LoginFormState extends State<LoginForm> {
                 width: double.infinity,
                 title: 'Sign In',
                 onPressed: () async {
-                  MyApp.navigatorKey.currentState!.pushNamed('main');
-                  // //login here
-                  // final token = await DioProvider()
-                  //     .getToken(_emailController.text, _passController.text);
-                  //     print(token);
-                  // if (token) {
-                  //   //auth.loginSuccess(); //update login status
-                  //   //redirect to main page
+                  /*
+                 final token = await DioProvider()
+                      .getToken(_emailController.text, _passController.text);
+                      print(token);
+                  if (token) {
+                    //auth.loginSuccess(); //update login status
+                    //redirect to main page
 
-                  //   //grab user data here
-                  //   final SharedPreferences prefs =
-                  //       await SharedPreferences.getInstance();
-                  //   final tokenValue = prefs.getString('token') ?? '';
+                    //grab user data here
+                    final SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    final tokenValue = prefs.getString('token') ?? '';
 
-                  //   if (tokenValue.isNotEmpty && tokenValue != '') {
-                  //     //get user data
-                  //     final response = await DioProvider().getUser(tokenValue);
-                  //     if (response != null) {
-                  //       setState(() {
-                  //         //json decode
-                  //         Map<String, dynamic> appointment = {};
-                  //         final user = json.decode(response);
+                    if (tokenValue.isNotEmpty && tokenValue != '') {
+                      //get user data
+                      final response = await DioProvider().getUser(tokenValue);
+                      if (response != null) {
+                        setState(() {
+                          //json decode
+                          Map<String, dynamic> appointment = {};
+                          final user = json.decode(response);
 
-                  //         //check if any appointment today
-                  //         for (var doctorData in user['doctor']) {
-                  //           //if there is appointment return for today
+                          //check if any appointment today
+                          for (var doctorData in user['doctor']) {
+                            //if there is appointment return for today
 
-                  //           if (doctorData['appointments'] != null) {
-                  //             appointment = doctorData;
-                  //           }
-                  //         }
+                            if (doctorData['appointments'] != null) {
+                              appointment = doctorData;
+                            }
+                          }
 
-                  //         auth.loginSuccess(user, appointment);
-                  //         MyApp.navigatorKey.currentState!.pushNamed('main');
-                  //       });
-                  //     }
-                  //   }
-                  // }
+                          auth.loginSuccess(user, appointment);
+                          MyApp.navigatorKey.currentState!.pushNamed('main');
+                        });
+                      }
+                    }
+                  }
+                  try{
+                    final email =_emailController.text;
+                    final password=_passController.text;
+                    try{
+                    final isAuthenticated=await _dbHelper.authService(email,password);
+                    if (isAuthenticated) {
+      // Update login status
+      auth.loginSuccess(email,password);
+
+      // Redirect to the main page
+      MyApp.navigatorKey.currentState!.pushNamed('main');
+    } else {
+      print('Invalid credentials');
+    }
+  } catch (e) {
+    print('Error during login: $e');
+  
+                  }*/
                 },
                 disable: false,
               );

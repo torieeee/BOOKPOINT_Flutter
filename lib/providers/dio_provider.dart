@@ -21,7 +21,6 @@ class DioProvider {
         return false;
       }
     } catch (error) {
-      print(error);
       return false;
     }
   }
@@ -35,6 +34,7 @@ class DioProvider {
         return json.encode(user.data);
       }
     } catch (error) {
+      print(error);
       return error;
     }
   }
@@ -70,6 +70,7 @@ class DioProvider {
         return 'Error';
       }
     } catch (error) {
+      print(error);
       return error;
     }
   }
@@ -86,6 +87,7 @@ class DioProvider {
         return 'Error';
       }
     } catch (error) {
+      print(error);
       return error;
     }
   }
@@ -109,6 +111,7 @@ class DioProvider {
         return 'Error';
       }
     } catch (error) {
+      print(error);
       return error;
     }
   }
@@ -128,6 +131,7 @@ class DioProvider {
         return 'Error';
       }
     } catch (error) {
+      print(error);
       return error;
     }
   }
@@ -144,6 +148,7 @@ class DioProvider {
         return 'Error';
       }
     } catch (error) {
+      print(error);
       return error;
     }
   }

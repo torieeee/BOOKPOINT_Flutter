@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../models/auth_model.dart';
-import '../providers/dio_provider.dart';
+//import '../providers/dio_provider.dart';
 import '../utils/config.dart';
 import 'button.dart';
+import 'package:book_point/providers/database_connection.dart';
 
 class SignUpForm extends StatefulWidget {
   SignUpForm({Key? key}) : super(key: key);
@@ -19,6 +20,27 @@ class _SignUpFormState extends State<SignUpForm> {
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
   bool obsecurePass = true;
+
+  late DatabaseHelper _dbHelper;
+  @override
+  void initState() {
+    super.initState();
+    
+    _dbHelper = DatabaseHelper(
+      host: 'localhost',
+      port: 3306,
+      user: 'root',
+      password: '',
+      databaseName: 'book_point',
+    );
+    _dbHelper.openConnection();
+  }
+
+  @override
+  void dispose() {
+    _dbHelper.closeConnection(); // Close database connection
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -86,25 +108,50 @@ class _SignUpFormState extends State<SignUpForm> {
                 width: double.infinity,
                 title: 'Sign Up',
                 onPressed: () async {
-                  MyApp.navigatorKey.currentState!.pushNamed('login_form');
-                  // final userRegistration = await DioProvider().registerUser(
-                  //     _nameController.text,
-                  //     _emailController.text,
-                  //     _passController.text);
+
+                 /* final username=_nameController.text;
+                  final email=_emailController.text;
+                  final password=_passController.text;
+
+                  try{
+                    final userRegistration=await _dbHelper.registerUser(username, email, password);
+
+                    if (userRegistration){
+                      final isAuthenticated=await _dbHelper.authService(email, password);
+
+                       if(isAuthenticated){
+                        auth.loginSuccess(email, password);
+                        MyApp.navigatorKey.currentState!.pushNamed('main');
+                       }
+
+                    }else{
+                      print('Registration not successful');
+
+                    }
+
+                  }catch(e){
+                    print('Error during registration');
+
+                  }*/
+            
+                  /*final userRegistration = await DioProvider().registerUser(
+                      _nameController.text,
+                      _emailController.text,
+                      _passController.text);
 
                   // //if register success, proceed to login
                   // if (userRegistration) {
                   //   final token = await DioProvider()
                   //       .getToken(_emailController.text, _passController.text);
 
-                  //   if (token) {
-                  //     auth.loginSuccess({}, {}); //update login status
-                  //     //rediret to main page
-                  //     MyApp.navigatorKey.currentState!.pushNamed('main');
-                  //   }
-                  // } else {
-                  //   print('register not successful');
-                  // }
+                    if (token) {
+                      auth.loginSuccess({}, {}); //update login status
+                      //rediret to main page
+                      MyApp.navigatorKey.currentState!.pushNamed('main');
+                    }
+                  } else {
+                    print('register not successful');
+                  }*/
                 },
                 disable: false,
               );

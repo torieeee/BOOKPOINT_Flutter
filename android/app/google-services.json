@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "306851339266",
+    "project_id": "bookpoint-23f70",
+    "storage_bucket": "bookpoint-23f70.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:306851339266:android:50368558d68b98ae08db1b",
+        "android_client_info": {
+          "package_name": "com.example.book_point"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZBT8ZTTcV2HiVU9glYYmvObH2T5TIurk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -30,9 +30,9 @@ class _MainNavBarState extends State<MainNavBar> {
         }
       },
       items: [
-        SalomonBottomBarItem(
-          icon: Icon(Icons.home),
-          title: Text("Discover"),
+         SalomonBottomBarItem(
+          icon:  Icon(Icons.home),
+          title:  Text("Discover"),
           selectedColor: colorScheme.primary,
         ),
         SalomonBottomBarItem(
