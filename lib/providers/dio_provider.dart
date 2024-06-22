@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/config.dart';
+
 class DioProvider {
+  final String _baseUrl = Config.baseUrl;
   //get token
   Future<bool> getToken(String email, String password) async {
     try {
-      var response = await Dio().post('http://127.0.0.1:8000/api/login',
+      var response = await Dio().post(('$_baseUrl/api/login'),
           data: {'email': email, 'password': password});
 
       if (response.statusCode == 200 && response.data != '') {
@@ -18,6 +21,7 @@ class DioProvider {
         return false;
       }
     } catch (error) {
+      print(error);
       return false;
     }
   }
@@ -25,7 +29,7 @@ class DioProvider {
   //get user data
   Future<dynamic> getUser(String token) async {
     try {
-      var user = await Dio().get('http://127.0.0.1:8000/api/user',
+      var user = await Dio().get(('$_baseUrl/api/user'),
           options: Options(headers: {'Authorization': 'Bearer $token'}));
       if (user.statusCode == 200 && user.data != '') {
         return json.encode(user.data);
@@ -39,7 +43,7 @@ class DioProvider {
   Future<bool> registerUser(
       String username, String email, String password) async {
     try {
-      var user = await Dio().post('http://127.0.0.1:8000/api/register',
+      var user = await Dio().post('$_baseUrl/api/register',
           data: {'name': username, 'email': email, 'password': password});
       if (user.statusCode == 201 && user.data != '') {
         return true;
@@ -47,6 +51,7 @@ class DioProvider {
         return false;
       }
     } catch (error) {
+      print(error);
       return false;
     }
   }
@@ -55,7 +60,7 @@ class DioProvider {
   Future<dynamic> bookAppointment(
       String date, String day, String time, int doctor, String token) async {
     try {
-      var response = await Dio().post('http://127.0.0.1:8000/api/book',
+      var response = await Dio().post('$_baseUrl/api/book',
           data: {'date': date, 'day': day, 'time': time, 'doctor_id': doctor},
           options: Options(headers: {'Authorization': 'Bearer $token'}));
 
@@ -72,7 +77,7 @@ class DioProvider {
   //retrieve booking details
   Future<dynamic> getAppointments(String token) async {
     try {
-      var response = await Dio().get('http://127.0.0.1:8000/api/appointments',
+      var response = await Dio().get('$_baseUrl/api/appointments',
           options: Options(headers: {'Authorization': 'Bearer $token'}));
 
       if (response.statusCode == 200 && response.data != '') {
@@ -89,7 +94,7 @@ class DioProvider {
   Future<dynamic> storeReviews(
       String reviews, double ratings, int id, int doctor, String token) async {
     try {
-      var response = await Dio().post('http://127.0.0.1:8000/api/reviews',
+      var response = await Dio().post('$_baseUrl/api/reviews',
           data: {
             'ratings': ratings,
             'reviews': reviews,
@@ -111,7 +116,7 @@ class DioProvider {
   //store fav doctor
   Future<dynamic> storeFavDoc(String token, List<dynamic> favList) async {
     try {
-      var response = await Dio().post('http://127.0.0.1:8000/api/fav',
+      var response = await Dio().post('$_baseUrl/api/fav',
           data: {
             'favList': favList,
           },
@@ -130,7 +135,7 @@ class DioProvider {
 //logout
   Future<dynamic> logout(String token) async {
     try {
-      var response = await Dio().post('http://127.0.0.1:8000/api/logout',
+      var response = await Dio().post('$_baseUrl/api/logout',
           options: Options(headers: {'Authorization': 'Bearer $token'}));
 
       if (response.statusCode == 200 && response.data != '') {

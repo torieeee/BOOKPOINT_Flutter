@@ -76,43 +76,44 @@ class _LoginFormState extends State<LoginForm> {
                 width: double.infinity,
                 title: 'Sign In',
                 onPressed: () async {
-                  //login here
-                  final token = await DioProvider()
-                      .getToken(_emailController.text, _passController.text);
-                      print(token);
-                  if (token) {
-                    //auth.loginSuccess(); //update login status
-                    //redirect to main page
+                  MyApp.navigatorKey.currentState!.pushNamed('main');
+                  // //login here
+                  // final token = await DioProvider()
+                  //     .getToken(_emailController.text, _passController.text);
+                  //     print(token);
+                  // if (token) {
+                  //   //auth.loginSuccess(); //update login status
+                  //   //redirect to main page
 
-                    //grab user data here
-                    final SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    final tokenValue = prefs.getString('token') ?? '';
+                  //   //grab user data here
+                  //   final SharedPreferences prefs =
+                  //       await SharedPreferences.getInstance();
+                  //   final tokenValue = prefs.getString('token') ?? '';
 
-                    if (tokenValue.isNotEmpty && tokenValue != '') {
-                      //get user data
-                      final response = await DioProvider().getUser(tokenValue);
-                      if (response != null) {
-                        setState(() {
-                          //json decode
-                          Map<String, dynamic> appointment = {};
-                          final user = json.decode(response);
+                  //   if (tokenValue.isNotEmpty && tokenValue != '') {
+                  //     //get user data
+                  //     final response = await DioProvider().getUser(tokenValue);
+                  //     if (response != null) {
+                  //       setState(() {
+                  //         //json decode
+                  //         Map<String, dynamic> appointment = {};
+                  //         final user = json.decode(response);
 
-                          //check if any appointment today
-                          for (var doctorData in user['doctor']) {
-                            //if there is appointment return for today
+                  //         //check if any appointment today
+                  //         for (var doctorData in user['doctor']) {
+                  //           //if there is appointment return for today
 
-                            if (doctorData['appointments'] != null) {
-                              appointment = doctorData;
-                            }
-                          }
+                  //           if (doctorData['appointments'] != null) {
+                  //             appointment = doctorData;
+                  //           }
+                  //         }
 
-                          auth.loginSuccess(user, appointment);
-                          MyApp.navigatorKey.currentState!.pushNamed('main');
-                        });
-                      }
-                    }
-                  }
+                  //         auth.loginSuccess(user, appointment);
+                  //         MyApp.navigatorKey.currentState!.pushNamed('main');
+                  //       });
+                  //     }
+                  //   }
+                  // }
                 },
                 disable: false,
               );

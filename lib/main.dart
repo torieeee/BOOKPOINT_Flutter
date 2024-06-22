@@ -3,6 +3,7 @@ import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'components/login_form.dart';
 import 'main_layout.dart';
 import 'screens/booking_page.dart';
 //import 'screens/doctor_details.dart';
@@ -58,6 +59,7 @@ class MyApp extends StatelessWidget {
           //authentication is the sign_up and sign_in
           '/': (context) => const Authentication(),
          'main': (context) => const MainLayout(),
+         'login_form': (context) => const LoginForm(),
          //'doc_details': (context) => const DoctorDetails(),
          'booking_page': (context) => BookingPage(),
          'success_booking': (context) => const AppointmentBooked(),

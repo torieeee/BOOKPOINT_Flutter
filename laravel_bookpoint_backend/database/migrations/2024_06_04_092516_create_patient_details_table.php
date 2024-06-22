@@ -8,24 +8,30 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('patient_details', function (Blueprint $table) {
-            
+        //this table is same as doctor table
+        //but is for users to store their details
+        Schema::create('user_details', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('patient_id')->unique();
+            $table->unsignedInteger('user_id')->unique();
+            $table->longText('bio_data')->nullable();
             $table->string('status')->nullable();
-            $table->foreign('patient_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('patient_details');
+        Schema::dropIfExists('user_details');
     }
 };
