@@ -223,6 +223,7 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
+          
           '/': (context) => const Authentication(),
           'main': (context) => const MainLayout(),
           'booking_page': (context) => BookingPage(),
