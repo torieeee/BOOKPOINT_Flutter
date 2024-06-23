@@ -206,6 +206,7 @@ class AuthModel extends ChangeNotifier {
   }*/
 */
 import 'package:flutter/material.dart';
+import 'package:book_point/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -266,14 +267,30 @@ class AuthModel extends ChangeNotifier {
         email: email,
         password: password,
       );
-      _firebaseUser = userCredential.user;
+
+    User? user = userCredential.user;
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        String userType = userDoc['userType'];
+        
+        // Navigate based on user type
+        if (userType == 'Dcotor'){
+          MyApp.navigatorKey.currentState!.pushNamed('adminDashboard');
+        } else {
+          MyApp.navigatorKey.currentState!.pushNamed('MainLayout');
+        }
+      }
+      _isLogin = true;
+      notifyListeners();
     } catch (e) {
+      _isLogin = false;
+      notifyListeners();
       print("Error during login: $e");
       _firebaseUser = null;
     }
   }
 
-  Future<void> register(String username, String email, String password) async {
+  Future<void> register(String username, String email, String password,String userType) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
@@ -284,6 +301,7 @@ class AuthModel extends ChangeNotifier {
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'username': username,
         'email': email,
+        'userType':userType,
         // Add any other relevant user information
       });
 

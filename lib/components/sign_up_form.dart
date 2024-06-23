@@ -21,6 +21,8 @@ class _SignUpFormState extends State<SignUpForm> {
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
   bool obsecurePass = true;
+  final List<String> _userTypes=['Doctor','Patient'];
+  String? _selectedUserType;
 
   late DatabaseHelper _dbHelper;
   @override
@@ -40,6 +42,9 @@ class _SignUpFormState extends State<SignUpForm> {
   @override
   void dispose() {
     _dbHelper.closeConnection(); // Close database connection
+    _nameController.dispose();
+    _emailController.dispose();
+    _passController.dispose();
     super.dispose();
   }
   @override
@@ -103,6 +108,22 @@ class _SignUpFormState extends State<SignUpForm> {
                           ))),
           ),
           Config.spaceSmall,
+          // Radio buttons for user type selection
+          Column(
+            children: _userTypes.map((String type) {
+              return RadioListTile<String>(
+                title: Text(type),
+                value: type,
+                groupValue: _selectedUserType,
+                onChanged: (String? value) {
+                  setState(() {
+                    _selectedUserType = value;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+          Config.spaceSmall,
           Consumer<AuthModel>(
             builder: (context, auth, child) {
               return Button(
@@ -111,13 +132,27 @@ class _SignUpFormState extends State<SignUpForm> {
                 onPressed: () async {
 
                   if(_formKey.currentState!.validate()){
+                    if (_selectedUserType == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Please select a user type')),
+                      );
+                      return;
+                    }
                     await auth.register(
                       _nameController.text,
                       _emailController.text,
                       _passController.text,
+                      _selectedUserType!,
                     );
                     if(auth.isLogin){
-                      MyApp.navigatorKey.currentState!.pushNamed('main');
+                      MyApp.navigatorKey.currentState!.pushNamed('/');
+                      /*if (_selectedUserType == 'Doctor') {
+                        
+                        MyApp.navigatorKey.currentState!.pushNamed('doctor_main');
+                      } else {
+                        // N
+                        MyApp.navigatorKey.currentState!.pushNamed('main');
+                      }*/
                     }else{
                       // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(context).showSnackBar(
