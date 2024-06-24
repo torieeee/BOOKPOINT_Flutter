@@ -1,5 +1,6 @@
 import 'package:book_point/components/login_form.dart';
 import 'package:book_point/components/sign_up_form.dart';
+import 'package:book_point/components/social_button.dart';
 import 'package:book_point/utils/text.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,7 @@ class Authentication extends StatefulWidget {
 
 class _AuthenticationState extends State<Authentication> {
   bool isSignIn = true;
+  
 
  /* @override
   void initState(){
@@ -23,70 +25,80 @@ class _AuthenticationState extends State<Authentication> {
      }
     );
   }*/
-  @override
+   @override
   Widget build(BuildContext context) {
-    Config().init(context);
+     Config().init(context);
     //build login text field
     return Scaffold(
         body: Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 15,
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              AppText.enText['welcome_text']!,
-              style: const TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-              ),
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: 15,
+              vertical: 15,
             ),
-            Config.spaceSmall,
-            Text(
-              isSignIn
-                  ? AppText.enText['signIn_text']!
-                  : AppText.enText['register_text']!,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Config.spaceSmall,
-            isSignIn ? LoginForm() : SignUpForm(),
-            Config.spaceSmall,
-            isSignIn
-                ? Center(
-                    child: TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        AppText.enText['forgot-password']!,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  )
-                : Container(),
-            const Spacer(),
-            Center(
-              child: Text(
-                AppText.enText['social-login']!,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.grey.shade500,
+            child: SafeArea(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  AppText.enText['welcome_text']!,
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ),
-            Config.spaceSmall,
-            Config.spaceSmall,
-            Row(
+                Config.spaceSmall,
+                Text(
+                  isSignIn
+                    ? AppText.enText['signIn_text']!
+                    : AppText.enText['register_text']!,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Config.spaceSmall,
+                //login
+                isSignIn ? LoginForm():SignUpForm(),
+                Config.spaceSmall,
+                isSignIn
+                ?Center(
+                  child: TextButton(
+                    onPressed:(){},
+                    child:Text(
+                      AppText.enText['forgot_password']??'',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                  ),
+                    ) ,
+                    )
+                :Container(),
+                //social button
+                const Spacer(),
+                Center(
+                  child: Text(
+                    AppText.enText['social_login']??'',
+                    style: TextStyle(
+                      fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.grey.shade500,
+                  ),
+                  ),
+                ),
+                Config.spaceSmall,
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: const <Widget>[
+                    //social button
+                    SocialButton(social:'google'),
+                    SocialButton(social: 'facebook'),
+                  ],
+                  ),
+                  Config.spaceSmall,
+                   Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(

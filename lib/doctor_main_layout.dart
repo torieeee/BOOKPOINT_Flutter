@@ -1,49 +1,51 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/widgets.dart';
 
-class DoctorMainLayout extends StatefulWidget {
-  const DoctorMainLayout({super.key});
+// import 'doctor_section/doctor_home.dart';
 
-  @override
-  State<DoctorMainLayout> createState() => _DoctorMainLayoutState();
-}
+// class DoctorMainLayout extends StatefulWidget {
+//   const DoctorMainLayout({super.key});
 
-class _DoctorMainLayoutState extends State<DoctorMainLayout> {
-  int currentPage=0;
-  final PageController _page=PageController();
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body:PageView(
-        controller: _page,
-        onPageChanged: ((value){
-          setState((){
-            currentPage=value;
-          });
-        }),
-        children: <Widget>[
-          const DoctorHome(),
-          RequestPage(),
-          DoctorProfile(),
+//   @override
+//   State<DoctorMainLayout> createState() => _DoctorMainLayoutState();
+// }
 
-        ],
-      )
-      bottomNavigationBar: DoctorNavBar(
-        currentIndex:currentPage,
-        onTap:(page){
-          setState((){
-            currentPage=page;
-            _page.animateToPage(
-              page,
-               duration: const Duration(milliseconds:500),
-                curve: Curves.easeInOut,
-                );
-          });
-        },
-        items:const <DoctorNavBarItem>[
-          BottomNavigati
-        ]
-      ),
-    );
-  }
-}
+// class _DoctorMainLayoutState extends State<DoctorMainLayout> {
+//   int currentPage=0;
+//   final PageController _page=PageController();
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body:PageView(
+//         controller: _page,
+//         onPageChanged: ((value){
+//           setState((){
+//             currentPage=value;
+//           });
+//         }),
+//         children: <Widget>[
+//           const DoctorHome(),
+//           RequestPage(),
+//           DoctorProfile(),
+
+//         ],
+//       )
+//       bottomNavigationBar: DoctorNavBar(
+//         currentIndex:currentPage,
+//         onTap:(page){
+//           setState((){
+//             currentPage=page;
+//             _page.animateToPage(
+//               page,
+//                duration: const Duration(milliseconds:500),
+//                 curve: Curves.easeInOut,
+//                 );
+//           });
+//         },
+//         items:const <DoctorNavBarItem>[
+//           BottomNavigation
+//         ]
+//       ),
+//     );
+//   }
+// }

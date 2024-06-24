@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:book_point/shared/theme/widgets/cards/appointment_preview_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
- 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
 import '../shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
@@ -232,4 +234,55 @@ class _DoctorCategories extends StatelessWidget {
       ],
     );
   }
+}
+void _createData(DoctorModel doctorModel){
+  final doctorCollection = FirebaseFirestore.instance.collection('doctors');
+  String id = doctorCollection.doc().id;
+
+  final newUser = DoctorModel(
+  doc_name: doctorModel.doc_name,
+  doc_type: doctorModel.doc_type,
+  rating: doctorModel.rating,
+  years_of_experience: doctorModel.years_of_experience,
+  id: id,
+  ).toJson();
+
+  doctorCollection.doc(id).set(newUser);
+}
+
+class DoctorModel{
+  final String? doc_name;
+  final String? doc_type;
+  final String? rating;
+  final String? years_of_experience;
+  final String? id;
+
+  DoctorModel({this.id, this.doc_name, this.doc_type, this.rating, this.years_of_experience});
+
+  static DoctorModel fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
+    return DoctorModel(
+      doc_name: snapshot['doc_name'],
+      doc_type: snapshot['doc_type'],
+      rating: snapshot['rating'],
+      years_of_experience: snapshot['years_of_experience'],
+    );
+  }
+  Map<String, dynamic> toJson() {
+  return {
+    'doc_name': doc_name,
+    'doc_type': doc_type,
+    'rating': rating,
+    'years_of_experience': years_of_experience,
+  };
+  }
+}
+
+
+Stream<List<DoctorModel>> _readData() {
+  final userCollection = FirebaseFirestore.instance.collection('users');
+
+  return userCollection.snapshots().map((querySnapshot)
+  =>querySnapshot.docs.map((e) 
+  => DoctorModel.fromSnapshot(e),).toList());   
+
 }

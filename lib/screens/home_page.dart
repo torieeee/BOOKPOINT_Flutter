@@ -48,8 +48,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     Config().init(context);
-    user = Provider.of<AuthModel>(context, listen: false).getUser;
-    doctor = Provider.of<AuthModel>(context, listen: false).getAppointment;
+    // user = Provider.of<AuthModel>(context, listen: false).getUser;
+    // doctor = Provider.of<AuthModel>(context, listen: false).getAppointment;
     favList = Provider.of<AuthModel>(context, listen: false).getFav;
 
     return Scaffold(
@@ -195,12 +195,4 @@ class _HomePageState extends State<HomePage> {
             ),
     );
   }
-}
-Stream<List<UserModel>> _readData() {
-  final userCollection = FirebaseFirestore.instance.collection('users');
-
-  return userCollection.snapshots().map((querySnapshot) {
-    => querySnapshot.docs.map((e)
-    => UserModel.fromMap(e.data())).toList();   
-  });
 }
