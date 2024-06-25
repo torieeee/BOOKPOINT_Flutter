@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 class DoctorNavbar extends StatefulWidget {
-  const DoctorNavbar({super.key});
+  const DoctorNavbar({super.key, required int currentIndex});
 
   @override
   State<DoctorNavbar> createState() => _DoctorNavbarState();
