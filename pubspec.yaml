@@ -34,7 +34,7 @@ dependencies:
   uuid: ^4.4.0
   table_calendar: ^3.1.2
   equatable: ^2.0.5
-  google_maps_flutter: ^2.6.1
+  google_maps_flutter: ^2.7.0
   lottie: ^3.1.2
   dio: ^5.4.3
   rating_dialog: ^2.0.4
@@ -49,6 +49,7 @@ dependencies:
   cloud_firestore: ^5.0.1
   firebase_auth: ^5.1.0
   firebase_storage: ^12.0.1
+  intl: ^0.19.0
 
 
   # The following adds the Cupertino Icons font to your application.
