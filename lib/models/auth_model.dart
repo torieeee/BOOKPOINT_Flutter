@@ -270,7 +270,7 @@ class AuthModel extends ChangeNotifier {
 
     User? user = userCredential.user;
       if (user != null) {
-       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
        if(userDoc.exists){
         String userType = userDoc['userType'];
         
@@ -305,28 +305,28 @@ class AuthModel extends ChangeNotifier {
 User? user = userCredential.user;
       if (user != null) {
       // Store additional user data in Firestore
-      await _firestore.collection('users').doc(user.uid).set({
+      await _firestore.collection('Users').doc(user.uid).set({
         'username': username,
         'email': email,
         'userType':userType,
         
       });
-      print("User data stored in 'users' collection.");
+      print("User data stored in 'Users' collection.");
 
       if (userType == 'Doctor') {
-        await _firestore.collection('doctors').doc(user.uid).set({
+        await _firestore.collection('Doctors').doc(user.uid).set({
           'username': username,
           'email': email,
           
         });
-        print("User data stored in 'doctors' collection.");
+        print("User data stored in 'Doctors' collection.");
       } else if (userType == 'Patient') {
-        await _firestore.collection('patients').doc(user.uid).set({
+        await _firestore.collection('Patients').doc(user.uid).set({
           'username': username,
           'email': email,
           
         });
-        print("User data stored in 'patients' collection.");
+        print("User data stored in 'Patients' collection.");
       }
       }
 
@@ -351,7 +351,7 @@ User? user = userCredential.user;
   Future<void> _fetchUserData() async {
     try {
       DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-          await _firestore.collection('users').doc(_firebaseUser!.uid).get();
+          await _firestore.collection('Users').doc(_firebaseUser!.uid).get();
 
       // Fetch appointment data
       if (userSnapshot.data() != null && userSnapshot.data()!['appointment'] != null) {
@@ -368,7 +368,7 @@ User? user = userCredential.user;
         // Fetch details of favorite doSctors
         for (var docId in _fav) {
           DocumentSnapshot<Map<String, dynamic>> docSnapshot =
-              await _firestore.collection('doctors').doc(docId as String?).get();
+              await _firestore.collection('Doctors').doc(docId as String?).get();
           if (docSnapshot.exists) {
             _favDoc.add(docSnapshot.data()!);
           }
