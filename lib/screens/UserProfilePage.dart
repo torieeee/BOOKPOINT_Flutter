@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/config.dart';
-import 'profile_page.dart'; // Import your update profile page here
+import 'profile_page.dart'; 
+import '../models/auth_model.dart';
+import 'package:book_point/main.dart';// Import your update profile page here
 
 class UserProfilePage extends StatefulWidget {
   @override
@@ -18,6 +20,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late String _gender;
   late String _email;
   late String _userType;
+  // ignore: unused_field
+  late User? _firebaseUser;
+  Map<String, dynamic> _user = {}; 
+  Map<String, dynamic> _appointment = {}; 
+  final List <dynamic> _favList = []; 
+ final Set _favDoc = {};
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -172,6 +180,35 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               },
                               child: const  Text(
                                 "Update Profile",
+                                style: TextStyle(
+                                  color: Config.primaryColor,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          ),
+                          ListTile(
+                            leading: Icon(
+                              Icons.door_back_door,
+                              color: Colors.blueAccent[400],
+                              size: 35,
+                            ),
+                            title: TextButton(
+                              onPressed: () async{
+                                
+    await FirebaseAuth.instance.signOut();
+    _firebaseUser = null;
+    _appointment ;
+    _favDoc.clear();
+    //_fav.clear();
+    MyApp.navigatorKey.currentState!.pushNamed('/');
+    //notifyListeners();
+  
+  
+  
+                              },
+                              child: const Text(
+                                "Logout",
                                 style: TextStyle(
                                   color: Config.primaryColor,
                                   fontSize: 15,

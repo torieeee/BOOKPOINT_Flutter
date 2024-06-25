@@ -276,11 +276,12 @@ class AuthModel extends ChangeNotifier {
         
         // Navigate based on user type
         if (userType == 'Doctor'){
-          MyApp.navigatorKey.currentState!.pushNamed('adminDashboard');
+          MyApp.navigatorKey.currentState!.pushNamed('doctor');
         } else {
           MyApp.navigatorKey.currentState!.pushNamed('main');
         }
       }else{
+
         MyApp.navigatorKey.currentState!.pushNamed('main');
       }
       

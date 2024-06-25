@@ -134,6 +134,7 @@ class MyApp extends StatelessWidget {
 */
 
 //import 'package:book_point/components/login_form.dart';
+import 'package:book_point/doctor_main_layout.dart';
 import 'package:book_point/screens/Authentication.dart';
 import 'package:book_point/models/auth_model.dart';
 //import 'package:book_point/screens/splash_screen.dart';
@@ -226,6 +227,7 @@ class MyApp extends StatelessWidget {
           'main': (context) => const MainLayout(),
           'booking_page': (context) => BookingPage(),
           'success_booking': (context) => const AppointmentBooked(),
+          'doctor':(context)=>const DoctorMainLayout(),
         },
       ),
     );
