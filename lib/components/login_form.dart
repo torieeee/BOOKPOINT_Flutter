@@ -11,6 +11,9 @@ import 'package:provider/provider.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:providers:database_connection.dart';
 import '../providers/database_connection.dart';
+//import 'package:book_point/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../utils/config.dart';
 
@@ -104,9 +107,52 @@ class _LoginFormState extends State<LoginForm> {
               return Button(
                 width: double.infinity,
                 title: 'Sign In',
-                onPressed: _signIn,
                 
-                  /*
+                onPressed: () async {
+
+                  if (_formKey.currentState!.validate()){
+                    await auth.login(_emailController.text,_passController.text);
+                    if(auth.isLogin){
+                      User? user = FirebaseAuth.instance.currentUser;
+                      if (user != null) {
+                    
+       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+       if(userDoc.exists){
+        String userType = userDoc['userType'];
+        
+        // Navigate based on user type
+        if (userType == 'Doctor'){
+          MyApp.navigatorKey.currentState!.pushNamed('doctor');
+        } else {
+          MyApp.navigatorKey.currentState!.pushNamed('main');
+        }
+      }else{
+
+        MyApp.navigatorKey.currentState!.pushNamed('main');
+      }
+                      
+
+                    } else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Login Failed')),
+                      );
+                    }
+                  }
+                
+                 
+                  }
+                },
+                //child:Text('Sign In')
+                disable: false,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+ /*
                  final token = await DioProvider()
                       .getToken(_emailController.text, _passController.text);
                       print(token);
@@ -162,26 +208,14 @@ class _LoginFormState extends State<LoginForm> {
     print('Error during login: $e');
   
                   }*/
-                //child:Text('Sign In')
-                disable: false,
-              );
-            },
-          )
-        ],
-      ),
-    );
-  }
-  void _signIn()async {
-    String email = _emailController.text;
-    String password = _passController.text;
-
-    User? user = await _auth.login(email, password);
-
-    if(user != null){
-      print('Login Successful');
-      Navigator.pushNamed(context, 'main');
-    }else{
-      print('Login Failed');
-    }
-  }
-}
+//                 },
+//                 //child:Text('Sign In')
+//                 disable: false,
+//               );
+//             },
+//           )
+//         ],
+//       ),
+//     );
+//   }
+// }

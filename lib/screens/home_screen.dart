@@ -81,7 +81,7 @@ class HomeView extends StatelessWidget {
           const SizedBox(width: 8.0),
         ],
         bottom: PreferredSize(
-            preferredSize: const size.fromHeight(64.0),
+            preferredSize: const Size.fromHeight(64.0),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(

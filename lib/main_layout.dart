@@ -1,3 +1,4 @@
+import 'package:book_point/screens/UserProfilePage.dart';
 import 'package:book_point/screens/home_page.dart';
 import 'package:book_point/screens/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'screens/appointment_page.dart';
 import 'screens/fav_page.dart';
-import 'screens/profile_page.dart';
+import 'screens/UserProfilePage.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({Key? key}) : super(key: key);
@@ -32,7 +33,7 @@ class _MainLayoutState extends State<MainLayout> {
           const HomeScreen(),
           FavPage(),
           const AppointmentPage(),
-          ProfilePage(),
+          UserProfilePage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

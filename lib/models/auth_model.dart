@@ -218,15 +218,15 @@ class AuthModel extends ChangeNotifier {
   
 
   // Data related to user appointments and favorites
- Map<String, dynamic> _user = {}; // Define user data
-  Map<String, dynamic> _appointment = {}; // Define appointment data
-  final List <dynamic> _favList = []; // Define favorite list data
+ Map<String, dynamic> _user = {}; 
+  Map<String, dynamic> _appointment = {}; 
+  final List <dynamic> _favList = []; 
  final Set _favDoc = {};
  Set _fav = {};
 
 
 
-  // Getter for user data
+  
  Map<String, dynamic> get user => _user;
 
   // Getter for appointment data
@@ -241,7 +241,7 @@ class AuthModel extends ChangeNotifier {
       if (user == null) {
         _isLogin = false;
         _firebaseUser = null;
-        _appointment ;
+        _appointment;
         _favDoc.clear();
         _fav.clear();
       } else {
@@ -267,6 +267,25 @@ class AuthModel extends ChangeNotifier {
         email: email,
         password: password,
       );
+
+    User? user = userCredential.user;
+      if (user != null) {
+       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+       if(userDoc.exists){
+        String userType = userDoc['userType'];
+        
+        // Navigate based on user type
+        if (userType == 'Doctor'){
+          MyApp.navigatorKey.currentState!.pushNamed('doctor');
+        } else {
+          MyApp.navigatorKey.currentState!.pushNamed('main');
+        }
+      }else{
+
+        MyApp.navigatorKey.currentState!.pushNamed('main');
+      }
+      
+      }
       _isLogin = true;
       notifyListeners();
       return userCredential.user;
@@ -298,15 +317,36 @@ class AuthModel extends ChangeNotifier {
         password: password,
       );
 
+User? user = userCredential.user;
+      if (user != null) {
       // Store additional user data in Firestore
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
+      await _firestore.collection('Users').doc(user.uid).set({
         'username': username,
         'email': email,
         'userType':userType,
-        // Add any other relevant user information
+        
       });
+      print("User data stored in 'Users' collection.");
+
+      if (userType == 'Doctor') {
+        await _firestore.collection('Doctors').doc(user.uid).set({
+          'username': username,
+          'email': email,
+          
+        });
+        print("User data stored in 'Doctors' collection.");
+      } else if (userType == 'Patient') {
+        await _firestore.collection('Patients').doc(user.uid).set({
+          'username': username,
+          'email': email,
+          
+        });
+        print("User data stored in 'Patients' collection.");
+      }
+      }
 
       _firebaseUser = userCredential.user;
+      notifyListeners();
     } catch (e) {
       print("Error during registration: $e");
       _firebaseUser = null;
@@ -319,13 +359,14 @@ class AuthModel extends ChangeNotifier {
     _appointment ;
     _favDoc.clear();
     _fav.clear();
+    notifyListeners();
   }
 
   // Fetch user data from Firestore
   Future<User?> _fetchUserData() async {
     try {
       DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-          await _firestore.collection('users').doc(_firebaseUser!.uid).get();
+          await _firestore.collection('Users').doc(_firebaseUser!.uid).get();
 
       // Fetch appointment data
       if (userSnapshot.data() != null && userSnapshot.data()!['appointment'] != null) {
@@ -342,7 +383,7 @@ class AuthModel extends ChangeNotifier {
         // Fetch details of favorite doSctors
         for (var docId in _fav) {
           DocumentSnapshot<Map<String, dynamic>> docSnapshot =
-              await _firestore.collection('doctors').doc(docId as String?).get();
+              await _firestore.collection('Doctors').doc(docId as String?).get();
           if (docSnapshot.exists) {
             _favDoc.add(docSnapshot.data()!);
           }

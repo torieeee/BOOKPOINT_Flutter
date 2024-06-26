@@ -25,7 +25,7 @@ class _DoctorHomeState extends State<DoctorHome> {
       ?const Center(
         child:CircularProgressIndicator() ,
         )
-        : Padding(padding: const EdgeInsets.symmetric(
+        : const Padding(padding: const EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 15,
         ),
