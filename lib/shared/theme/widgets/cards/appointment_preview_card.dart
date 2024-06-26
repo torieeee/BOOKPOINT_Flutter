@@ -3,41 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class AppointmentPreviewCard extends StatelessWidget {
-  const AppointmentPreviewCard({super.key});
-
+  final Map<String, dynamic> doctor;
+  const AppointmentPreviewCard({Key? key, required this.doctor});
   @override
   Widget build(BuildContext context) {
+    final String _baseUrl = Config.baseUrl;
+    final Map<String, dynamic> doctor;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colorScheme.primary,
-                colorScheme.tertiary,
-              ],
-            ),
-          ),
           child: Column(
             children: [
-              SizedBox(
-                height: 100,
-                child: Center(
-                    child: Text(
-                  'No appointment yet',
-                  style: textTheme.bodyMedium!.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )),
-              ),
               Config.spaceSmall,
-              const ScheduleCard(),
+              ScheduleCard(
+                appointment: this.doctor['appointments']
+                ),
               Config.spaceSmall,
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -98,39 +80,51 @@ class AppointmentPreviewCard extends StatelessWidget {
 }
 
 class ScheduleCard extends StatelessWidget {
-  const ScheduleCard({super.key});
+  const ScheduleCard({Key? key, required this.appointment}) : super(key: key);
+  final Map<String, dynamic> appointment;
 
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> user = {};
+    Map<String, dynamic> doctor = {};
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFFFFBA52),
+        color: Colors.grey,
         borderRadius: BorderRadius.circular(10),
       ),
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Icon(
+          const Icon(
             Icons.calendar_today,
             color: Colors.white,
             size: 15,
           ),
-          SizedBox(width: 5),
-          Text(
-            'Monday, 11/28/2022',
-            style: TextStyle(color: Colors.white),
+          const SizedBox(
+            width: 5,
           ),
-          SizedBox(width: 20),
-          Icon(
+          Text(
+            '${appointment['day']}, ${appointment['date']}',
+            style: const TextStyle(color: Colors.white),
+          ),
+          const SizedBox(
+            width: 20,
+          ),
+          const Icon(
             Icons.access_alarm,
             color: Colors.white,
             size: 17,
           ),
-          SizedBox(width: 5),
+          const SizedBox(
+            width: 5,
+          ),
           Flexible(
-              child: Text('2:00 PM', style: TextStyle(color: Colors.white))),
+              child: Text(
+            appointment['time'],
+            style: const TextStyle(color: Colors.white),
+          ))
         ],
       ),
     );

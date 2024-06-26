@@ -1,6 +1,6 @@
 # book_point
 
-A new Flutter project.
+This is an application that intends to seamlessly  connect doctors to patients. By using flutter, the app is available to all platforms, ie. Android, IOS, web and desktop. 
 
 ## Getting Started
 

@@ -14,12 +14,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 
 
+//import 'doctor_section/doctor_home.dart';
+
 class DoctorMainLayout extends StatefulWidget {
   const DoctorMainLayout({super.key});
 
   @override
   State<DoctorMainLayout> createState() => _DoctorMainLayoutState();
-}
+ }
 
 class _DoctorMainLayoutState extends State<DoctorMainLayout> {
   int currentPage=0;
@@ -38,6 +40,7 @@ class _DoctorMainLayoutState extends State<DoctorMainLayout> {
           const DoctorHome(),
           //RequestPage(),
           DoctorUserPage(),
+
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -59,7 +62,7 @@ class _DoctorMainLayoutState extends State<DoctorMainLayout> {
           ),
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.solidCalendarCheck),
-            label: 'Request',
+            label: 'Requests',
           ),
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.solidUser),

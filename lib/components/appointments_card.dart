@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppointmentCard extends StatefulWidget {
   const AppointmentCard({super.key, required this.doctor, required this.color});
 
+  final String _baseUrl = Config.baseUrl;
   final Map<String, dynamic> doctor;
   final Color color;
 
@@ -35,7 +36,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                 children: [
                   CircleAvatar(
                     backgroundImage: NetworkImage(
-                        "http://127.0.0.1:8000${widget.doctor['doctor_profile']}"), //insert doctor profile
+                        widget._baseUrl + widget.doctor['doctor_profile']), //insert doctor profile
                   ),
                   const SizedBox(
                     width: 10,

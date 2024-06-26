@@ -20,6 +20,7 @@ class _SignUpFormState extends State<SignUpForm> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
+  bool _isSigningUp = false;
   bool obsecurePass = true;
   final List<String> _userTypes=['Doctor','Patient'];
   String? _selectedUserType;
@@ -201,10 +202,10 @@ class _SignUpFormState extends State<SignUpForm> {
                       _emailController.text,
                       _passController.text);
 
-                  //if register success, proceed to login
-                  if (userRegistration) {
-                    final token = await DioProvider()
-                        .getToken(_emailController.text, _passController.text);
+                  // //if register success, proceed to login
+                  // if (userRegistration) {
+                  //   final token = await DioProvider()
+                  //       .getToken(_emailController.text, _passController.text);
 
                     if (token) {
                       auth.loginSuccess({}, {}); //update login status

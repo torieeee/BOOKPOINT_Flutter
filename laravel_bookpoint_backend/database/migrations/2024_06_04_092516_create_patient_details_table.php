@@ -8,11 +8,14 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('patient_details', function (Blueprint $table) {
-            
+        //this table is same as doctor table
+        //but is for users to store their details
+        Schema::create('user_details', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('user_id')->unique();
             $table->string('status')->nullable();
@@ -23,9 +26,11 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('patient_details');
+        Schema::dropIfExists('user_details');
     }
 };
