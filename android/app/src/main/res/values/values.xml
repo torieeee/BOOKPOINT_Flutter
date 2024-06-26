@@ -1,0 +1,9 @@
+<resources>
+    <string name="firebase_database_url">https://bookpoint-23f70.firebaseio.com</string>
+    <string name="gcm_defaultSenderId">306851339266</string>
+    <string name="google_api_key">AIzaSyDZBT8ZTTcV2HiVU9glYYmvObH2T5TIurk</string>
+    <string name="google_app_id">1:306851339266:android:50368558d68b98ae08db1b</string>
+    <string name="google_crash_reporting_api_key">AIzaSyDZBT8ZTTcV2HiVU9glYYmvObH2T5TIurk</string>
+    <string name="project_id">bookpoint-23f70</string>
+    <string name="storage_bucket">bookpoint-23f70.appspot.com</string>
+</resources>

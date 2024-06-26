@@ -88,7 +88,7 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
                   const SizedBox(height: 110),
                   const CircleAvatar(
                     radius: 65.0,
-                    backgroundImage: AssetImage('assets/profile1.jpg'),
+                    backgroundImage: AssetImage('lib/screens/icons/doctor_picture.jpeg'),
                     backgroundColor: Colors.white,
                   ),
                   const SizedBox(height: 10),
