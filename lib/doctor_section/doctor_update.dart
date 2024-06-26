@@ -58,7 +58,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
           Map<String, dynamic> userData = {
             'name': _nameController.text,
-            'DOB': dob,
+            'DOB': _dobController.text,
             'gender': _genderController.text,
             'email': _emailController.text,
             'userType': _userType,
@@ -246,7 +246,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
             ),
             Config.spaceSmall,
             TextFormField(
-              controller: _emailController,
+              controller: _yocController,
               keyboardType: TextInputType.datetime,
               cursorColor: Config.primaryColor,
               decoration: const InputDecoration(
