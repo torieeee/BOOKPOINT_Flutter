@@ -127,7 +127,7 @@ class MyApp extends StatelessWidget {
 */
 
 
-import 'package:book_point/components/login_form.dart';
+//import 'package:book_point/components/login_form.dart';
 import 'package:book_point/doctor_main_layout.dart';
 import 'package:book_point/screens/Authentication.dart';
 import 'package:book_point/models/auth_model.dart';

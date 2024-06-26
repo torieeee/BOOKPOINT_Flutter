@@ -1,11 +1,10 @@
+import 'package:book_point/doctor_section/view_profile.dart';
 import 'package:flutter/material.dart';
-//import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/config.dart';
 import 'doctor_update.dart'; 
-//import '../models/auth_model.dart';
-import 'package:book_point/main.dart';// Import your update profile page here
+import 'package:book_point/main.dart';
 
 class DoctorUserPage extends StatefulWidget {
   @override
@@ -24,9 +23,9 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
   late String _category;
   late String _location;
   late User? _firebaseUser;
-  Map<String, dynamic> _user = {}; 
-  Map<String, dynamic> _appointment = {}; 
-  final List <dynamic> _favList = []; 
+  //Map<String, dynamic> _user = {}; 
+  final Map<String, dynamic> _appointment = {}; 
+  //final List <dynamic> _favList = []; 
  final Set _favDoc = {};
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -150,7 +149,24 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
                               size: 35,
                             ),
                             title: TextButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ViewDoctorProfile(
+                                      userId: _userId,
+                                      name: _name,
+                                      dob: _dob,
+                                      gender: _gender,
+                                      email: _email,
+                                      userType: _userType,
+                                      yoc: _yoc,
+                                      category: _category,
+                                      location: _location,
+                                    ),
+                                  ),
+                                );
+                              },
                               child: const Text(
                                 "View Profile",
                                 style: TextStyle(
