@@ -3,6 +3,7 @@
 import 'package:book_point/components/button.dart';
 import 'package:book_point/main.dart';
 import 'package:book_point/models/auth_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:book_point/providers/dio_provider.dart';
 //import 'package:book_point/screens/Authentication.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +22,11 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  final AuthModel _auth = AuthModel();
+
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passController = TextEditingController();
   bool _isSigningIn = false;
   bool obsecurePass = true;
   late DatabaseHelper _dbHelper;
@@ -43,6 +46,8 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   void dispose() {
+    _emailController.dispose();
+    _passController.dispose();
     _dbHelper.closeConnection(); // Close database connection
     super.dispose();
   }
@@ -99,20 +104,7 @@ class _LoginFormState extends State<LoginForm> {
               return Button(
                 width: double.infinity,
                 title: 'Sign In',
-                
-                onPressed: () async {
-
-                  if (_formKey.currentState!.validate()){
-                    await auth.login(_emailController.text,_passController.text);
-                    if(auth.isLogin){
-                      MyApp.navigatorKey.currentState!.pushNamed('main');
-
-                    } else{
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Login Failed')),
-                      );
-                    }
-                  }
+                onPressed: _signIn,
                 
                   /*
                  final token = await DioProvider()
@@ -170,7 +162,6 @@ class _LoginFormState extends State<LoginForm> {
     print('Error during login: $e');
   
                   }*/
-                },
                 //child:Text('Sign In')
                 disable: false,
               );
@@ -179,5 +170,18 @@ class _LoginFormState extends State<LoginForm> {
         ],
       ),
     );
+  }
+  void _signIn()async {
+    String email = _emailController.text;
+    String password = _passController.text;
+
+    User? user = await _auth.login(email, password);
+
+    if(user != null){
+      print('Login Successful');
+      Navigator.pushNamed(context, 'main');
+    }else{
+      print('Login Failed');
+    }
   }
 }

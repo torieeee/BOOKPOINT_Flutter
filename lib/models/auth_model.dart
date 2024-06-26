@@ -261,27 +261,28 @@ class AuthModel extends ChangeNotifier {
 
   get getFavDoc => null;
 
-  Future<void> login(String email, String password) async {
+  Future<User?> login(String email, String password) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-    User? user = userCredential.user;
-      if (user != null) {
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-        String userType = userDoc['userType'];
-        
-        // Navigate based on user type
-        if (userType == 'Dcotor'){
-          MyApp.navigatorKey.currentState!.pushNamed('adminDashboard');
-        } else {
-          MyApp.navigatorKey.currentState!.pushNamed('MainLayout');
-        }
-      }
       _isLogin = true;
       notifyListeners();
+      return userCredential.user;
+
+    // User? user = userCredential.user;
+    //   if (user != null) {
+    //     DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    //     String userType = userDoc['userType'];
+        
+    //     // Navigate based on user type
+    //     if (userType == 'Doctor'){
+    //       MyApp.navigatorKey.currentState!.pushNamed('adminDashboard');
+    //     } else {
+    //       MyApp.navigatorKey.currentState!.pushNamed('MainLayout');
+    //     }
+    //   }
     } catch (e) {
       _isLogin = false;
       notifyListeners();
@@ -290,7 +291,7 @@ class AuthModel extends ChangeNotifier {
     }
   }
 
-  Future<void> register(String username, String email, String password,String userType) async {
+  Future<User?> register(String username, String email, String password,String userType) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
@@ -312,7 +313,7 @@ class AuthModel extends ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
+  Future<User?> logout() async {
     await FirebaseAuth.instance.signOut();
     _firebaseUser = null;
     _appointment ;
@@ -321,7 +322,7 @@ class AuthModel extends ChangeNotifier {
   }
 
   // Fetch user data from Firestore
-  Future<void> _fetchUserData() async {
+  Future<User?> _fetchUserData() async {
     try {
       DocumentSnapshot<Map<String, dynamic>> userSnapshot =
           await _firestore.collection('users').doc(_firebaseUser!.uid).get();
@@ -354,6 +355,7 @@ class AuthModel extends ChangeNotifier {
       _fav.clear();
     }
     notifyListeners();
+    return null;
   }
 
   // Method to update favorite list and notify listeners

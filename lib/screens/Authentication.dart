@@ -88,17 +88,7 @@ class _AuthenticationState extends State<Authentication> {
                   ),
                   ),
                 ),
-                Config.spaceSmall,
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const <Widget>[
-                    //social button
-                    SocialButton(social:'google'),
-                    SocialButton(social: 'facebook'),
-                  ],
-                  ),
-                  Config.spaceSmall,
-                   Row(
+                Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(

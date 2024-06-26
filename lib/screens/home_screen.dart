@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:ffi';
 
 import 'package:book_point/shared/theme/widgets/cards/appointment_preview_card.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +81,7 @@ class HomeView extends StatelessWidget {
           const SizedBox(width: 8.0),
         ],
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(64.0),
+            preferredSize: const size.fromHeight(64.0),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(
@@ -250,39 +250,54 @@ void _createData(DoctorModel doctorModel){
   doctorCollection.doc(id).set(newUser);
 }
 
-class DoctorModel{
+class DoctorModel {
   final String? doc_name;
   final String? doc_type;
-  final String? rating;
-  final String? years_of_experience;
+  final Double? rating;
+  final int? years_of_experience;
   final String? id;
 
   DoctorModel({this.id, this.doc_name, this.doc_type, this.rating, this.years_of_experience});
 
   static DoctorModel fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
-    return DoctorModel(
-      doc_name: snapshot['doc_name'],
-      doc_type: snapshot['doc_type'],
-      rating: snapshot['rating'],
-      years_of_experience: snapshot['years_of_experience'],
-    );
+    try {
+      final data = snapshot.data();
+      if (data == null) {
+        throw Exception('Document snapshot data is null');
+      }
+      return DoctorModel(
+        id: snapshot.id,
+        doc_name: data['doc_name'] as String?,
+        doc_type: data['doc_type'] as String?,
+        rating: data['rating'] as Double?,
+        years_of_experience: data['years_of_experience'] as int?,
+      );
+    } catch (e) {
+      throw Exception('Error reading DoctorModel from snapshot: ${e.toString()}');
+    }
   }
+
   Map<String, dynamic> toJson() {
-  return {
-    'doc_name': doc_name,
-    'doc_type': doc_type,
-    'rating': rating,
-    'years_of_experience': years_of_experience,
-  };
+    return {
+      'doc_name': doc_name,
+      'doc_type': doc_type,
+      'rating': rating,
+      'years_of_experience': years_of_experience,
+    };
   }
 }
 
-
 Stream<List<DoctorModel>> _readData() {
-  final userCollection = FirebaseFirestore.instance.collection('users');
+  final userCollection = FirebaseFirestore.instance.collection('Doctors');
 
-  return userCollection.snapshots().map((querySnapshot)
-  =>querySnapshot.docs.map((e) 
-  => DoctorModel.fromSnapshot(e),).toList());   
-
+  return userCollection.snapshots().handleError((error) {
+    print('Error reading data from Firestore: ${error.toString()}');
+  }).map((querySnapshot) {
+    try {
+      return querySnapshot.docs.map((e) => DoctorModel.fromSnapshot(e)).toList();
+    } catch (e) {
+      print('Error processing querySnapshot: ${e.toString()}');
+      return [];
+    }
+  });
 }

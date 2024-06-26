@@ -15,17 +15,21 @@ class DoctorListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return StreamBuilder<List<DoctorModel>>(
       stream: _readData(),
       builder: (context, snapshot) {
-        if(snapshot.connectionState == ConnectionState.waiting){
-          return Center(child: CircularProgressIndicator(),);
-        }if(snapshot.data!.isEmpty){
-          return Center(child: Text('No data found'),);
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No data found'));
         }
-        final users = snapshot.data;
+
+        final users = snapshot.data!;
         return Column(
-          children: users!.map((user){
+          children: users.map((user) {
             return ListTile(
               onTap: () {},
               contentPadding: EdgeInsets.zero,
@@ -35,7 +39,7 @@ class DoctorListTile extends StatelessWidget {
                 backgroundImage: NetworkImage(doctor.profileImageUrl),
               ),
               title: Text(
-                user.doc_name!,
+                user.doc_name ?? 'No Name',
                 style: textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),
               ),
               subtitle: Column(
@@ -43,18 +47,18 @@ class DoctorListTile extends StatelessWidget {
                 children: [
                   SizedBox(height: 4.0),
                   Text(
-                    user.doc_type!,
+                    user.doc_type ?? 'No Type',
                     style: textTheme.bodyMedium!.copyWith(
                       color: colorScheme.secondary,
                     ),
                   ),
-                  const SizedBox(width: 8.0),
+                  const SizedBox(height: 4.0),
                   Row(
                     children: [
                       Icon(Icons.star, color: const Color.fromRGBO(255, 204, 128, 1), size: 16),
                       const SizedBox(width: 4.0),
                       Text(
-                        user.rating.toString(),
+                        user.rating?.toString() ?? 'No Rating',
                         style: textTheme.bodySmall!.copyWith(
                           color: colorScheme.onSurface.withOpacity(0.5),
                           fontWeight: FontWeight.bold,
@@ -64,32 +68,35 @@ class DoctorListTile extends StatelessWidget {
                       Icon(Icons.work, color: colorScheme.tertiary, size: 16),
                       const SizedBox(width: 4),
                       Text(
-                        user.years_of_experience!,
+                        user.years_of_experience.toString(),
                         style: textTheme.bodySmall!.copyWith(
                           color: colorScheme.onSurface.withOpacity(0.5),
                           fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      ),
-                    ]
+                    ],
                   ),
                 ],
               ),
               trailing: FilledButton(
                 onPressed: () {},
                 child: const Text('Book Now'),
-                ),
+              ),
             );
           }).toList(),
         );
-      }
+      },
     );
   }
 }
+
 Stream<List<DoctorModel>> _readData() {
-  final userCollection = FirebaseFirestore.instance.collection('users');
+  final userCollection = FirebaseFirestore.instance.collection('Doctors');
 
-  return userCollection.snapshots().map((querySnapshot)
-  =>querySnapshot.docs.map((e) 
-  => DoctorModel.fromSnapshot(e),).toList());   
+  return userCollection.snapshots().map((querySnapshot) =>
+      querySnapshot.docs.map((e) => DoctorModel.fromSnapshot(e)).toList());
+}
 
+void _createData(){
+  final userCollection = FirebaseFirestore.instance.collection("Doctors");
 }
