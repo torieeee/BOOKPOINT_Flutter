@@ -131,6 +131,7 @@ class MyApp extends StatelessWidget {
 import 'package:book_point/doctor_main_layout.dart';
 import 'package:book_point/screens/Authentication.dart';
 import 'package:book_point/models/auth_model.dart';
+import 'package:book_point/shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
 //import 'package:book_point/screens/splash_screen.dart';
 import 'package:book_point/utils/config.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -220,7 +221,6 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          
           '/': (context) => const Authentication(),
           'main': (context) => const MainLayout(),
           'booking_page': (context) => BookingPage(),

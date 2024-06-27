@@ -128,8 +128,8 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                             response.rating,
                                             widget.doctor['appointments']
                                                 ['id'], //this is appointment id
-                                            widget.doctor[
-                                                'doc_id'], //this is doctor id
+                                            widget.doctor
+                                            ['doc_id'], //this is doctor id
                                             token);
 
                                     //if successful, then refresh

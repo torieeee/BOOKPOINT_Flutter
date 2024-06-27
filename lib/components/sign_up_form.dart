@@ -25,24 +25,24 @@ class _SignUpFormState extends State<SignUpForm> {
   final List<String> _userTypes=['Doctor','Patient'];
   String? _selectedUserType;
 
-  late DatabaseHelper _dbHelper;
-  @override
-  void initState() {
-    super.initState();
+  // late DatabaseHelper _dbHelper;
+  // @override
+  // void initState() {
+  //   super.initState();
     
-    _dbHelper = DatabaseHelper(
-      host: 'localhost',
-      port: 3306,
-      user: 'root',
-      password: '',
-      databaseName: 'book_point',
-    );
-    _dbHelper.openConnection();
-  }
+  //   _dbHelper = DatabaseHelper(
+  //     host: 'localhost',
+  //     port: 3306,
+  //     user: 'root',
+  //     password: '',
+  //     databaseName: 'book_point',
+  //   );
+  //   _dbHelper.openConnection();
+  // }
 
   @override
   void dispose() {
-    _dbHelper.closeConnection(); // Close database connection
+    // _dbHelper.closeConnection(); // Close database connection
     _nameController.dispose();
     _emailController.dispose();
     _passController.dispose();

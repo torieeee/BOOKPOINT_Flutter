@@ -4,6 +4,8 @@ import 'package:book_point/main.dart';
 import 'package:book_point/models/booking_datetime_converted.dart';
 import 'package:book_point/providers/dio_provider.dart';
 import 'package:book_point/utils/config.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -126,31 +128,46 @@ class _BookingPageState extends State<BookingPage> {
                       crossAxisCount: 4, childAspectRatio: 1.5),
                 ),
           SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 80),
-              child: Button(
-                width: double.infinity,
-                title: 'Make Appointment',
-                onPressed: () async {
-                  //convert date/day/time into string first
-                  final getDate = DateConverted.getDate(_currentDay);
-                  final getDay = DateConverted.getDay(_currentDay.weekday);
-                  final getTime = DateConverted.getTime(_currentIndex!);
+  child: Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 80),
+    child: Button(
+      width: double.infinity,
+      title: 'Make Appointment',
+      onPressed: () async {
+        // Convert date/day/time into string first
+        final getDate = DateConverted.getDate(_currentDay);
+        final getTime = DateConverted.getTime(_currentIndex!);
 
-                  final booking = await DioProvider().bookAppointment(
-                      getDate, getDay, getTime, doctor['doctor_id'], token!);
+        // Create a new document in the 'bookings' collection
+        try {
+          DocumentReference docRef = await FirebaseFirestore.instance.collection('appointments').add({
+            'date': getDate,
+            //'time': getTime,
+             'doctor_id': doctor['doc_id'],
+            // 'user_id': FirebaseAuth.instance.currentUser?.uid, // Assuming you're using Firebase Auth
+            'status': 'pending', // You can set an initial status
+            // 'created_at': FieldValue.serverTimestamp(),
+          });
 
-                  //if booking return status code 200, then redirect to success booking page
+          // Get the auto-generated document ID
+          String doc_id = docRef.id;
 
-                  if (booking == 200) {
-                    MyApp.navigatorKey.currentState!
-                        .pushNamed('success_booking');
-                  }
-                },
-                disable: _timeSelected && _dateSelected ? false : true,
-              ),
-            ),
-          ),
+          // You can use the doc_id as needed, for example:
+          // Update the document with its own ID
+          await docRef.update({'booking_id': doc_id});
+
+          // Navigate to success page
+          MyApp.navigatorKey.currentState!.pushNamed('success_booking', arguments: doc_id);
+        } catch (e) {
+          // Handle any errors here
+          print('Error creating booking: $e');
+          // You might want to show an error message to the user
+        }
+      },
+      disable: _timeSelected && _dateSelected ? false : true,
+    ),
+  ),
+),
         ],
       ),
     );

@@ -1,5 +1,4 @@
-import 'dart:ffi';
-
+import 'dart:ui';
 import 'package:book_point/shared/theme/widgets/cards/appointment_preview_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +9,7 @@ import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
 import '../shared/theme/widgets/titles/section_title.dart';
 import '../src/doctor.dart';
 import '../src/doctor_category.dart';
+import 'booking_page.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -32,7 +32,7 @@ class HomeView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 80,
+        toolbarHeight: 144, // Increased to accommodate the search bar
         backgroundColor: const Color(0xFFFFFFFF),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,6 +71,23 @@ class HomeView extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 16.0), // Add space before the search bar
+            TextFormField(
+              style: GoogleFonts.spaceGrotesk(),
+              decoration: InputDecoration(
+                hintText: 'Search for doctors...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: Container(
+                  margin: const EdgeInsets.all(4.0),
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurfaceVariant,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: const Icon(Icons.filter_alt_outlined),
+                ),
+              ),
+            ),
           ],
         ),
         actions: [
@@ -80,26 +97,6 @@ class HomeView extends StatelessWidget {
           ),
           const SizedBox(width: 8.0),
         ],
-        bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(64.0),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                style: GoogleFonts.spaceGrotesk(),
-                decoration: InputDecoration(
-                  hintText: 'Search for doctors...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: Container(
-                    margin: const EdgeInsets.all(4.0),
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                        color: colorScheme.onSurfaceVariant,
-                        borderRadius: BorderRadius.circular(8.0)),
-                    child: const Icon(Icons.filter_alt_outlined),
-                  ),
-                ),
-              ),
-            )),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(8.0),
@@ -111,7 +108,6 @@ class HomeView extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: MainNavBar(),
     );
   }
 }
@@ -131,21 +127,35 @@ class _NearbyDoctors extends StatelessWidget {
           onPressed: () {},
         ),
         SizedBox(height: 8.0),
-        ListView.separated(
-          physics: const NeverScrollableScrollPhysics(), 
-          shrinkWrap: true, 
-          separatorBuilder: (context, index) {
-            return Divider(
-              height: 24.0,
-              color: colorScheme.surfaceContainerHighest,
+        StreamBuilder<List<DoctorModel>>(
+          stream: _readData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text('No data found'));
+            }
+
+            final doctors = snapshot.data!;
+            return ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              separatorBuilder: (context, index) {
+                return Divider(
+                  height: 24.0,
+                  color: colorScheme.surfaceContainerHighest,
+                );
+              },
+              itemCount: doctors.length,
+              itemBuilder: (context, index) {
+                final doctor = doctors[index];
+                return DoctorListTile(doctor: doctor);
+              },
             );
           },
-          itemCount: Doctor.sampleDoctors.length,
-          itemBuilder: (context, index) {
-            final doctor = Doctor.sampleDoctors[index];
-            return DoctorListTile(doctor: doctor);
-          },
-        )
+        ),
       ],
     );
   }
@@ -166,7 +176,12 @@ class _MySchedule extends StatelessWidget {
         SectionTitle(
           title: 'My Schedule',
           action: 'See all',
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BookingPage()),
+            );
+          },
         ),
         doctor.isNotEmpty
         ?AppointmentPreviewCard(
@@ -243,7 +258,7 @@ void _createData(DoctorModel doctorModel){
   doc_name: doctorModel.doc_name,
   doc_type: doctorModel.doc_type,
   rating: doctorModel.rating,
-  years_of_experience: doctorModel.years_of_experience,
+  year_of_experience: doctorModel.year_of_experience,
   id: id,
   ).toJson();
 
@@ -253,11 +268,11 @@ void _createData(DoctorModel doctorModel){
 class DoctorModel {
   final String? doc_name;
   final String? doc_type;
-  final Double? rating;
-  final int? years_of_experience;
+  final double? rating;
+  final int? year_of_experience;
   final String? id;
 
-  DoctorModel({this.id, this.doc_name, this.doc_type, this.rating, this.years_of_experience});
+  DoctorModel({this.id, this.doc_name, this.doc_type, this.rating, this.year_of_experience});
 
   static DoctorModel fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     try {
@@ -269,8 +284,8 @@ class DoctorModel {
         id: snapshot.id,
         doc_name: data['doc_name'] as String?,
         doc_type: data['doc_type'] as String?,
-        rating: data['rating'] as Double?,
-        years_of_experience: data['years_of_experience'] as int?,
+        rating: data['rating'] as double?,
+        year_of_experience: data['year_of_experience'] as int?,
       );
     } catch (e) {
       throw Exception('Error reading DoctorModel from snapshot: ${e.toString()}');
@@ -282,7 +297,7 @@ class DoctorModel {
       'doc_name': doc_name,
       'doc_type': doc_type,
       'rating': rating,
-      'years_of_experience': years_of_experience,
+      'year_of_experience': year_of_experience,
     };
   }
 }

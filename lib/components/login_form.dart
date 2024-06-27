@@ -32,26 +32,26 @@ class _LoginFormState extends State<LoginForm> {
   TextEditingController _passController = TextEditingController();
   bool _isSigningIn = false;
   bool obsecurePass = true;
-  late DatabaseHelper _dbHelper;
-  @override
-  void initState() {
-    super.initState();
+  // late DatabaseHelper _dbHelper;
+  // @override
+  // void initState() {
+  //   super.initState();
     
-    _dbHelper = DatabaseHelper(
-      host: 'localhost',
-      port: 3306,
-      user: 'root',
-      password: '',
-      databaseName: 'book_point',
-    );
-    _dbHelper.openConnection(); 
-  }
+  //   _dbHelper = DatabaseHelper(
+  //     host: 'localhost',
+  //     port: 3306,
+  //     user: 'root',
+  //     password: '',
+  //     databaseName: 'book_point',
+  //   );
+  //   _dbHelper.openConnection(); 
+  // }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passController.dispose();
-    _dbHelper.closeConnection(); // Close database connection
+    // _dbHelper.closeConnection(); // Close database connection
     super.dispose();
   }
   @override
@@ -115,23 +115,19 @@ class _LoginFormState extends State<LoginForm> {
                     if(auth.isLogin){
                       User? user = FirebaseAuth.instance.currentUser;
                       if (user != null) {
-                    
-       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
-       if(userDoc.exists){
-        String userType = userDoc['userType'];
-        
-        // Navigate based on user type
-        if (userType == 'Doctor'){
-          MyApp.navigatorKey.currentState!.pushNamed('doctor');
-        } else {
-          MyApp.navigatorKey.currentState!.pushNamed('main');
-        }
-      }else{
-
-        MyApp.navigatorKey.currentState!.pushNamed('main');
-      }
-                      
-
+                        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+                        if(userDoc.exists){
+                          String userType = userDoc['userType'];
+                          
+                          // Navigate based on user type
+                          if (userType == 'Doctor'){
+                            MyApp.navigatorKey.currentState!.pushNamed('doctor');
+                          } else {
+                            MyApp.navigatorKey.currentState!.pushNamed('main');
+                          }
+                        }else{
+                          MyApp.navigatorKey.currentState!.pushNamed('main');
+                        }
                     } else{
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Login Failed')),
