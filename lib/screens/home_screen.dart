@@ -266,13 +266,14 @@ void _createData(DoctorModel doctorModel){
 }
 
 class DoctorModel {
+  final int? doc_id;
   final String? doc_name;
   final String? doc_type;
   final double? rating;
   final int? year_of_experience;
   final String? id;
 
-  DoctorModel({this.id, this.doc_name, this.doc_type, this.rating, this.year_of_experience});
+  DoctorModel({this. id, this.doc_id, this.doc_name, this.doc_type, this.rating, this.year_of_experience});
 
   static DoctorModel fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     try {
@@ -282,6 +283,7 @@ class DoctorModel {
       }
       return DoctorModel(
         id: snapshot.id,
+        doc_id: data['doc_id'] as int?,
         doc_name: data['doc_name'] as String?,
         doc_type: data['doc_type'] as String?,
         rating: data['rating'] as double?,
@@ -294,6 +296,7 @@ class DoctorModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'dox_id': doc_id,
       'doc_name': doc_name,
       'doc_type': doc_type,
       'rating': rating,

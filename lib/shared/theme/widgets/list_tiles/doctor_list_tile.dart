@@ -69,7 +69,12 @@ class DoctorListTile extends StatelessWidget {
         onPressed: () {
           Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => BookingPage()),
+          MaterialPageRoute(
+            builder: (context) => BookingPage(),
+            settings: const RouteSettings(
+              arguments: {'doc_id': 'docId'},
+            ),
+          ),
         );
       },
         child: const Text('Book Now'),

@@ -43,7 +43,19 @@ class _BookingPageState extends State<BookingPage> {
   @override
   Widget build(BuildContext context) {
     Config().init(context);
-    final doctor = ModalRoute.of(context)!.settings.arguments as Map;
+    late Map<dynamic, dynamic> doctor;
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map<dynamic, dynamic>) {
+      doctor = args;
+    } else {
+      // Handle the case where arguments are not provided or are of the wrong type
+      doctor = {}; // or provide default values
+      // Optionally, show an error message or navigate back
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: Doctor information not provided')),
+      );
+      // Navigator.pop(context); // Uncomment this if you want to go back automatically
+    }
     return Scaffold(
       appBar: CustomAppBar(
         appTitle: 'Appointment',
@@ -128,46 +140,49 @@ class _BookingPageState extends State<BookingPage> {
                       crossAxisCount: 4, childAspectRatio: 1.5),
                 ),
           SliverToBoxAdapter(
-  child: Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 80),
-    child: Button(
-      width: double.infinity,
-      title: 'Make Appointment',
-      onPressed: () async {
-        // Convert date/day/time into string first
-        final getDate = DateConverted.getDate(_currentDay);
-        final getTime = DateConverted.getTime(_currentIndex!);
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 80),
+              child: Button(
+                width: double.infinity,
+                title: 'Make Appointment',
+                onPressed: () async {
+                  if (doctor.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content:
+                              Text('Error: Doctor information is missing')),
+                    );
+                    return;
+                  }
 
-        // Create a new document in the 'bookings' collection
-        try {
-          DocumentReference docRef = await FirebaseFirestore.instance.collection('appointments').add({
-            'date': getDate,
-            //'time': getTime,
-             'doctor_id': doctor['doc_id'],
-            // 'user_id': FirebaseAuth.instance.currentUser?.uid, // Assuming you're using Firebase Auth
-            'status': 'pending', // You can set an initial status
-            // 'created_at': FieldValue.serverTimestamp(),
-          });
+                  // Rest of your booking logic...
+                  final getDate = DateConverted.getDate(_currentDay);
+                  final getTime = DateConverted.getTime(_currentIndex!);
 
-          // Get the auto-generated document ID
-          String doc_id = docRef.id;
+                  try {
+                    DocumentReference docRef = await FirebaseFirestore.instance
+                        .collection('appointments')
+                        .add({
+                      'date': getDate,
+                      'doc_id': doctor['doc_id'],
+                      'status': 'pending',
+                    });
 
-          // You can use the doc_id as needed, for example:
-          // Update the document with its own ID
-          await docRef.update({'booking_id': doc_id});
-
-          // Navigate to success page
-          MyApp.navigatorKey.currentState!.pushNamed('success_booking', arguments: doc_id);
-        } catch (e) {
-          // Handle any errors here
-          print('Error creating booking: $e');
-          // You might want to show an error message to the user
-        }
-      },
-      disable: _timeSelected && _dateSelected ? false : true,
-    ),
-  ),
-),
+                    String doc_id = docRef.id;
+                    await docRef.update({'booking_id': doc_id});
+                    MyApp.navigatorKey.currentState!
+                        .pushNamed('success_booking', arguments: doc_id);
+                  } catch (e) {
+                    print('Error creating booking: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error creating appointment: $e')),
+                    );
+                  }
+                },
+                disable: _timeSelected && _dateSelected ? false : true,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -175,41 +190,41 @@ class _BookingPageState extends State<BookingPage> {
 
   //table calendar
   Widget _tableCalendar() {
-    return TableCalendar(
-      focusedDay: _focusDay,
-      firstDay: DateTime.now(),
-      lastDay: DateTime(2023, 12, 31),
-      calendarFormat: _format,
-      currentDay: _currentDay,
-      rowHeight: 48,
-      calendarStyle: const CalendarStyle(
-        todayDecoration:
-            BoxDecoration(color: Config.primaryColor, shape: BoxShape.circle),
-      ),
-      availableCalendarFormats: const {
-        CalendarFormat.month: 'Month',
-      },
-      onFormatChanged: (format) {
-        setState(() {
-          _format = format;
-        });
-      },
-      onDaySelected: ((selectedDay, focusedDay) {
-        setState(() {
-          _currentDay = selectedDay;
-          _focusDay = focusedDay;
-          _dateSelected = true;
+  return TableCalendar(
+    focusedDay: _focusDay,
+    firstDay: DateTime.now(),
+    lastDay: DateTime(2025, 12, 31),  // Updated to a future date
+    calendarFormat: _format,
+    currentDay: _currentDay,
+    rowHeight: 48,
+    calendarStyle: const CalendarStyle(
+      todayDecoration:
+          BoxDecoration(color: Config.primaryColor, shape: BoxShape.circle),
+    ),
+    availableCalendarFormats: const {
+      CalendarFormat.month: 'Month',
+    },
+    onFormatChanged: (format) {
+      setState(() {
+        _format = format;
+      });
+    },
+    onDaySelected: ((selectedDay, focusedDay) {
+      setState(() {
+        _currentDay = selectedDay;
+        _focusDay = focusedDay;
+        _dateSelected = true;
 
-          //check if weekend is selected
-          if (selectedDay.weekday == 6 || selectedDay.weekday == 7) {
-            _isWeekend = true;
-            _timeSelected = false;
-            _currentIndex = null;
-          } else {
-            _isWeekend = false;
-          }
-        });
-      }),
-    );
+        //check if weekend is selected
+        if (selectedDay.weekday == 6 || selectedDay.weekday == 7) {
+          _isWeekend = true;
+          _timeSelected = false;
+          _currentIndex = null;
+        } else {
+          _isWeekend = false;
+        }
+      });
+    }),
+  );
   }
 }
