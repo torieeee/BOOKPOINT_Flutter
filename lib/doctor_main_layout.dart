@@ -1,5 +1,6 @@
 import 'package:book_point/doctor_section/doctor_home.dart';
 import 'package:book_point/doctor_section/doctor_profile.dart';
+import 'package:book_point/doctor_section/requests.dart';
 //import 'package:book_point/shared/theme/widgets/bottom_nav_bars/doctor_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -38,7 +39,7 @@ class _DoctorMainLayoutState extends State<DoctorMainLayout> {
         }),
         children: <Widget>[
           const DoctorHome(),
-          //RequestPage(),
+         const RequestsPage(doctor: {},),
           DoctorUserPage(),
 
         ],
