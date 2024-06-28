@@ -72,8 +72,9 @@ flutter:
 
   uses-material-design: true
   assets:
-    - assets/icons/
+    - assets/success.json
 
 flutter_icons:
   android: "launcher_icon"
   image_path: "assets/icons/faviconColor.png"
+  ios: null
