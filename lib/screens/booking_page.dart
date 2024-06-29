@@ -34,6 +34,11 @@ class _BookingPageState extends State<BookingPage> {
     token = prefs.getString('token') ?? '';
   }
 
+  Future<String?> getStoredUID() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('uid');
+  }
+
   @override
   void initState() {
     getToken();
@@ -155,6 +160,7 @@ class _BookingPageState extends State<BookingPage> {
 
                   final getDate = DateConverted.getDate(_currentDay);
                   final getTime = DateConverted.getTime(_currentIndex!);
+                  String? uid = await getStoredUID();
 
                   final DateTime appointmentDateTime = DateTime(
                     _currentDay.year,
@@ -168,8 +174,9 @@ class _BookingPageState extends State<BookingPage> {
                     DocumentReference docRef = await FirebaseFirestore.instance
                         .collection('appointments')
                         .add({
-                      'date': Timestamp.fromDate(appointmentDateTime), 
+                      'date': Timestamp.fromDate(appointmentDateTime),
                       'doc_id': docId,
+                      'patient_id': uid,
                       'status': 'pending',
                     });
 

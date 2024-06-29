@@ -309,7 +309,7 @@ class AuthModel extends ChangeNotifier {
   }
 
   Future<User?> register(
-      String username, String email, String password, String userType) async {
+    String username, String email, String password, String userType) async {
     try {
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -329,21 +329,27 @@ class AuthModel extends ChangeNotifier {
 
         if (userType == 'Doctor') {
           await _firestore.collection('Doctors').doc(user.uid).set({
+            'doc_id': user.uid,
             'username': username,
             'email': email,
+            'rating':5,
+            'doc_type':'None',
+            'createdAt': FieldValue.serverTimestamp(),
           });
           print("User data stored in 'Doctors' collection.");
         } else if (userType == 'Patient') {
           await _firestore.collection('Patients').doc(user.uid).set({
+            'doc_id': user.uid,
             'username': username,
             'email': email,
+            'createdAt': FieldValue.serverTimestamp(),
           });
           print("User data stored in 'Patients' collection.");
         }
       }
 
       _firebaseUser = userCredential.user;
-      userId = userCredential.user?.uid;
+      userId = userCredential.user!.uid;
       notifyListeners();
     } catch (e) {
       print("Error during registration: $e");

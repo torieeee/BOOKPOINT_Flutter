@@ -177,13 +177,13 @@ class _SignUpFormState extends State<SignUpForm> {
                       _selectedUserType!,
                     );
                     if(auth.isLogin){
-                      if (_selectedUserType == 'Patient') {
-                        await createPatientInFirestore(
-                          auth.userId!, // Assuming your AuthModel has a userId property
-                          _nameController.text,
-                          _emailController.text,
-                        );
-                      }
+                      // if (_selectedUserType == 'Patient') {
+                      //   await createPatientInFirestore(
+                      //     auth.userId!, // Assuming your AuthModel has a userId property
+                      //     _nameController.text,
+                      //     _emailController.text,
+                      //   );
+                      // }
                       MyApp.navigatorKey.currentState!.pushNamed('/');
                       /*if (_selectedUserType == 'Doctor') {
                         
