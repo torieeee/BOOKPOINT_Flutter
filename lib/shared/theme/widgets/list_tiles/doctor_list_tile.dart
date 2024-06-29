@@ -42,7 +42,8 @@ class DoctorListTile extends StatelessWidget {
           const SizedBox(height: 4.0),
           Row(
             children: [
-              Icon(Icons.star, color: const Color.fromRGBO(255, 204, 128, 1), size: 16),
+              Icon(Icons.star,
+                  color: const Color.fromRGBO(255, 204, 128, 1), size: 16),
               const SizedBox(width: 4.0),
               Text(
                 doctor.rating?.toString() ?? 'No Rating',
@@ -55,7 +56,9 @@ class DoctorListTile extends StatelessWidget {
               Icon(Icons.work, color: colorScheme.tertiary, size: 16),
               const SizedBox(width: 4),
               Text(
-                doctor.year_of_experience != null ? '${doctor.year_of_experience.toString()} years' : 'N/A',
+                doctor.year_of_experience != null
+                    ? '${doctor.year_of_experience.toString()} years'
+                    : 'N/A',
                 style: textTheme.bodySmall!.copyWith(
                   color: colorScheme.onSurface.withOpacity(0.5),
                   fontWeight: FontWeight.bold,
@@ -68,15 +71,15 @@ class DoctorListTile extends StatelessWidget {
       trailing: FilledButton(
         onPressed: () {
           Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BookingPage(),
-            settings: const RouteSettings(
-              arguments: {'doc_id': 'docId'},
+            context,
+            MaterialPageRoute(
+              builder: (context) => BookingPage(),
+              settings: RouteSettings(
+                arguments: {'doc_id': doctor.doc_id},
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
         child: const Text('Book Now'),
       ),
     );
@@ -90,6 +93,6 @@ Stream<List<DoctorModel>> _readData() {
       querySnapshot.docs.map((e) => DoctorModel.fromSnapshot(e)).toList());
 }
 
-void _createData(){
+void _createData() {
   final userCollection = FirebaseFirestore.instance.collection("Doctors");
 }

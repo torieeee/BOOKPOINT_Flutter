@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../models/auth_model.dart';
-//import '../providers/dio_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/config.dart';
 import 'button.dart';
 import 'package:book_point/providers/database_connection.dart';
@@ -13,6 +14,19 @@ class SignUpForm extends StatefulWidget {
 
   @override
   State<SignUpForm> createState() => _SignUpFormState();
+
+  Future<void> createPatientInFirestore(String userId, String name, String email) async {
+  try {
+    await FirebaseFirestore.instance.collection('patients').doc(userId).set({
+      'name': name,
+      'email': email,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    print('Patient created in Firestore');
+  } catch (e) {
+    print('Error creating patient in Firestore: $e');
+  }
+}
 }
 
 class _SignUpFormState extends State<SignUpForm> {
@@ -24,7 +38,6 @@ class _SignUpFormState extends State<SignUpForm> {
   bool obsecurePass = true;
   final List<String> _userTypes=['Doctor','Patient'];
   String? _selectedUserType;
-
   // late DatabaseHelper _dbHelper;
   // @override
   // void initState() {
@@ -127,6 +140,24 @@ class _SignUpFormState extends State<SignUpForm> {
           Config.spaceSmall,
           Consumer<AuthModel>(
             builder: (context, auth, child) {
+              Future<void> createPatientInFirestore(String userid, String name, String email) async {
+                if (auth.userId == null) {
+                  print('Error: User ID is null');
+                  return;
+                }
+
+                try {
+                  await FirebaseFirestore.instance.collection('patients').doc(auth.userId).set({
+                    'id': userid,
+                    'name': name,
+                    'email': email,
+                    'createdAt': FieldValue.serverTimestamp(),
+                  });
+                  print('Patient created in Firestore with ID: ${auth.userId}');
+                } catch (e) {
+                  print('Error creating patient in Firestore: $e');
+                }
+              }
               return Button(
                 width: double.infinity,
                 title: 'Sign Up',
@@ -146,6 +177,13 @@ class _SignUpFormState extends State<SignUpForm> {
                       _selectedUserType!,
                     );
                     if(auth.isLogin){
+                      if (_selectedUserType == 'Patient') {
+                        await createPatientInFirestore(
+                          auth.userId!, // Assuming your AuthModel has a userId property
+                          _nameController.text,
+                          _emailController.text,
+                        );
+                      }
                       MyApp.navigatorKey.currentState!.pushNamed('/');
                       /*if (_selectedUserType == 'Doctor') {
                         

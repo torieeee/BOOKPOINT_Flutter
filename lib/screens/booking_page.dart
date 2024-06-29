@@ -43,16 +43,16 @@ class _BookingPageState extends State<BookingPage> {
   @override
   Widget build(BuildContext context) {
     Config().init(context);
-    late Map<dynamic, dynamic> doctor;
+    String? docId;
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map<dynamic, dynamic>) {
-      doctor = args;
-    } else {
-      // Handle the case where arguments are not provided or are of the wrong type
-      doctor = {}; // or provide default values
-      // Optionally, show an error message or navigate back
+    if (args is Map<String, dynamic>) {
+      docId = args['doc_id'] as String?;
+    }
+
+    if (docId == null) {
+      // Handle the case where doc_id is not provided
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: Doctor information not provided')),
+        SnackBar(content: Text('Error: Doctor ID not provided')),
       );
       // Navigator.pop(context); // Uncomment this if you want to go back automatically
     }
@@ -146,32 +146,37 @@ class _BookingPageState extends State<BookingPage> {
                 width: double.infinity,
                 title: 'Make Appointment',
                 onPressed: () async {
-                  if (doctor.isEmpty) {
+                  if (docId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text('Error: Doctor information is missing')),
+                      SnackBar(content: Text('Error: Doctor ID is missing')),
                     );
                     return;
                   }
 
-                  // Rest of your booking logic...
                   final getDate = DateConverted.getDate(_currentDay);
                   final getTime = DateConverted.getTime(_currentIndex!);
+
+                  final DateTime appointmentDateTime = DateTime(
+                    _currentDay.year,
+                    _currentDay.month,
+                    _currentDay.day,
+                    _currentIndex! + 8, // Assuming the time starts from 9:00 AM
+                    0, // Minutes
+                  );
 
                   try {
                     DocumentReference docRef = await FirebaseFirestore.instance
                         .collection('appointments')
                         .add({
-                      'date': getDate,
-                      'doc_id': doctor['doc_id'],
+                      'date': Timestamp.fromDate(appointmentDateTime), 
+                      'doc_id': docId,
                       'status': 'pending',
                     });
 
-                    String doc_id = docRef.id;
-                    await docRef.update({'booking_id': doc_id});
+                    String bookingId = docRef.id;
+                    await docRef.update({'booking_id': bookingId});
                     MyApp.navigatorKey.currentState!
-                        .pushNamed('success_booking', arguments: doc_id);
+                        .pushNamed('success_booking', arguments: bookingId);
                   } catch (e) {
                     print('Error creating booking: $e');
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -190,41 +195,41 @@ class _BookingPageState extends State<BookingPage> {
 
   //table calendar
   Widget _tableCalendar() {
-  return TableCalendar(
-    focusedDay: _focusDay,
-    firstDay: DateTime.now(),
-    lastDay: DateTime(2025, 12, 31),  // Updated to a future date
-    calendarFormat: _format,
-    currentDay: _currentDay,
-    rowHeight: 48,
-    calendarStyle: const CalendarStyle(
-      todayDecoration:
-          BoxDecoration(color: Config.primaryColor, shape: BoxShape.circle),
-    ),
-    availableCalendarFormats: const {
-      CalendarFormat.month: 'Month',
-    },
-    onFormatChanged: (format) {
-      setState(() {
-        _format = format;
-      });
-    },
-    onDaySelected: ((selectedDay, focusedDay) {
-      setState(() {
-        _currentDay = selectedDay;
-        _focusDay = focusedDay;
-        _dateSelected = true;
+    return TableCalendar(
+      focusedDay: _focusDay,
+      firstDay: DateTime.now(),
+      lastDay: DateTime(2025, 12, 31), // Updated to a future date
+      calendarFormat: _format,
+      currentDay: _currentDay,
+      rowHeight: 48,
+      calendarStyle: const CalendarStyle(
+        todayDecoration:
+            BoxDecoration(color: Config.primaryColor, shape: BoxShape.circle),
+      ),
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'Month',
+      },
+      onFormatChanged: (format) {
+        setState(() {
+          _format = format;
+        });
+      },
+      onDaySelected: ((selectedDay, focusedDay) {
+        setState(() {
+          _currentDay = selectedDay;
+          _focusDay = focusedDay;
+          _dateSelected = true;
 
-        //check if weekend is selected
-        if (selectedDay.weekday == 6 || selectedDay.weekday == 7) {
-          _isWeekend = true;
-          _timeSelected = false;
-          _currentIndex = null;
-        } else {
-          _isWeekend = false;
-        }
-      });
-    }),
-  );
+          //check if weekend is selected
+          if (selectedDay.weekday == 6 || selectedDay.weekday == 7) {
+            _isWeekend = true;
+            _timeSelected = false;
+            _currentIndex = null;
+          } else {
+            _isWeekend = false;
+          }
+        });
+      }),
+    );
   }
 }
