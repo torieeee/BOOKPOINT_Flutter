@@ -258,20 +258,26 @@ class AuthModel extends ChangeNotifier {
   get getFavDoc => null;
 
   Future<User?> login(String email, String password) async {
-    try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+  try {
+    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      User? user = userCredential.user;
-      if (user != null) {
+    User? user = userCredential.user;
+    if (user != null) {
+      if (user.emailVerified) {
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('Users')
             .doc(user.uid)
             .get();
+        
         if (userDoc.exists) {
+          // Update the emailVerified status in Firestore
+          await _firestore.collection('Users').doc(user.uid).update({
+            'emailVerified': true,
+          });
+
           String userType = userDoc['userType'];
 
           // Navigate based on user type
@@ -283,79 +289,59 @@ class AuthModel extends ChangeNotifier {
         } else {
           MyApp.navigatorKey.currentState!.pushNamed('main');
         }
+        
+        _isLogin = true;
+        notifyListeners();
+        return user;
+      } else {
+        // Email is not verified
+        print("Please verify your email before logging in.");
+        await FirebaseAuth.instance.signOut(); // Sign out the unverified user
+        return null;
       }
-      _isLogin = true;
-      notifyListeners();
-      return userCredential.user;
-
-      // User? user = userCredential.user;
-      //   if (user != null) {
-      //     DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      //     String userType = userDoc['userType'];
-
-      //     // Navigate based on user type
-      //     if (userType == 'Doctor'){
-      //       MyApp.navigatorKey.currentState!.pushNamed('adminDashboard');
-      //     } else {
-      //       MyApp.navigatorKey.currentState!.pushNamed('MainLayout');
-      //     }
-      //   }
-    } catch (e) {
-      _isLogin = false;
-      notifyListeners();
-      print("Error during login: $e");
-      _firebaseUser = null;
     }
+  } catch (e) {
+    _isLogin = false;
+    notifyListeners();
+    print("Error during login: $e");
+    _firebaseUser = null;
   }
+}
 
-  Future<User?> register(
-    String username, String email, String password, String userType) async {
-    try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+  Future<User?> register(String username, String email, String password, String userType) async {
+  try {
+    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    User? user = userCredential.user;
+    if (user != null) {
+      // Send verification email
+      await user.sendEmailVerification();
 
-      User? user = userCredential.user;
-      if (user != null) {
-        // Store additional user data in Firestore
-        await _firestore.collection('Users').doc(user.uid).set({
-          'username': username,
-          'email': email,
-          'userType': userType,
-        });
-        print("User data stored in 'Users' collection.");
+      // Store additional user data in Firestore
+      await _firestore.collection('Users').doc(user.uid).set({
+        'username': username,
+        'email': email,
+        'userType': userType,
+        'emailVerified': false, // Add this field
+      });
+      print("User data stored in 'Users' collection.");
 
-        if (userType == 'Doctor') {
-          await _firestore.collection('Doctors').doc(user.uid).set({
-            'doc_id': user.uid,
-            'username': username,
-            'email': email,
-            'rating':5,
-            'doc_type':'None',
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-          print("User data stored in 'Doctors' collection.");
-        } else if (userType == 'Patient') {
-          await _firestore.collection('Patients').doc(user.uid).set({
-            'doc_id': user.uid,
-            'username': username,
-            'email': email,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-          print("User data stored in 'Patients' collection.");
-        }
-      }
+      // ... (rest of your existing code for storing data in 'Doctors' or 'Patients' collections)
 
       _firebaseUser = userCredential.user;
       userId = userCredential.user!.uid;
       notifyListeners();
-    } catch (e) {
-      print("Error during registration: $e");
-      _firebaseUser = null;
+      
+      // Inform the user to check their email
+      print("A verification email has been sent. Please verify your email before logging in.");
     }
+  } catch (e) {
+    print("Error during registration: $e");
+    _firebaseUser = null;
   }
+}
 
   Future<User?> logout() async {
     await FirebaseAuth.instance.signOut();

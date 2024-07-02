@@ -48,9 +48,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
         case 'complete':
           schedule['status'] = FilterStatus.complete;
           break;
-        case 'cancel':
-          schedule['status'] = FilterStatus.cancel;
-          break;
       }
       return schedule['status'] == status;
     }).toList();
