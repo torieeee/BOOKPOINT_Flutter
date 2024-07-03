@@ -22,9 +22,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late String _userType;
   // ignore: unused_field
   late User? _firebaseUser;
-  Map<String, dynamic> _user = {}; 
+  //Map<String, dynamic> _user = {}; 
   Map<String, dynamic> _appointment = {}; 
-  final List <dynamic> _favList = []; 
+  //final List <dynamic> _favList = []; 
  final Set _favDoc = {};
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -33,7 +33,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
   @override
   void initState() {
     super.initState();
+    _initializeVariables();
     fetchUserData();
+  }
+  void _initializeVariables() {
+    _userId = '';
+    _name = '';
+    _dob = DateTime.now();
+    _gender = '';
+    _email = '';
+    _userType = '';
+    
   }
 
   Future<void> fetchUserData() async {
@@ -55,6 +65,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
+@override
+void dispose() {
+  
+  _firebaseUser = null;
+  _appointment ;
+  _favDoc.clear();
+  MyApp.navigatorKey.currentState!.pushNamed('/');
+  //notifyListeners();
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
