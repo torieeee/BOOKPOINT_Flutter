@@ -49,9 +49,11 @@ class _BookingPageState extends State<BookingPage> {
   Widget build(BuildContext context) {
     Config().init(context);
     String? docId;
+    String? docName;
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map<String, dynamic>) {
       docId = args['doc_id'] as String?;
+      docName = args['doc_name'] as String?;
     }
 
     if (docId == null) {
@@ -176,6 +178,7 @@ class _BookingPageState extends State<BookingPage> {
                         .add({
                       'date': Timestamp.fromDate(appointmentDateTime),
                       'doc_id': docId,
+                      'doc_name':docName,
                       'patient_id': uid,
                       'status': 'pending',
                     });

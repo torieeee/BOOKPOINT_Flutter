@@ -15,11 +15,12 @@ class AppointmentPage extends StatefulWidget {
   State<AppointmentPage> createState() => _AppointmentPageState();
 }
 
-enum FilterStatus { upcoming, complete, cancel }
+enum FilterStatus { Upcoming, complete }
 
 class _AppointmentPageState extends State<AppointmentPage> {
-  FilterStatus status = FilterStatus.upcoming;
+  FilterStatus status = FilterStatus.Upcoming;
   Alignment _alignment = Alignment.centerLeft;
+  Alignment _alignmentRight = Alignment.centerRight;
   List<Map<String, dynamic>> schedules = [];
   bool isLoading = true;
 
@@ -71,16 +72,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
       FilterStatus scheduleStatus;
       switch (statusStr) {
         case 'pending':
-          scheduleStatus = FilterStatus.upcoming;
+          scheduleStatus = FilterStatus.Upcoming;
           break;
         case 'complete':
           scheduleStatus = FilterStatus.complete;
           break;
-        case 'cancel':
-          scheduleStatus = FilterStatus.cancel;
-          break;
         default:
-          scheduleStatus = FilterStatus.upcoming;
+          scheduleStatus = FilterStatus.Upcoming;
       }
       return scheduleStatus == status;
     }).toList();
@@ -118,22 +116,26 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           child: GestureDetector(
                             onTap: () {
                               setState(() {
-                                if (filterStatus == FilterStatus.upcoming) {
-                                  status = FilterStatus.upcoming;
-                                  _alignment = Alignment.centerLeft;
-                                } else if (filterStatus ==
-                                    FilterStatus.complete) {
-                                  status = FilterStatus.complete;
-                                  _alignment = Alignment.center;
-                                } else if (filterStatus ==
-                                    FilterStatus.cancel) {
-                                  status = FilterStatus.cancel;
-                                  _alignment = Alignment.centerRight;
-                                }
+                                status = filterStatus;
+                                _alignment = _getAlignment(filterStatus);
                               });
                             },
-                            child: Center(
-                              child: Text(filterStatus.name),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Align(
+                                alignment: _getTextAlignment(filterStatus),
+                                child: Text(
+                                  filterStatus.name,
+                                  style: TextStyle(
+                                    color: status == filterStatus
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontWeight: status == filterStatus
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -143,6 +145,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 AnimatedAlign(
                   alignment: _alignment,
                   duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
                   child: Container(
                     width: 100,
                     height: 40,
@@ -187,7 +190,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                       CrossAxisAlignment.stretch,
                                   children: [
                                     Text(
-                                      schedule['doc_id'] ?? 'No name',
+                                      schedule['doc_name'] ?? 'No name',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -199,7 +202,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                       date: _formatTimestamp(schedule['date']),
                                       day: _getDayFromTimestamp(
                                           schedule['date']),
-                                      time: schedule['time'] ?? 'No time',
+                                      time: _getTimeFromTimestamp(
+                                          schedule['date']),
                                     ),
                                     const SizedBox(
                                       height: 15,
@@ -251,6 +255,24 @@ class _AppointmentPageState extends State<AppointmentPage> {
   }
 }
 
+Alignment _getAlignment(FilterStatus filterStatus) {
+  switch (filterStatus) {
+    case FilterStatus.Upcoming:
+      return Alignment.centerLeft;
+    case FilterStatus.complete:
+      return Alignment.centerRight;
+  }
+}
+
+Alignment _getTextAlignment(FilterStatus filterStatus) {
+  switch (filterStatus) {
+    case FilterStatus.Upcoming:
+      return Alignment.centerLeft;
+    case FilterStatus.complete:
+      return Alignment.centerRight;
+  }
+}
+
 String _formatTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
     return DateFormat('yyyy-MM-dd').format(timestamp.toDate());
@@ -263,6 +285,13 @@ String _getDayFromTimestamp(dynamic timestamp) {
     return DateFormat('EEEE').format(timestamp.toDate());
   }
   return 'Invalid Day';
+}
+
+String _getTimeFromTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('h:mm a').format(timestamp.toDate());
+  }
+  return 'Invalid Time';
 }
 
 class ScheduleCard extends StatelessWidget {
