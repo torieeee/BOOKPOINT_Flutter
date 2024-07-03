@@ -75,7 +75,7 @@ class DoctorListTile extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => BookingPage(),
               settings: RouteSettings(
-                arguments: {'doc_id': doctor.doc_id},
+                arguments: {'doc_id': doctor.doc_id,'doc_name':doctor.doc_name},
               ),
             ),
           );

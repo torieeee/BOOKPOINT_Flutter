@@ -1,14 +1,16 @@
 import 'package:book_point/utils/config.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 class AppointmentPreviewCard extends StatelessWidget {
-  final Map<String, dynamic> doctor;
-  const AppointmentPreviewCard({Key? key, required this.doctor});
+  final Map<String, dynamic> appointment;
+  const AppointmentPreviewCard({Key? key, required this.appointment})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final String _baseUrl = Config.baseUrl;
-    final Map<String, dynamic> doctor;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return Column(
@@ -17,9 +19,7 @@ class AppointmentPreviewCard extends StatelessWidget {
           child: Column(
             children: [
               Config.spaceSmall,
-              ScheduleCard(
-                appointment: this.doctor['appointments']
-                ),
+              ScheduleCard(appointment: this.appointment),
               Config.spaceSmall,
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -33,22 +33,22 @@ class AppointmentPreviewCard extends StatelessWidget {
                         'Cancel',
                         style: TextStyle(color: Colors.white),
                       ),
-                      onPressed: (){},
-                      ),
+                      onPressed: () {},
+                    ),
                   ),
                   const SizedBox(width: 20),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                      ),
-                      child: const Text(
-                        'Completed',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      onPressed: (){},
-                      ),
-                  ),
+                  // Expanded(
+                  //   child: ElevatedButton(
+                  //     style: ElevatedButton.styleFrom(
+                  //       backgroundColor: Colors.blue,
+                  //     ),
+                  //     child: const Text(
+                  //       'Completed',
+                  //       style: TextStyle(color: Colors.white),
+                  //     ),
+                  //     onPressed: (){},
+                  //     ),
+                  // ),
                 ],
               ),
             ],
@@ -85,14 +85,49 @@ class ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> user = {};
-    Map<String, dynamic> doctor = {};
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    // Check if the appointment data contains a date
+    if (appointment['date'] == null) {
+      return Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primary,
+              colorScheme.tertiary,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        child: Text('No appointment date available',
+            style: TextStyle(color: Colors.white)),
+      );
+    }
+
+    // Parse the date from the appointment data
+    DateTime appointmentDate = (appointment['date'] as Timestamp).toDate();
+    String formattedDate =
+        DateFormat('EEEE, MMMM d, y').format(appointmentDate);
+    String formattedTime = DateFormat('h:mm a').format(appointmentDate);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary,
+            colorScheme.tertiary,
+          ],
+        ),
         borderRadius: BorderRadius.circular(10),
       ),
       width: double.infinity,
+
       padding: const EdgeInsets.all(20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -102,29 +137,25 @@ class ScheduleCard extends StatelessWidget {
             color: Colors.white,
             size: 15,
           ),
-          const SizedBox(
-            width: 5,
+          const SizedBox(width: 5),
+          Expanded(
+            child: Text(
+              formattedDate,
+              style: const TextStyle(color: Colors.white),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          Text(
-            '${appointment['day']}, ${appointment['date']}',
-            style: const TextStyle(color: Colors.white),
-          ),
-          const SizedBox(
-            width: 20,
-          ),
+          const SizedBox(width: 20),
           const Icon(
             Icons.access_alarm,
             color: Colors.white,
             size: 17,
           ),
-          const SizedBox(
-            width: 5,
-          ),
-          Flexible(
-              child: Text(
-            appointment['time'],
+          const SizedBox(width: 5),
+          Text(
+            formattedTime,
             style: const TextStyle(color: Colors.white),
-          ))
+          )
         ],
       ),
     );

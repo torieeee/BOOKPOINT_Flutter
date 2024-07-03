@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -12,47 +15,72 @@ class AppointmentPage extends StatefulWidget {
   State<AppointmentPage> createState() => _AppointmentPageState();
 }
 
-//enum for appointment status
-enum FilterStatus { upcoming, complete, cancel }
+enum FilterStatus { Upcoming, complete }
 
 class _AppointmentPageState extends State<AppointmentPage> {
-  FilterStatus status = FilterStatus.upcoming; //initial status
+  FilterStatus status = FilterStatus.Upcoming;
   Alignment _alignment = Alignment.centerLeft;
-  List<dynamic> schedules = [];
+  Alignment _alignmentRight = Alignment.centerRight;
+  List<Map<String, dynamic>> schedules = [];
+  bool isLoading = true;
 
-  //get appointments details
   Future<void> getAppointments() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token') ?? '';
-    final appointment = await DioProvider().getAppointments(token);
-    if (appointment != 'Error') {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final QuerySnapshot appointmentSnapshot = await FirebaseFirestore
+            .instance
+            .collection('appointments')
+            .where('patient_id', isEqualTo: user.uid)
+            .get();
+
+        setState(() {
+          schedules = appointmentSnapshot.docs
+              .map((doc) => doc.data() as Map<String, dynamic>)
+              .toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          schedules = [];
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching appointments: $e');
       setState(() {
-        schedules = json.decode(appointment);
+        schedules = [];
+        isLoading = false;
       });
     }
   }
 
   @override
   void initState() {
-    getAppointments();
     super.initState();
+    getAppointments();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> filteredSchedules = schedules.where((var schedule) {
-      switch (schedule['status']) {
-        case 'upcoming':
-          schedule['status'] = FilterStatus.upcoming;
+    List<Map<String, dynamic>> filteredSchedules = schedules.where((schedule) {
+      String statusStr = schedule['status'] as String? ?? 'pending';
+      FilterStatus scheduleStatus;
+      switch (statusStr) {
+        case 'pending':
+          scheduleStatus = FilterStatus.Upcoming;
           break;
         case 'complete':
-          schedule['status'] = FilterStatus.complete;
+          scheduleStatus = FilterStatus.complete;
           break;
-        case 'cancel':
-          schedule['status'] = FilterStatus.cancel;
-          break;
+        default:
+          scheduleStatus = FilterStatus.Upcoming;
       }
-      return schedule['status'] == status;
+      return scheduleStatus == status;
     }).toList();
 
     return SafeArea(
@@ -88,22 +116,26 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           child: GestureDetector(
                             onTap: () {
                               setState(() {
-                                if (filterStatus == FilterStatus.upcoming) {
-                                  status = FilterStatus.upcoming;
-                                  _alignment = Alignment.centerLeft;
-                                } else if (filterStatus ==
-                                    FilterStatus.complete) {
-                                  status = FilterStatus.complete;
-                                  _alignment = Alignment.center;
-                                } else if (filterStatus ==
-                                    FilterStatus.cancel) {
-                                  status = FilterStatus.cancel;
-                                  _alignment = Alignment.centerRight;
-                                }
+                                status = filterStatus;
+                                _alignment = _getAlignment(filterStatus);
                               });
                             },
-                            child: Center(
-                              child: Text(filterStatus.name),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Align(
+                                alignment: _getTextAlignment(filterStatus),
+                                child: Text(
+                                  filterStatus.name,
+                                  style: TextStyle(
+                                    color: status == filterStatus
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontWeight: status == filterStatus
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -113,6 +145,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 AnimatedAlign(
                   alignment: _alignment,
                   duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
                   child: Container(
                     width: 100,
                     height: 40,
@@ -134,114 +167,131 @@ class _AppointmentPageState extends State<AppointmentPage> {
               ],
             ),
             Config.spaceSmall,
+            Config.spaceSmall,
+            Config.spaceSmall,
             Expanded(
-              child: ListView.builder(
-                itemCount: filteredSchedules.length,
-                itemBuilder: ((context, index) {
-                  var schedule = filteredSchedules[index];
-                  bool isLastElement = filteredSchedules.length + 1 == index;
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(
-                        color: Colors.grey,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    margin: !isLastElement
-                        ? const EdgeInsets.only(bottom: 20)
-                        : EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                    "http://127.0.0.1:8000${schedule['doctor_profile']}"),
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : filteredSchedules.isEmpty
+                      ? const Center(child: Text('No appointments found'))
+                      : ListView.builder(
+                          itemCount: filteredSchedules.length,
+                          itemBuilder: ((context, index) {
+                            var schedule = filteredSchedules[index];
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    schedule['doctor_name'],
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w700,
+                              child: Padding(
+                                padding: const EdgeInsets.all(15),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      schedule['doc_name'] ?? 'No name',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text(
-                                    schedule['category'],
-                                    style: const TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                    const SizedBox(height: 5),
+                                    Text(schedule['status'] ?? 'No category'),
+                                    const SizedBox(height: 15),
+                                    ScheduleCard(
+                                      date: _formatTimestamp(schedule['date']),
+                                      day: _getDayFromTimestamp(
+                                          schedule['date']),
+                                      time: _getTimeFromTimestamp(
+                                          schedule['date']),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          ScheduleCard(
-                            date: schedule['date'],
-                            day: schedule['day'],
-                            time: schedule['time'],
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () {},
-                                  child: const Text(
-                                    'Cancel',
-                                    style:
-                                        TextStyle(color: Config.primaryColor),
-                                  ),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: OutlinedButton(
+                                            onPressed: () {},
+                                            child: const Text(
+                                              'Cancel',
+                                              style: TextStyle(
+                                                  color: Config.primaryColor),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 20,
+                                        ),
+                                        Expanded(
+                                          child: OutlinedButton(
+                                            style: OutlinedButton.styleFrom(
+                                              backgroundColor:
+                                                  Config.primaryColor,
+                                            ),
+                                            onPressed: () {},
+                                            child: const Text(
+                                              'Reschedule',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(
-                                width: 20,
-                              ),
-                              Expanded(
-                                child: OutlinedButton(
-                                  style: OutlinedButton.styleFrom(
-                                    backgroundColor: Config.primaryColor,
-                                  ),
-                                  onPressed: () {},
-                                  child: const Text(
-                                    'Reschedule',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
+                            );
+                          }),
+                        ),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+Alignment _getAlignment(FilterStatus filterStatus) {
+  switch (filterStatus) {
+    case FilterStatus.Upcoming:
+      return Alignment.centerLeft;
+    case FilterStatus.complete:
+      return Alignment.centerRight;
+  }
+}
+
+Alignment _getTextAlignment(FilterStatus filterStatus) {
+  switch (filterStatus) {
+    case FilterStatus.Upcoming:
+      return Alignment.centerLeft;
+    case FilterStatus.complete:
+      return Alignment.centerRight;
+  }
+}
+
+String _formatTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('yyyy-MM-dd').format(timestamp.toDate());
+  }
+  return 'Invalid Date';
+}
+
+String _getDayFromTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('EEEE').format(timestamp.toDate());
+  }
+  return 'Invalid Day';
+}
+
+String _getTimeFromTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('h:mm a').format(timestamp.toDate());
+  }
+  return 'Invalid Time';
 }
 
 class ScheduleCard extends StatelessWidget {

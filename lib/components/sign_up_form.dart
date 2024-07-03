@@ -15,18 +15,19 @@ class SignUpForm extends StatefulWidget {
   @override
   State<SignUpForm> createState() => _SignUpFormState();
 
-  Future<void> createPatientInFirestore(String userId, String name, String email) async {
-  try {
-    await FirebaseFirestore.instance.collection('patients').doc(userId).set({
-      'name': name,
-      'email': email,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-    print('Patient created in Firestore');
-  } catch (e) {
-    print('Error creating patient in Firestore: $e');
+  Future<void> createPatientInFirestore(
+      String userId, String name, String email) async {
+    try {
+      await FirebaseFirestore.instance.collection('patients').doc(userId).set({
+        'name': name,
+        'email': email,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      print('Patient created in Firestore');
+    } catch (e) {
+      print('Error creating patient in Firestore: $e');
+    }
   }
-}
 }
 
 class _SignUpFormState extends State<SignUpForm> {
@@ -36,13 +37,21 @@ class _SignUpFormState extends State<SignUpForm> {
   final _passController = TextEditingController();
   bool _isSigningUp = false;
   bool obsecurePass = true;
-  final List<String> _userTypes=['Doctor','Patient'];
+  final List<String> _userTypes = ['Doctor', 'Patient'];
+  final List<String> _doctorTypes = [
+    'General Practitioner',
+    'Cardiologist',
+    'Pediatrician',
+    'Neurologist',
+    'Dermatologist'
+  ];
   String? _selectedUserType;
+  String? _selectedDoctorType;
   // late DatabaseHelper _dbHelper;
   // @override
   // void initState() {
   //   super.initState();
-    
+
   //   _dbHelper = DatabaseHelper(
   //     host: 'localhost',
   //     port: 3306,
@@ -61,6 +70,7 @@ class _SignUpFormState extends State<SignUpForm> {
     _passController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -125,29 +135,61 @@ class _SignUpFormState extends State<SignUpForm> {
           // Radio buttons for user type selection
           Column(
             children: _userTypes.map((String type) {
-              return RadioListTile<String>(
-                title: Text(type),
-                value: type,
-                groupValue: _selectedUserType,
-                onChanged: (String? value) {
-                  setState(() {
-                    _selectedUserType = value;
-                  });
-                },
+              return Column(
+                children: [
+                  RadioListTile<String>(
+                    title: Text(type),
+                    value: type,
+                    groupValue: _selectedUserType,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _selectedUserType = value;
+                        if (value != 'Doctor') {
+                          _selectedDoctorType = null;
+                        }
+                      });
+                    },
+                  ),
+                  if (type == 'Doctor' && _selectedUserType == 'Doctor')
+                    DropdownButtonFormField<String>(
+                      value: _selectedDoctorType,
+                      hint: Text('Select Doctor Type'),
+                      items: _doctorTypes.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedDoctorType = newValue;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      ),
+                    ),
+                ],
               );
             }).toList(),
           ),
           Config.spaceSmall,
           Consumer<AuthModel>(
             builder: (context, auth, child) {
-              Future<void> createPatientInFirestore(String userid, String name, String email) async {
+              Future<void> createPatientInFirestore(
+                  String userid, String name, String email) async {
                 if (auth.userId == null) {
                   print('Error: User ID is null');
                   return;
                 }
 
                 try {
-                  await FirebaseFirestore.instance.collection('patients').doc(auth.userId).set({
+                  await FirebaseFirestore.instance
+                      .collection('patients')
+                      .doc(auth.userId)
+                      .set({
                     'id': userid,
                     'name': name,
                     'email': email,
@@ -158,15 +200,22 @@ class _SignUpFormState extends State<SignUpForm> {
                   print('Error creating patient in Firestore: $e');
                 }
               }
+
               return Button(
                 width: double.infinity,
                 title: 'Sign Up',
                 onPressed: () async {
-
-                  if(_formKey.currentState!.validate()){
+                  if (_formKey.currentState!.validate()) {
                     if (_selectedUserType == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Please select a user type')),
+                      );
+                      return;
+                    }
+                    if (_selectedUserType == 'Doctor' &&
+                        _selectedDoctorType == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Please select a doctor type')),
                       );
                       return;
                     }
@@ -175,34 +224,20 @@ class _SignUpFormState extends State<SignUpForm> {
                       _emailController.text,
                       _passController.text,
                       _selectedUserType!,
+                      // _selectedDoctorType!,
                     );
-                    if(auth.isLogin){
-                      if (_selectedUserType == 'Patient') {
-                        await createPatientInFirestore(
-                          auth.userId!, // Assuming your AuthModel has a userId property
-                          _nameController.text,
-                          _emailController.text,
-                        );
-                      }
+                    if (auth.isLogin) {
                       MyApp.navigatorKey.currentState!.pushNamed('/');
-                      /*if (_selectedUserType == 'Doctor') {
-                        
-                        MyApp.navigatorKey.currentState!.pushNamed('doctor_main');
-                      } else {
-                        // N
-                        MyApp.navigatorKey.currentState!.pushNamed('main');
-                      }*/
-                    }else{
-                      // ignore: use_build_context_synchronously
+                    } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Registration failed')),
                       );
                     }
                   }
-                  },
-                  disable: false,
-                  );
-                  },
+                },
+                disable: false,
+              );
+            },
           ),
         ],
       ),

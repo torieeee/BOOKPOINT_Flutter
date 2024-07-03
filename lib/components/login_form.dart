@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:book_point/screens/Authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:providers:database_connection.dart';
 import '../providers/database_connection.dart';
@@ -36,7 +37,7 @@ class _LoginFormState extends State<LoginForm> {
   // @override
   // void initState() {
   //   super.initState();
-    
+
   //   _dbHelper = DatabaseHelper(
   //     host: 'localhost',
   //     port: 3306,
@@ -44,7 +45,7 @@ class _LoginFormState extends State<LoginForm> {
   //     password: '',
   //     databaseName: 'book_point',
   //   );
-  //   _dbHelper.openConnection(); 
+  //   _dbHelper.openConnection();
   // }
 
   @override
@@ -54,6 +55,7 @@ class _LoginFormState extends State<LoginForm> {
     // _dbHelper.closeConnection(); // Close database connection
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -107,38 +109,43 @@ class _LoginFormState extends State<LoginForm> {
               return Button(
                 width: double.infinity,
                 title: 'Sign In',
-                
                 onPressed: () async {
-
-                  if (_formKey.currentState!.validate()){
-                    await auth.login(_emailController.text,_passController.text);
-                    if(auth.isLogin){
+                  if (_formKey.currentState!.validate()) {
+                    await auth.login(
+                        _emailController.text, _passController.text);
+                    if (auth.isLogin) {
                       User? user = FirebaseAuth.instance.currentUser;
                       if (user != null) {
-                        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
-                        if(userDoc.exists){
+                        // Store the UID using shared preferences
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('uid', user.uid);
+
+                        DocumentSnapshot userDoc = await FirebaseFirestore
+                            .instance
+                            .collection('Users')
+                            .doc(user.uid)
+                            .get();
+                        if (userDoc.exists) {
                           String userType = userDoc['userType'];
-                          
+
                           // Navigate based on user type
-                          if (userType == 'Doctor'){
-                            MyApp.navigatorKey.currentState!.pushNamed('doctor');
+                          if (userType == 'Doctor') {
+                            MyApp.navigatorKey.currentState!
+                                .pushNamed('doctor');
                           } else {
                             MyApp.navigatorKey.currentState!.pushNamed('main');
                           }
-                        }else{
+                        } else {
                           MyApp.navigatorKey.currentState!.pushNamed('main');
                         }
-                    } else{
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Login Failed')),
-                      );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Login Failed')),
+                        );
+                      }
                     }
                   }
-                
-                 
-                  }
                 },
-                //child:Text('Sign In')
                 disable: false,
               );
             },
@@ -148,7 +155,7 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 }
- /*
+/*
                  final token = await DioProvider()
                       .getToken(_emailController.text, _passController.text);
                       print(token);
@@ -185,8 +192,8 @@ class _LoginFormState extends State<LoginForm> {
                       }
                     }
                   }*/
-                  
-                   /*try{
+
+/*try{
                     final email =_emailController.text;
                     final password=_passController.text;
                     try{
