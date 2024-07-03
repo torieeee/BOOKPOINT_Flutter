@@ -177,7 +177,7 @@ class _MySchedule extends StatelessWidget {
         SectionTitle(
           title: 'My appointment',
           action: 'See all',
-          onPressed: () => Navigator.of(context).pushNamed('main'),
+          onPressed: () => Navigator.of(context).pushNamed('appointment_page'),
         ),
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseAuth.instance.currentUser != null

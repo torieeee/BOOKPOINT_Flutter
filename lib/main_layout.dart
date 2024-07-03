@@ -30,8 +30,8 @@ class _MainLayoutState extends State<MainLayout> {
         }),
         children: <Widget>[
           const HomeScreen(),
-          FavPage(),
           const AppointmentPage(),
+          FavPage(),
           UserProfilePage(),
         ],
       ),
@@ -53,12 +53,12 @@ class _MainLayoutState extends State<MainLayout> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.solidHeart),
-            label: 'Favorite',
-          ),
-          BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.solidCalendarCheck),
             label: 'Appointments',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.solidHeart),
+            label: 'Favorite',
           ),
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.solidUser),
