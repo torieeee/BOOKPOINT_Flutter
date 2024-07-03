@@ -34,7 +34,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         final QuerySnapshot appointmentSnapshot = await FirebaseFirestore
             .instance
             .collection('appointments')
-            .where('patientId', isEqualTo: user.uid)
+            .where('patient_id', isEqualTo: user.uid)
             .get();
 
         setState(() {
@@ -67,10 +67,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> filteredSchedules = schedules.where((schedule) {
-      String statusStr = schedule['status'] as String? ?? 'upcoming';
+      String statusStr = schedule['status'] as String? ?? 'pending';
       FilterStatus scheduleStatus;
       switch (statusStr) {
-        case 'upcoming':
+        case 'pending':
           scheduleStatus = FilterStatus.upcoming;
           break;
         case 'complete':
@@ -187,13 +187,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                       CrossAxisAlignment.stretch,
                                   children: [
                                     Text(
-                                      schedule['doctor_name'] ?? 'No name',
+                                      schedule['doc_id'] ?? 'No name',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 5),
-                                    Text(schedule['category'] ?? 'No category'),
+                                    Text(schedule['status'] ?? 'No category'),
                                     const SizedBox(height: 15),
                                     ScheduleCard(
                                       date: _formatTimestamp(schedule['date']),
