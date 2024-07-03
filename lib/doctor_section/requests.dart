@@ -209,8 +209,10 @@ class RequestsCard extends StatelessWidget {
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:book_point/utils/config.dart'; 
+//import 'package:book_point/utils/config.dart'; 
 import '../shared/theme/widgets/cards/requests_card.dart';
+import 'prescription.dart';
+//import '../shared/theme/widgets/cards/requests_card.dart';
 
 class RequestsPage extends StatefulWidget {
   const RequestsPage({
@@ -326,12 +328,18 @@ class _RequestsPageState extends State<RequestsPage> {
       return RequestsCard(
          doctor: appointment['doctor'],
         patient: appointment['patient'],
-        //appointment: appointment,
-        //primaryButtonText: primaryButtonText,
-       // primaryButtonStatus: primaryButtonStatus,
-        //secondaryButtonText: secondaryButtonText,
-        //secondaryButtonStatus: secondaryButtonStatus,
-        //onStatusChange: _updateAppointmentStatus,
+        onCompleted: () {
+          _updateAppointmentStatus(appointment['id'], 'completed');
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PrescriptionForm(
+                doctor: appointment['doctor'],
+                patient: appointment['patient'],
+              ),
+            ),
+          );
+        }
       );
 }).toList(),
   );
