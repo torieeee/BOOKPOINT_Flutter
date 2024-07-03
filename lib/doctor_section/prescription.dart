@@ -231,7 +231,14 @@ import '../models/prescribe.dart';
 
 
 class PrescriptionForm extends StatefulWidget {
-  const PrescriptionForm({super.key});
+  final Map<String, dynamic> doctor;
+  final Map<String, dynamic> patient;
+
+  const PrescriptionForm({
+    super.key,
+    required this.doctor,
+    required this.patient,
+  });
 
   @override
   State<PrescriptionForm> createState() => _PrescriptionFormState();
@@ -239,7 +246,6 @@ class PrescriptionForm extends StatefulWidget {
 
 class _PrescriptionFormState extends State<PrescriptionForm> {
   final _formKey = GlobalKey<FormState>();
-  
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _doctorController = TextEditingController();
@@ -259,9 +265,11 @@ class _PrescriptionFormState extends State<PrescriptionForm> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
       final prescribe = Provider.of<Prescribe>(context, listen: false);
-      _doctorController.text = prescribe.doctor['name'] ?? '';
+      _nameController.text = widget.patient['patient'] ?? '';
+      _emailController.text = widget.patient['email'] ?? ''; 
+      _doctorController.text = prescribe.doctor['doctor'] ?? '';
     });
   }
 
