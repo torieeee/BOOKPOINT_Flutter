@@ -163,6 +163,7 @@ class _BookingPageState extends State<BookingPage> {
                   final getDate = DateConverted.getDate(_currentDay);
                   final getTime = DateConverted.getTime(_currentIndex!);
                   String? uid = await getStoredUID();
+                  String? userName = await getUserName(uid!);
 
                   final DateTime appointmentDateTime = DateTime(
                     _currentDay.year,
@@ -180,6 +181,7 @@ class _BookingPageState extends State<BookingPage> {
                       'doc_id': docId,
                       'doc_name':docName,
                       'patient_id': uid,
+                      'patient_name': userName,
                       'status': 'pending',
                     });
 
@@ -242,4 +244,16 @@ class _BookingPageState extends State<BookingPage> {
       }),
     );
   }
+}
+
+Future<String?> getUserName(String uid) async {
+  try {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('patients').doc(uid).get();
+    if (userDoc.exists) {
+      return userDoc.get('name') as String?;
+    }
+  } catch (e) {
+    print('Error fetching user name: $e');
+  }
+  return null;
 }
