@@ -323,19 +323,34 @@ class AuthModel extends ChangeNotifier {
       await _firestore.collection('Users').doc(user.uid).set({
         'username': username,
         'email': email,
-        'userType': userType,
-        'emailVerified': false, // Add this field
+        'userType': userType, // Add this field
       });
       print("User data stored in 'Users' collection.");
-
-      // ... (rest of your existing code for storing data in 'Doctors' or 'Patients' collections)
-
+      if (userType == 'Doctor') {
+          await _firestore.collection('Doctors').doc(user.uid).set({
+            'patient_id': user.uid,
+            'doc_name': username,
+            'rating':4.9,
+            'doc_type':userType,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+          print("User data stored in 'Doctors' collection.");
+        } else if (userType == 'Patient') {
+          await _firestore.collection('Patients').doc(user.uid).set({
+            'doc_id': user.uid,
+            'username': username,
+            'email': email,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+          print("User data stored in 'Patients' collection.");
+        }
       _firebaseUser = userCredential.user;
       userId = userCredential.user!.uid;
       notifyListeners();
       
       // Inform the user to check their email
       print("A verification email has been sent. Please verify your email before logging in.");
+  
     }
   } catch (e) {
     print("Error during registration: $e");
