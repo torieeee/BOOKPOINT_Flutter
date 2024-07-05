@@ -1,10 +1,11 @@
 //import 'package:book_point/components/appointments_card.dart';
-import 'package:book_point/doctor_section/prescription.dart';
+//import 'package:book_point/doctor_section/prescription.dart';
 //import 'package:book_point/utils/config.dart';
 //import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 //import 'package:flutter/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:book_point/doctor_section/requests.dart';
 
 
 /*class RequestsCard extends StatelessWidget {
@@ -160,8 +161,8 @@ class RequestsCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ScheduleCard(appointment: doctor['requests']),
-              SizedBox(height: 12.0),
+              ScheduleCard(appointment: doctor['appointments']),
+              const SizedBox(height: 12.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -265,18 +266,18 @@ class ScheduleCard extends StatelessWidget {
             color: Colors.white,
             size: 15,
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Text(
             '${appointment['day']}, ${appointment['date']}',
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
-          SizedBox(width: 20),
+          const SizedBox(width: 20),
           const Icon(
             Icons.access_alarm,
             color: Colors.white,
             size: 17,
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: 5),
           Flexible(
             child: Text(
               appointment['time'],

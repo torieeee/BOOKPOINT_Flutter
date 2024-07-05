@@ -209,6 +209,7 @@ class RequestsCard extends StatelessWidget {
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 //import 'package:book_point/utils/config.dart'; 
 import '../shared/theme/widgets/cards/requests_card.dart';
 import 'prescription.dart';
@@ -227,10 +228,10 @@ class RequestsPage extends StatefulWidget {
 }
 
 class _RequestsPageState extends State<RequestsPage> {
-  late List<Map<String, dynamic>> _requests = [];
-  late List<Map<String, dynamic>> _upcoming = [];
-  late List<Map<String, dynamic>> _completed = [];
-  late List<Map<String, dynamic>> _canceled = [];
+   List<Map<String, dynamic>> _requests = [];
+   List<Map<String, dynamic>> _upcoming = [];
+  List<Map<String, dynamic>> _completed = [];
+  List<Map<String, dynamic>> _canceled = [];
 
   @override
   void initState() {
@@ -241,30 +242,33 @@ class _RequestsPageState extends State<RequestsPage> {
   Future<void> _fetchAppointments() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      String doctorName = widget.doctor['name'];
+      String doctorName = widget.doctor['doc_name'];
+       print('Fetching appointments for doctor: $doctorName');
 
-      // Fetch appointments for different statuses
+
+try{
+      
       QuerySnapshot<Map<String, dynamic>> requestsSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorName)
-          .where('status', isEqualTo: 'requested')
+          .where('doc_name', isEqualTo: doctorName)
+          .where('status', isEqualTo: 'pending')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> upcomingSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorName)
+          .where('doc_name', isEqualTo: doctorName)
           .where('status', isEqualTo: 'approved')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> completedSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorName)
+          .where('doc_name', isEqualTo: doctorName)
           .where('status', isEqualTo: 'completed')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> canceledSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorName)
+          .where('doc_name', isEqualTo: doctorName)
           .where('status', isEqualTo: 'canceled')
           .get();
 
@@ -274,7 +278,40 @@ class _RequestsPageState extends State<RequestsPage> {
         _completed = completedSnapshot.docs.map((doc) => doc.data()).toList();
         _canceled = canceledSnapshot.docs.map((doc) => doc.data()).toList();
       });
+    
+      print("Requests: $_requests");
+      print("Upcoming: $_upcoming");
+      print("Completed: $_completed");
+      print("Canceled: $_canceled");
+    } catch (e) {
+      print("Error fetching appointments: $e");
     }
+
+    }else {
+    print("No authenticated user found.");
+
+  }
+  }
+  Map<String, dynamic> _mapFirestoreDocumentToAppointment(DocumentSnapshot<Map<String, dynamic>> doc) {
+  Map<String, dynamic>? data = doc.data();
+  if (data == null) {
+    return {};
+  }
+  
+  // Safely handle date field
+  Timestamp? timestamp = data['date'] as Timestamp?;
+  DateTime dateTime = timestamp != null ? timestamp.toDate() : DateTime.now();
+  String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
+  String formattedTime = DateFormat('HH:mm').format(dateTime);
+
+  return {
+    'booking_id': doc.id,
+    'doc_name': data['doc_name'] ?? '',
+    'patient_id': data['patient_id'] ?? '',
+    'date': formattedDate,
+    'time': formattedTime,
+    'status': data['status'] ?? '',
+  };
   }
 
   Future<void> _updateAppointmentStatus(String id, String status) async {
@@ -326,16 +363,25 @@ class _RequestsPageState extends State<RequestsPage> {
   return ListView(
     children: appointments.map((appointment) {
       return RequestsCard(
-         doctor: appointment['doctor'],
-        patient: appointment['patient'],
+         doctor:{
+          'appointments': {
+            //'day': 'Monday', 
+            'date': appointment['date'],
+            ///'time': '',
+          },
+          'doc_name': appointment['doc_name'],
+        },
+        patient: {
+          'patient_id': appointment['patient_id'],
+        },
         onCompleted: () {
-          _updateAppointmentStatus(appointment['id'], 'completed');
+          _updateAppointmentStatus(appointment['booking_id'], 'completed');
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PrescriptionForm(
-                doctor: appointment['doctor'],
-                patient: appointment['patient'],
+                doctor: appointment['doc_name'],
+                patient: appointment['patient_id'],
               ),
             ),
           );

@@ -268,7 +268,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 return null;
               },
             ),
-            Config.spaceSmall,
+            //Config.spaceSmall,
             TextFormField(
               controller: _locationController,
               keyboardType: TextInputType.text,
@@ -289,8 +289,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
               },
             ),
 
-
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _saveProfile,
               child: const Text('Save Profile'),
