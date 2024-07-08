@@ -129,9 +129,11 @@ class MyApp extends StatelessWidget {
 
 //import 'package:book_point/components/login_form.dart';
 import 'package:book_point/doctor_main_layout.dart';
+import 'package:book_point/doctor_section/requests.dart';
 import 'package:book_point/screens/Authentication.dart';
 import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/screens/appointment_page.dart';
+//import 'package:book_point/screens/home_screen.dart';
 //import 'package:book_point/shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
 //import 'package:book_point/screens/splash_screen.dart';
 import 'package:book_point/utils/config.dart';
@@ -176,7 +178,7 @@ Future main() async {
       body: Center(
         child: Text(
           details.exceptionAsString(),
-          style: TextStyle(color: Colors.red),
+          style: const TextStyle(color: Colors.red),
         ),
       ),
     );
@@ -228,6 +230,10 @@ class MyApp extends StatelessWidget {
           'appointment_page':(context) => const AppointmentPage(),
           'success_booking': (context) => const AppointmentBooked(),
           'doctor':(context)=>const DoctorMainLayout(),
+          '/doctor/requests': (context) {
+            final Map<String, dynamic> doctor = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return RequestsPage(doctor: doctor);
+          }
         },
       ),
     );

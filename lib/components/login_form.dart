@@ -27,11 +27,10 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final AuthModel _auth = AuthModel();
-
   final _formKey = GlobalKey<FormState>();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passController = TextEditingController();
-  bool _isSigningIn = false;
+ // bool _isSigningIn = false;
   bool obsecurePass = true;
   // late DatabaseHelper _dbHelper;
   // @override
@@ -101,7 +100,9 @@ class _LoginFormState extends State<LoginForm> {
                         : const Icon(
                             Icons.visibility_outlined,
                             color: Config.primaryColor,
-                          ))),
+                          )
+                          )
+                          ),
           ),
           Config.spaceSmall,
           Consumer<AuthModel>(
@@ -131,7 +132,7 @@ class _LoginFormState extends State<LoginForm> {
                           // Navigate based on user type
                           if (userType == 'Doctor') {
                             MyApp.navigatorKey.currentState!
-                                .pushNamed('doctor');
+                                .pushNamed('doctor',arguments:userDoc.data());
                           } else {
                             MyApp.navigatorKey.currentState!.pushNamed('main');
                           }
