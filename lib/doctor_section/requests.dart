@@ -33,30 +33,30 @@ class _RequestsPageState extends State<RequestsPage> {
   Future<void> _fetchAppointments() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      String doctorName = widget.doctor['name'];
+      String doctorId = widget.doctor['name'];
 
       // Fetch appointments for different statuses
       QuerySnapshot<Map<String, dynamic>> requestsSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorName)
+          .where('doctor_name', isEqualTo: doctorId)
           .where('status', isEqualTo: 'requested')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> upcomingSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorName)
+          .where('doctor_name', isEqualTo: doctorId)
           .where('status', isEqualTo: 'approved')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> completedSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorName)
+          .where('doctor_name', isEqualTo: doctorId)
           .where('status', isEqualTo: 'completed')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> canceledSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorName)
+          .where('doctor_name', isEqualTo: doctorId)
           .where('status', isEqualTo: 'canceled')
           .get();
 
@@ -242,33 +242,33 @@ class _RequestsPageState extends State<RequestsPage> {
   Future<void> _fetchAppointments() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      String doctorName = widget.doctor['doc_name'];
-       print('Fetching appointments for doctor: $doctorName');
+      String doctorId = widget.doctor['doc_id'];
+       print('Fetching appointments for doctor: $doctorId');
 
 
 try{
       
       QuerySnapshot<Map<String, dynamic>> requestsSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doc_name', isEqualTo: doctorName)
+          .where('doc_id', isEqualTo: doctorId)
           .where('status', isEqualTo: 'pending')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> upcomingSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doc_name', isEqualTo: doctorName)
+          .where('doc_id', isEqualTo: doctorId)
           .where('status', isEqualTo: 'approved')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> completedSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doc_name', isEqualTo: doctorName)
+          .where('doc_id', isEqualTo: doctorId)
           .where('status', isEqualTo: 'completed')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> canceledSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doc_name', isEqualTo: doctorName)
+          .where('doc_id', isEqualTo: doctorId)
           .where('status', isEqualTo: 'canceled')
           .get();
 
@@ -292,7 +292,8 @@ try{
 
   }
   }
-  Map<String, dynamic> _mapFirestoreDocumentToAppointment(DocumentSnapshot<Map<String, dynamic>> doc) {
+  Map<String, dynamic> _mapFirestoreDocumentToAppointment(
+    DocumentSnapshot<Map<String, dynamic>> doc) {
   Map<String, dynamic>? data = doc.data();
   if (data == null) {
     return {};
@@ -306,7 +307,8 @@ try{
 
   return {
     'booking_id': doc.id,
-    'doc_name': data['doc_name'] ?? '',
+    'doc_id': data['doc_id'] ?? '',
+    //'doc_name': data['doc_name'] ?? '',
     'patient_id': data['patient_id'] ?? '',
     'date': formattedDate,
     'time': formattedTime,
@@ -369,7 +371,8 @@ try{
             'date': appointment['date'],
             ///'time': '',
           },
-          'doc_name': appointment['doc_name'],
+          'doc_id': appointment['doc_id'],
+          //'doc_name': appointment['doc_name'],
         },
         patient: {
           'patient_id': appointment['patient_id'],
@@ -380,7 +383,7 @@ try{
             context,
             MaterialPageRoute(
               builder: (context) => PrescriptionForm(
-                doctor: appointment['doc_name'],
+                doctor: appointment['doc_id'],
                 patient: appointment['patient_id'],
               ),
             ),

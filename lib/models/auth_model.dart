@@ -279,10 +279,11 @@ class AuthModel extends ChangeNotifier {
           });
 
           String userType = userDoc['userType'];
+          _isLogin=true;
 
           // Navigate based on user type
           if (userType == 'Doctor') {
-            MyApp.navigatorKey.currentState!.pushNamed('doctor');
+            MyApp.navigatorKey.currentState!.pushNamed('doctor',arguments:_user);
           } else {
             MyApp.navigatorKey.currentState!.pushNamed('main');
           }

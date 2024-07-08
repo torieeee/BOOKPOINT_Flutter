@@ -133,6 +133,7 @@ import 'package:book_point/doctor_section/requests.dart';
 import 'package:book_point/screens/Authentication.dart';
 import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/screens/appointment_page.dart';
+//import 'package:book_point/screens/home_screen.dart';
 //import 'package:book_point/shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
 //import 'package:book_point/screens/splash_screen.dart';
 import 'package:book_point/utils/config.dart';
@@ -229,9 +230,14 @@ class MyApp extends StatelessWidget {
           'appointment_page':(context) => const AppointmentPage(),
           'success_booking': (context) => const AppointmentBooked(),
           'doctor':(context)=>const DoctorMainLayout(),
-          '/doctor/requests': (context) => RequestsPage(
-            doctor:requestdata(),
-            patient:requestData
+          '/doctor/requests': (context) => const RequestsPage(
+            doctor: {
+              'name': '',
+              'specialization': '',
+              'experience': '5 years',
+              'rating': 4.5,
+              'image': 'assets/images/doctor.jpg',
+            },
           ),
         },
       ),
