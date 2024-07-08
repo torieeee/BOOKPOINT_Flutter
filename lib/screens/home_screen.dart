@@ -8,9 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
 import '../shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
+import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';import '../shared/theme/widgets/titles/section_title.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
-import '../shared/theme/widgets/titles/section_title.dart';
-import '../src/doctor.dart';
 import '../src/doctor_category.dart';
 import 'booking_page.dart';
 
@@ -28,70 +27,95 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> user = {};
-    Map<String, dynamic> doctor = {};
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 144, // Increased to accommodate the search bar
+        toolbarHeight: 144,
         backgroundColor: const Color(0xFFFFFFFF),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(width: 8.0),
-            Text(
-              'Welcome',
-              style: GoogleFonts.sora(
-                textStyle: textTheme.bodyMedium,
-              ),
-            ),
-            Text(
-              'Sean',
-              style: GoogleFonts.sora(
-                textStyle: textTheme.bodyLarge!
-                    .copyWith(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-            ),
-            const SizedBox(height: 4.0),
-            Row(
+        title: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseAuth.instance.currentUser != null
+              ? FirebaseFirestore.instance
+                  .collection('Patients')
+                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                  .snapshots()
+              : null,
+          builder: (context, snapshot) {
+            if (FirebaseAuth.instance.currentUser == null) {
+              return Text('Please log in to view your profile');
+            }
+            
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            }
+
+            String userName = 'Guest';
+            if (snapshot.hasData && snapshot.data!.exists) {
+              userName = snapshot.data!.get('patient_name') ?? 'Guest';
+            }
+
+            if (userName.isEmpty) {
+              return CircularProgressIndicator();
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.location_on,
-                  color: colorScheme.secondary,
+                const SizedBox(width: 8.0),
+                Text(
+                  'Welcome',
+                  style: GoogleFonts.sora(
+                    textStyle: textTheme.bodyMedium,
+                  ),
                 ),
-                const SizedBox(width: 4.0),
-                Text('Nairobi, Kenya',
-                    style: GoogleFonts.sora(
-                      textStyle: textTheme.bodySmall,
-                    )),
+                Text(
+                  userName,
+                  style: GoogleFonts.sora(
+                    textStyle: textTheme.bodyLarge!
+                        .copyWith(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                ),
                 const SizedBox(height: 4.0),
-                Icon(
-                  Icons.expand_more,
-                  color: colorScheme.secondary,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      color: colorScheme.secondary,
+                    ),
+                    const SizedBox(width: 4.0),
+                    Text('Nairobi, Kenya',
+                        style: GoogleFonts.sora(
+                          textStyle: textTheme.bodySmall,
+                        )),
+                    const SizedBox(height: 4.0),
+                    Icon(
+                      Icons.expand_more,
+                      color: colorScheme.secondary,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  style: GoogleFonts.spaceGrotesk(),
+                  decoration: InputDecoration(
+                    hintText: 'Search for doctors...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: Container(
+                      margin: const EdgeInsets.all(4.0),
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: colorScheme.onSurfaceVariant,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: const Icon(Icons.filter_alt_outlined),
+                    ),
+                  ),
                 ),
               ],
-            ),
-            const SizedBox(height: 16.0), // Add space before the search bar
-            TextFormField(
-              style: GoogleFonts.spaceGrotesk(),
-              decoration: InputDecoration(
-                hintText: 'Search for doctors...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: Container(
-                  margin: const EdgeInsets.all(4.0),
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurfaceVariant,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: const Icon(Icons.filter_alt_outlined),
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         ),
         actions: [
           IconButton(
@@ -337,6 +361,15 @@ class DoctorModel {
   }
 
   Map<String, dynamic> toJson() {
+    return {
+      'doc_id': doc_id,
+      'doc_name': doc_name,
+      'doc_type': doc_type,
+      'rating': rating,
+      'year_of_experience': year_of_experience,
+    };
+  }
+  Map<String, dynamic> toMap() {
     return {
       'doc_id': doc_id,
       'doc_name': doc_name,
