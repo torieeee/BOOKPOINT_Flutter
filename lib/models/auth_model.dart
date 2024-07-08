@@ -237,9 +237,9 @@ class AuthModel extends ChangeNotifier {
       if (user == null) {
         _isLogin = false;
         _firebaseUser = null;
-        _appointment;
-        _favDoc.clear();
-        _fav.clear();
+       // _appointment;
+        //_favDoc.clear();
+        //_fav.clear();
       } else {
         _firebaseUser = user;
         _isLogin = true;
@@ -274,7 +274,9 @@ class AuthModel extends ChangeNotifier {
         
         if (userDoc.exists) {
           // Update the emailVerified status in Firestore
-          await _firestore.collection('Users').doc(user.uid).update({
+          await _firestore.collection('Users')
+          .doc(user.uid)
+          .update({
             'emailVerified': true,
           });
 
@@ -283,12 +285,22 @@ class AuthModel extends ChangeNotifier {
 
           // Navigate based on user type
           if (userType == 'Doctor') {
-            MyApp.navigatorKey.currentState!.pushNamed('doctor',arguments:_user);
+            MyApp.navigatorKey.currentState!.
+            pushNamed('doctor',arguments:{
+              'doc_id': user.uid,
+              'doc_name': _user['username'],
+
+            });
           } else {
-            MyApp.navigatorKey.currentState!.pushNamed('main');
+            MyApp.navigatorKey.currentState!
+           .pushNamed('main',arguments:{
+              'doc_id': user.uid,
+              'doc_name': _user['username'],
+           });
           }
         } else {
-          MyApp.navigatorKey.currentState!.pushNamed('main');
+          MyApp.navigatorKey.currentState!
+          .pushNamed('main');
         }
         
         _isLogin = true;
@@ -372,7 +384,10 @@ class AuthModel extends ChangeNotifier {
   Future<User?> _fetchUserData() async {
     try {
       DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-          await _firestore.collection('Users').doc(_firebaseUser!.uid).get();
+          await _firestore
+          .collection('Users')
+          .doc(_firebaseUser!.uid)
+          .get();
 
       // Fetch appointment data
       if (userSnapshot.data() != null &&

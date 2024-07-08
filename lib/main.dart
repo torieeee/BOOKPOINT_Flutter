@@ -178,7 +178,7 @@ Future main() async {
       body: Center(
         child: Text(
           details.exceptionAsString(),
-          style: TextStyle(color: Colors.red),
+          style: const TextStyle(color: Colors.red),
         ),
       ),
     );
@@ -230,15 +230,10 @@ class MyApp extends StatelessWidget {
           'appointment_page':(context) => const AppointmentPage(),
           'success_booking': (context) => const AppointmentBooked(),
           'doctor':(context)=>const DoctorMainLayout(),
-          '/doctor/requests': (context) => const RequestsPage(
-            doctor: {
-              'name': '',
-              'specialization': '',
-              'experience': '5 years',
-              'rating': 4.5,
-              'image': 'assets/images/doctor.jpg',
-            },
-          ),
+          '/doctor/requests': (context) {
+            final Map<String, dynamic> doctor = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return RequestsPage(doctor: doctor);
+          }
         },
       ),
     );
