@@ -129,6 +129,7 @@ class MyApp extends StatelessWidget {
 
 //import 'package:book_point/components/login_form.dart';
 import 'package:book_point/doctor_main_layout.dart';
+import 'package:book_point/doctor_section/requests.dart';
 import 'package:book_point/screens/Authentication.dart';
 import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/screens/appointment_page.dart';
@@ -228,6 +229,10 @@ class MyApp extends StatelessWidget {
           'appointment_page':(context) => const AppointmentPage(),
           'success_booking': (context) => const AppointmentBooked(),
           'doctor':(context)=>const DoctorMainLayout(),
+          '/doctor/requests': (context) => RequestsPage(
+            doctor:requestdata(),
+            patient:requestData
+          ),
         },
       ),
     );
