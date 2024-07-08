@@ -1,18 +1,18 @@
-import 'dart:ui';
-import 'package:book_point/screens/UserProfilePage.dart';
-import 'package:book_point/screens/appointment_page.dart';
+//import 'dart:ui';
+//import 'package:book_point/screens/UserProfilePage.dart';
+//import 'package:book_point/screens/appointment_page.dart';
 import 'package:book_point/shared/theme/widgets/cards/appointment_preview_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
-import '../shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
+//import '../shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
 import '../shared/theme/widgets/titles/section_title.dart';
-import '../src/doctor.dart';
+//import '../src/doctor.dart';
 import '../src/doctor_category.dart';
-import 'booking_page.dart';
+//import 'booking_page.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -28,8 +28,8 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> user = {};
-    Map<String, dynamic> doctor = {};
+    //Map<String, dynamic> user = {};
+    //Map<String, dynamic> doctor = {};
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -101,7 +101,7 @@ class HomeView extends StatelessWidget {
           const SizedBox(width: 8.0),
         ],
       ),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         padding: EdgeInsets.all(8.0),
         child: Column(
           children: [
@@ -121,7 +121,7 @@ class _NearbyDoctors extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    //final textTheme = Theme.of(context).textTheme;
     return Column(
       children: [
         SectionTitle(
