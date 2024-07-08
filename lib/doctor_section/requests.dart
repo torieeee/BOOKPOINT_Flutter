@@ -217,9 +217,9 @@ import 'prescription.dart';
 
 class RequestsPage extends StatefulWidget {
   const RequestsPage({
-    Key? key,
+    super.key,
     required this.doctor,
-  }) : super(key: key);
+  });
 
   final Map<String, dynamic> doctor;
 
@@ -242,7 +242,8 @@ class _RequestsPageState extends State<RequestsPage> {
   Future<void> _fetchAppointments() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      String doctorId = widget.doctor['doc_id'];
+      String doctorId = widget.doctor['doc_id'] as String;
+      if (doctorId != null) {
        print('Fetching appointments for doctor: $doctorId');
 
 
@@ -286,7 +287,9 @@ try{
     } catch (e) {
       print("Error fetching appointments: $e");
     }
-
+} else {
+        print("Doctor ID is null.");
+      }
     }else {
     print("No authenticated user found.");
 
@@ -321,6 +324,7 @@ try{
     _fetchAppointments(); // Refresh the list after updating
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -354,6 +358,7 @@ try{
       ),
     );
   }
+
 
   Widget _buildAppointmentList(
   List<Map<String, dynamic>> appointments,
