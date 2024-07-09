@@ -2,64 +2,106 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
-//import 'dart:convert';
 
-//import '../providers/dio_provider.dart';
 import '../utils/config.dart';
 
-class AppointmentPage extends StatefulWidget {
-  const AppointmentPage({Key? key}) : super(key: key);
+class RequestDoctor extends StatefulWidget {
+  const RequestDoctor({super.key});
 
   @override
-  State<AppointmentPage> createState() => _AppointmentPageState();
+  State<RequestDoctor> createState() => _RequestDoctorState();
 }
+enum FilterStatus{
+      Pending,
+      Approved,
+      Completed,
+      }
 
-enum FilterStatus { Upcoming, complete }
-
-class _AppointmentPageState extends State<AppointmentPage> {
-  FilterStatus status = FilterStatus.Upcoming;
-  Alignment _alignment = Alignment.centerLeft;
-  Alignment _alignmentRight = Alignment.centerRight;
+class _RequestDoctorState extends State<RequestDoctor> {
+  FilterStatus status = FilterStatus.Pending;
+  Alignment _alignment=Alignment.centerLeft;
+  //Alignment _alignmentR = Alignment.centerRight;
   List<Map<String, dynamic>> schedules = [];
   bool isLoading = true;
+
+Future<String?> getDoctorIdByName(String doctorName) async {
+  try {
+    final QuerySnapshot doctorSnapshot = await FirebaseFirestore.instance
+        .collection('doctors')
+        .where('name', isEqualTo: doctorName)
+        .get();
+    if (doctorSnapshot.docs.isNotEmpty) {
+    
+      return doctorSnapshot.docs.first.id;
+    } else {
+      return null; // No matching doctor found
+    }
+  } catch (e) {
+    print(e);
+    return null; // Error occurred
+  }
+}
+
 
   Future<void> getAppointments() async {
     setState(() {
       isLoading = true;
     });
 
-    try {
-      final User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final QuerySnapshot appointmentSnapshot = await FirebaseFirestore
-            .instance
-            .collection('appointments')
-            .where('patient_id', isEqualTo: user.uid)
-            .get();
-
-        setState(() {
+try {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Assuming you have a way to get the doctor's name using the user's ID
+      // This could be from the user's profile or another method
+      final String? doctorName = await getDoctorNameByUserId(user.uid);
+      if (doctorName != null) {
+        final String? doctorId = await getDoctorIdByName(doctorName);
+        if (doctorId != null) {
+          final QuerySnapshot appointmentSnapshot = await FirebaseFirestore.instance
+              .collection('appointments')
+              .where('doc_id', isEqualTo: doctorId)
+              .get();
           schedules = appointmentSnapshot.docs
               .map((doc) => doc.data() as Map<String, dynamic>)
               .toList();
-          isLoading = false;
-        });
+        } else {
+          print("Doctor not found");
+        }
       } else {
-        setState(() {
-          schedules = [];
-          isLoading = false;
-        });
+        print("Doctor name not found");
       }
-    } catch (e) {
-      print('Error fetching appointments: $e');
-      setState(() {
-        schedules = [];
-        isLoading = false;
-      });
+    }
+  } catch (e) {
+    print(e);
+  } finally {setState(() {
+      isLoading = false;
+    });
+  
     }
   }
+  Future<String?> getDoctorNameByUserId(String userId) async {
+    try {
+    
+    final DocumentSnapshot userDoc = await FirebaseFirestore
+    .instance
+    .collection('users')
+    .doc(userId)
+    .get();
+    if (userDoc.exists) {
+      // Assuming the user's document contains a 'name' field
+      return userDoc['name'];
+    } else {
+      print("User document does not exist.");
+      return null;
+    }
+  } catch (e) {
+    print("Error fetching user name: $e");
+    return null;
+  }
+  
+}
 
-  @override
+@override
   void initState() {
     super.initState();
     getAppointments();
@@ -72,17 +114,20 @@ class _AppointmentPageState extends State<AppointmentPage> {
       FilterStatus scheduleStatus;
       switch (statusStr) {
         case 'pending':
-          scheduleStatus = FilterStatus.Upcoming;
+          scheduleStatus = FilterStatus.Pending;
+          break;
+        case 'approved':
+          scheduleStatus = FilterStatus.Approved;
           break;
         case 'complete':
-          scheduleStatus = FilterStatus.complete;
+          scheduleStatus = FilterStatus.Completed;
           break;
+
         default:
-          scheduleStatus = FilterStatus.Upcoming;
+          scheduleStatus = FilterStatus.Approved;
       }
       return scheduleStatus == status;
     }).toList();
-
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
@@ -254,44 +299,45 @@ class _AppointmentPageState extends State<AppointmentPage> {
     );
   }
 }
-
 Alignment _getAlignment(FilterStatus filterStatus) {
   switch (filterStatus) {
-    case FilterStatus.Upcoming:
+    case FilterStatus.Pending:
       return Alignment.centerLeft;
-    case FilterStatus.complete:
+    case FilterStatus.Approved:
+      return Alignment.center;
+    case FilterStatus.Completed:
       return Alignment.centerRight;
+    
   }
 }
-
 Alignment _getTextAlignment(FilterStatus filterStatus) {
   switch (filterStatus) {
-    case FilterStatus.Upcoming:
+    case FilterStatus.Pending:
       return Alignment.centerLeft;
-    case FilterStatus.complete:
-      return Alignment.centerRight;
+    case FilterStatus.Approved:
+      return Alignment.center;
+    case FilterStatus.Completed:
+      return Alignment.center;
+    
   }
 }
-
 String _formatTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
     return DateFormat('yyyy-MM-dd').format(timestamp.toDate());
   }
   return 'Invalid Date';
 }
-
-String _getDayFromTimestamp(dynamic timestamp) {
-  if (timestamp is Timestamp) {
-    return DateFormat('EEEE').format(timestamp.toDate());
-  }
-  return 'Invalid Day';
-}
-
 String _getTimeFromTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
     return DateFormat('h:mm a').format(timestamp.toDate());
   }
   return 'Invalid Time';
+}
+String _getDayFromTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('EEEE').format(timestamp.toDate());
+  }
+  return 'Invalid Day';
 }
 
 class ScheduleCard extends StatelessWidget {

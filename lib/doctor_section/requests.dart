@@ -232,18 +232,21 @@ class _RequestsPageState extends State<RequestsPage> {
    List<Map<String, dynamic>> _upcoming = [];
   List<Map<String, dynamic>> _completed = [];
   List<Map<String, dynamic>> _canceled = [];
+  //bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _fetchAppointments();
+   /// fetchData();
   }
+  
 
   Future<void> _fetchAppointments() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       String doctorId = widget.doctor['doc_id'] as String;
-      if (doctorId != null) {
+    
        print('Fetching appointments for doctor: $doctorId');
 
 
@@ -290,10 +293,10 @@ try{
 } else {
         print("Doctor ID is null.");
       }
-    }else {
-    print("No authenticated user found.");
+    
+   // print("No authenticated user found.");
 
-  }
+  
   }
   Map<String, dynamic> _mapFirestoreDocumentToAppointment(
     DocumentSnapshot<Map<String, dynamic>> doc) {
