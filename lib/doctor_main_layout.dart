@@ -40,7 +40,7 @@ class _DoctorMainLayoutState extends State<DoctorMainLayout> {
         }),
         children: <Widget>[
           const DoctorHome(),
-        const RequestDoctor(),
+        const RequestsPage(doctor: {},),
           DoctorUserPage(),
 
         ],

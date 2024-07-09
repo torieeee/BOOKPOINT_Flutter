@@ -23,6 +23,7 @@ class _RequestDoctorState extends State<RequestDoctor> {
   //Alignment _alignmentR = Alignment.centerRight;
   List<Map<String, dynamic>> schedules = [];
   bool isLoading = true;
+  
 
 Future<String?> getDoctorIdByName(String doctorName) async {
   try {
@@ -43,11 +44,11 @@ Future<String?> getDoctorIdByName(String doctorName) async {
 }
 
 
-  Future<void> getAppointments() async {
+ /* Future<void> getAppointments() async {
     setState(() {
       isLoading = true;
     });
-
+/*
 try {
     final User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -75,16 +76,103 @@ try {
     print(e);
   } finally {setState(() {
       isLoading = false;
-    });
-  
     }
+    );
+  
+    }*/
+     try {
+      // Step 1: Get Current User ID
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception("User not logged in");
+      }
+
+      // Step 2: Get Doctor's Name
+      // This step assumes there's a 'users' collection with a document for each user
+      // that includes the doctor's name or ID. Adjust according to your database structure.
+      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+      final doctorName = userDoc.data()?['name'];
+      if (doctorName == null) {
+        throw Exception("Doctor name not found for user");
+      }
+
+      // Step 3: Get Doctor's ID
+      final doctorId = await getDoctorIdByName(doctorName);
+      if (doctorId == null) {
+        throw Exception("Doctor not found");
+      }
+      final appointmentsSnapshot = await FirebaseFirestore.instance
+          .collection('appointments')
+          .where('doc_id', isEqualTo: doctorId)
+          .get();
+
+      final appointments = appointmentsSnapshot.docs
+          .map((doc) => doc.data())
+          .toList();
+
+      setState(() {
+        schedules = appointments;
+        isLoading = false;
+      });
+    } catch (e) {
+      print(e);
+      setState(() {
+        isLoading = false;
+      });
+    }
+    
+
+  }*/
+
+  Future<List<Map<String, dynamic>>> fetchAppointmentsForUserDoctor(String userId) async {
+  try {
+    // Step 1: Fetch Doctor's Name from User's Document
+    final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+    if (!userDoc.exists) {
+      print("User document does not exist.");
+      return [];
+    }
+    final doctorName = userDoc.data()?['name'];
+    if (doctorName == null) {
+      print("Doctor name not found in user's document.");
+      return [];
+    }else{
+      print(doctorName);
+    }
+
+    // Step 2: Find Doctor's ID Using Doctor's Name
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('Doctors')
+        .where('doc_name', isEqualTo: doctorName)
+        .get();
+    if (querySnapshot.docs.isEmpty) {
+      print("Doctor not found.");
+      return [];
+    }
+    final doctorId = querySnapshot.docs.first.id; // Assuming unique doctor names
+
+    // Step 3: Fetch Appointments for the Doctor
+    final appointmentsSnapshot = await FirebaseFirestore.instance
+        .collection('appointments')
+        .where('doc_name', isEqualTo: doctorName)
+        .get();
+
+      print("Running...");
+    return appointmentsSnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
+  } catch (e) {
+    print("Error fetching appointments: $e");
+    return [];
   }
+}
+
   Future<String?> getDoctorNameByUserId(String userId) async {
     try {
     
     final DocumentSnapshot userDoc = await FirebaseFirestore
     .instance
-    .collection('users')
+    .collection('Users')
     .doc(userId)
     .get();
     if (userDoc.exists) {
@@ -100,11 +188,28 @@ try {
   }
   
 }
+void updateAlignment(FilterStatus status) {
+  setState(() {
+    switch (status) {
+      case FilterStatus.Pending:
+        _alignment = Alignment.centerLeft;
+        break;
+      case FilterStatus.Approved:
+        _alignment = Alignment.center;
+        break;
+      case FilterStatus.Completed:
+        _alignment = Alignment.centerRight;
+        break;
+    }
+  });
+}
 
 @override
   void initState() {
     super.initState();
-    getAppointments();
+    //getDoctorIdByName(doctorName);
+    fetchAppointmentsForUserDoctor(FirebaseAuth.instance.currentUser!.uid);
+    updateAlignment( FilterStatus.Pending);
   }
 
   @override
@@ -318,9 +423,13 @@ Alignment _getTextAlignment(FilterStatus filterStatus) {
       return Alignment.center;
     case FilterStatus.Completed:
       return Alignment.center;
-    
+    default:  
+    return Alignment.centerLeft;
   }
+  
 }
+
+
 String _formatTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
     return DateFormat('yyyy-MM-dd').format(timestamp.toDate());

@@ -116,19 +116,19 @@ Widget build(BuildContext context) {
 }*/
 import 'dart:ui';
 
-import 'package:book_point/doctor_section/requests.dart';
+//import 'package:book_point/doctor_section/requests.dart';
 import 'package:book_point/shared/theme/widgets/titles/section_title.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+//import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/auth_model.dart';
 import '../shared/theme/widgets/cards/requests_card.dart';
-import '../utils/config.dart';
-import '../components/doctor_card.dart';
+//import '../utils/config.dart';
+//import '../components/doctor_card.dart';
 //import 'requests.dart';
 
 /*class DoctorHome extends StatelessWidget {
@@ -281,8 +281,8 @@ const DoctorView({super.key});
 
 @override
 Widget build(BuildContext context) {
-  final authModel = Provider.of<AuthModel>(context);
-  Map<String, dynamic> doctor={};
+  //final authModel = Provider.of<AuthModel>(context);
+ // Map<String, dynamic> doctor={};
   final textTheme = Theme.of(context).textTheme;
   final colorScheme = Theme.of(context).colorScheme;
 
@@ -296,7 +296,7 @@ Widget build(BuildContext context) {
         children: [
           const SizedBox(width:8.0),
           Text(
-            'Welcome',
+            'Welcome ',
             style: GoogleFonts.sora(
               textStyle: textTheme.bodyMedium!.copyWith(
                 color: colorScheme.primary,
@@ -305,7 +305,7 @@ Widget build(BuildContext context) {
             ),
           ),
           Text(
-            'Daktari',
+            'Daktari ${FirebaseAuth.instance.currentUser!.displayName} ',
             style: GoogleFonts.sora(
               textStyle: textTheme.bodyMedium!.copyWith(
                 color: colorScheme.primary,
@@ -338,6 +338,7 @@ Widget build(BuildContext context) {
       padding: EdgeInsets.all(16.0),
       child: Column(children: [
         _MyRequests(),
+        SizedBox(height: 16.0,),
         _MyPrescriptions(),
               ],),
     )
@@ -360,14 +361,29 @@ return Column(
   children:[
     SectionTitle(title: 'My Requests',
     action:'View All',
-    onPressed: ()=>Navigator.of(context).pushNamed('/doctor/requests'),
+    onPressed: ()=>Navigator.of(context).pushNamed('RequestsPage'),
     ),
-    StreamBuilder<QuerySnapshot>(
+    FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance
+              .collection('Users')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .get(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return CircularProgressIndicator();
+            }
+
+            // Fetch the doctor name from the user's document
+            var userDoc = snapshot.data;
+            String doctorName = userDoc!['name'];
+
+            // Use the doctor name to fetch appointments
+            return  StreamBuilder<QuerySnapshot>(
       stream:FirebaseAuth.instance.currentUser != null
       ?FirebaseFirestore.instance
       .collection('appointments')
-      .where('doc_id',
-      isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      .where('doc_name',
+      isEqualTo: doctorName)
        .orderBy('date',descending: true)
        .limit(3)
        .snapshots()
@@ -432,7 +448,9 @@ return Column(
             }
 
           },
-            )
+            );
+          }
+    ),
   ],
 );
     
@@ -453,14 +471,27 @@ return Column(
            action: 'View All',
            onPressed: ()=>Navigator.of(context).pushNamed('/doctor/prescriptions'),
            ),
-           StreamBuilder<QuerySnapshot>(
+
+           FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance
+              .collection('Users')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .get(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return CircularProgressIndicator();
+            }
+            var userDoc = snapshot.data;
+            String doctorName = userDoc!['name'];
+
+          return StreamBuilder<QuerySnapshot>(
              stream:FirebaseAuth.instance.currentUser != null
              ?FirebaseFirestore.instance
              .collection('prescriptions')
-             .where('doc_id',
-             isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+             .where('doc_name',
+             isEqualTo: doctorName)
              .orderBy('date',descending: true)
-             .limit(3)
+             .limit(1)
              .snapshots()
              :Stream.empty(),
              builder: (context, snapshot) {
@@ -522,7 +553,10 @@ return Column(
                  return const Center(child: Text('No prescription data available'));
                }
              },
-           )
+           );
+          }
+           ),
+     
          ],
        );
      }
