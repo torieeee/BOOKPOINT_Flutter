@@ -39,6 +39,21 @@ class _BookingPageState extends State<BookingPage> {
     return prefs.getString('uid');
   }
 
+  Future<String?> getUserName(String uid) async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('Patients')
+          .doc(uid)
+          .get();
+      if (userDoc.exists) {
+        return userDoc.get('patient_name') as String?;
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
+    }
+    return null;
+  }
+
   @override
   void initState() {
     getToken();
@@ -179,7 +194,7 @@ class _BookingPageState extends State<BookingPage> {
                         .add({
                       'date': Timestamp.fromDate(appointmentDateTime),
                       'doc_id': docId,
-                      'doc_name':docName,
+                      'doc_name': docName,
                       'patient_id': uid,
                       'patient_name': userName,
                       'status': 'pending',
@@ -244,16 +259,4 @@ class _BookingPageState extends State<BookingPage> {
       }),
     );
   }
-}
-
-Future<String?> getUserName(String uid) async {
-  try {
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('patients').doc(uid).get();
-    if (userDoc.exists) {
-      return userDoc.get('name') as String?;
-    }
-  } catch (e) {
-    print('Error fetching user name: $e');
-  }
-  return null;
 }

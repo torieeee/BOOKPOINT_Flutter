@@ -1,3 +1,4 @@
+import 'package:book_point/screens/doctor_details.dart';
 import 'package:book_point/screens/home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class DoctorListTile extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BookingPage(),
+              builder: (context) => DoctorDetails(doctor: doctor.toMap(), isFav: false),
               settings: RouteSettings(
                 arguments: {'doc_id': doctor.doc_id,'doc_name':doctor.doc_name},
               ),
@@ -96,3 +97,5 @@ Stream<List<DoctorModel>> _readData() {
 void _createData() {
   final userCollection = FirebaseFirestore.instance.collection("Doctors");
 }
+
+

@@ -341,7 +341,7 @@ class AuthModel extends ChangeNotifier {
       print("User data stored in 'Users' collection.");
       if (userType == 'Doctor') {
           await _firestore.collection('Doctors').doc(user.uid).set({
-            'patient_id': user.uid,
+            'doc_id': user.uid,
             'doc_name': username,
             'rating':4.9,
             'doc_type':userType,
@@ -350,8 +350,8 @@ class AuthModel extends ChangeNotifier {
           print("User data stored in 'Doctors' collection.");
         } else if (userType == 'Patient') {
           await _firestore.collection('Patients').doc(user.uid).set({
-            'doc_id': user.uid,
-            'username': username,
+            'patient_id': user.uid,
+            'patient_name': username,
             'email': email,
             'createdAt': FieldValue.serverTimestamp(),
           });

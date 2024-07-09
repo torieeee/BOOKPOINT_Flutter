@@ -1,296 +1,10 @@
-/*
 import 'package:book_point/components/button.dart';
 import 'package:book_point/models/auth_model.dart';
 import 'package:book_point/providers/dio_provider.dart';
 import 'package:book_point/utils/config.dart';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../components//custom_appbar.dart';
-
-class DoctorDetails extends StatefulWidget {
-  const DoctorDetails({Key? key, required this.doctor, required this.isFav})
-      : super(key: key);
-  final Map<String, dynamic> doctor;
-  final bool isFav;
-
-  @override
-  State<DoctorDetails> createState() => _DoctorDetailsState();
-}
-
-class _DoctorDetailsState extends State<DoctorDetails> {
-  Map<String, dynamic> doctor = {};
-  bool isFav = false;
-
-  @override
-  void initState() {
-    doctor = widget.doctor;
-    isFav = widget.isFav;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        appTitle: 'Doctor Details',
-        icon: const FaIcon(Icons.arrow_back_ios),
-        actions: [
-          //Favorite Button
-          IconButton(
-            //press this button to add/remove favorite doctor
-            onPressed: () async {
-              //get latest favorite list from auth model
-              final list =
-                  Provider.of<AuthModel>(context, listen: false).getFav;
-
-              //if doc id is already exist, mean remove the doc id
-              if (list.contains(doctor['doc_id'])) {
-                list.removeWhere((id) => id == doctor['doc_id']);
-              } else {
-                //else, add new doctor to favorite list
-                list.add(doctor['doc_id']);
-              }
-
-              //update the list into auth model and notify all widgets
-              Provider.of<AuthModel>(context, listen: false).setFavList(list);
-
-              final SharedPreferences prefs =
-                  await SharedPreferences.getInstance();
-              final token = prefs.getString('token') ?? '';
-
-              if (token.isNotEmpty && token != '') {
-                //update the favorite list into database
-                final response = await DioProvider().storeFavDoc(token, list);
-                //if insert successfully, then change the favorite status
-
-                if (response == 200) {
-                  setState(() {
-                    isFav = !isFav;
-                  });
-                }
-              }
-            },
-            icon: FaIcon(
-              isFav ? Icons.favorite_rounded : Icons.favorite_outline,
-              color: Colors.red,
-            ),
-          )
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            AboutDoctor(
-              doctor: doctor,
-            ),
-            DetailBody(
-              doctor: doctor,
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Button(
-                width: double.infinity,
-                title: 'Book Appointment',
-                onPressed: () {
-                  Navigator.of(context).pushNamed('booking_page',
-                      arguments: {"doctor_id": doctor['doc_id']});
-                },
-                disable: false,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AboutDoctor extends StatelessWidget {
-  const AboutDoctor({Key? key, required this.doctor}) : super(key: key);
-
-  final Map<dynamic, dynamic> doctor;
-
-  @override
-  Widget build(BuildContext context) {
-    Config().init(context);
-    return Container(
-      width: double.infinity,
-      child: Column(
-        children: <Widget>[
-          CircleAvatar(
-            radius: 65.0,
-            backgroundImage: NetworkImage(
-              "http://127.0.0.1:8000${doctor['doctor_profile']}",
-            ),
-            backgroundColor: Colors.white,
-          ),
-          Config.spaceMedium,
-          Text(
-            "Dr ${doctor['doctor_name']}",
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 24.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Config.spaceSmall,
-          SizedBox(
-            width: Config.widthSize * 0.75,
-            child: const Text(
-              'MBBS (International Medical University, Malaysia), MRCP (Royal College of Physicians, United Kingdom)',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 15,
-              ),
-              softWrap: true,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Config.spaceSmall,
-          SizedBox(
-            width: Config.widthSize * 0.75,
-            child: const Text(
-              'Sarawak General Hospital',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-              softWrap: true,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class DetailBody extends StatelessWidget {
-  const DetailBody({Key? key, required this.doctor}) : super(key: key);
-  final Map<dynamic, dynamic> doctor;
-
-  @override
-  Widget build(BuildContext context) {
-    Config().init(context);
-    return Container(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Config.spaceSmall,
-          DoctorInfo(
-            patients: doctor['patients'],
-            exp: doctor['experience'],
-          ),
-          Config.spaceMedium,
-          const Text(
-            'About Doctor',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-          ),
-          Config.spaceSmall,
-          Text(
-            'Dr. ${doctor['doctor_name']} is an experience ${doctor['category']} Specialist at Sarawak, graduated since 2008, and completed his/her training at Sungai Buloh General Hospital.',
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              height: 1.5,
-            ),
-            softWrap: true,
-            textAlign: TextAlign.justify,
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class DoctorInfo extends StatelessWidget {
-  const DoctorInfo({Key? key, required this.patients, required this.exp})
-      : super(key: key);
-
-  final int patients;
-  final int exp;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        InfoCard(
-          label: 'Patients',
-          value: '$patients',
-        ),
-        const SizedBox(
-          width: 15,
-        ),
-        InfoCard(
-          label: 'Experiences',
-          value: '$exp years',
-        ),
-        const SizedBox(
-          width: 15,
-        ),
-        const InfoCard(
-          label: 'Rating',
-          value: '4.6',
-        ),
-      ],
-    );
-  }
-}
-
-class InfoCard extends StatelessWidget {
-  const InfoCard({Key? key, required this.label, required this.value})
-      : super(key: key);
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: Config.primaryColor,
-        ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 15,
-          horizontal: 15,
-        ),
-        child: Column(
-          children: <Widget>[
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}*/
-import 'package:book_point/components/button.dart';
-import 'package:book_point/models/auth_model.dart';
-import 'package:book_point/providers/dio_provider.dart';
-import 'package:book_point/utils/config.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -325,36 +39,41 @@ class _DoctorDetailsState extends State<DoctorDetails> {
         appTitle: 'Doctor Details',
         icon: const FaIcon(Icons.arrow_back_ios),
         actions: [
-          // Favorite Button
           IconButton(
-            // Press this button to add/remove favorite doctor
             onPressed: () async {
-              // Get latest favorite list from auth model
-              final list = Provider.of<AuthModel>(context, listen: false).getFav;
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                final userDoc = FirebaseFirestore.instance
+                    .collection('Favorites')
+                    .doc(user.uid);
 
-              // If doc id is already exist, mean remove the doc id
-              if (list.contains(doctor['doc_id'])) {
-                list.removeWhere((id) => id == doctor['doc_id']);
-              } else {
-                // Else, add new doctor to favorite list
-                list.add(doctor['doc_id']);
-              }
+                await FirebaseFirestore.instance
+                    .runTransaction((transaction) async {
+                  final snapshot = await transaction.get(userDoc);
 
-              // Update the list into auth model and notify all widgets
-              Provider.of<AuthModel>(context, listen: false).setFavList(list.toSet());
+                  if (!snapshot.exists) {
+                    transaction.set(userDoc, {'Favorites': []});
+                  }
 
-              final SharedPreferences prefs = await SharedPreferences.getInstance();
-              final token = prefs.getString('token') ?? '';
+                  List<dynamic> favorites = snapshot.data()?['Favorites'] ?? [];
 
-              if (token.isNotEmpty && token != '') {
-                // Update the favorite list into database
-                final response = await DioProvider().storeFavDoc(token, list);
-                // If insert successfully, then change the favorite status
-                if (response == 200) {
+                  if (favorites.contains(doctor['doc_id'])) {
+                    favorites.remove(doctor['doc_id']);
+                  } else {
+                    favorites.add(doctor['doc_id']);
+                  }
+
+                  transaction.update(userDoc, {'Favorites': favorites});
+
+                  // Update local state
                   setState(() {
                     isFav = !isFav;
                   });
-                }
+
+                  // Update AuthModel
+                  Provider.of<AuthModel>(context, listen: false)
+                      .setFavList(Set.from(favorites));
+                });
               }
             },
             icon: FaIcon(
@@ -368,10 +87,10 @@ class _DoctorDetailsState extends State<DoctorDetails> {
         child: Column(
           children: <Widget>[
             AboutDoctor(
-              doctor: doctor,
+              doctorId: doctor['doc_id'],
             ),
             DetailBody(
-              doctor: doctor,
+              doctorId: doctor['doc_id'],
             ),
             const Spacer(),
             Padding(
@@ -381,7 +100,7 @@ class _DoctorDetailsState extends State<DoctorDetails> {
                 title: 'Book Appointment',
                 onPressed: () {
                   Navigator.of(context).pushNamed('booking_page',
-                      arguments: {"doctor_id": doctor['doc_id']});
+                      arguments: {"doc_id": doctor['doc_id'],"doc_name": doctor['doc_name']});
                 },
                 disable: false,
               ),
@@ -394,135 +113,188 @@ class _DoctorDetailsState extends State<DoctorDetails> {
 }
 
 class AboutDoctor extends StatelessWidget {
-  const AboutDoctor({Key? key, required this.doctor}) : super(key: key);
+  const AboutDoctor({Key? key, required this.doctorId}) : super(key: key);
 
-  final Map<dynamic, dynamic> doctor;
+  final String doctorId;
 
   @override
   Widget build(BuildContext context) {
     Config().init(context);
-    return Container(
-      width: double.infinity,
-      child: Column(
-        children: <Widget>[
-          CircleAvatar(
-            radius: 65.0,
-            backgroundImage: NetworkImage(
-              "http://127.0.0.1:8000${doctor['doctor_profile']}",
-            ),
-            backgroundColor: Colors.white,
-          ),
-          Config.spaceMedium,
-          Text(
-            "Dr ${doctor['doctor_name']}",
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 24.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Config.spaceSmall,
-          SizedBox(
-            width: Config.widthSize * 0.75,
-            child: const Text(
-              'MBBS (International Medical University, Malaysia), MRCP (Royal College of Physicians, United Kingdom)',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 15,
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('doctor_bio')
+          .doc(doctorId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final doctor = snapshot.data!.data() as Map<String, dynamic>;
+        doctor['profile_image'] = 'profile_image/test.jpg';
+
+        return Container(
+          width: double.infinity,
+          child: Column(
+            children: <Widget>[
+              FutureBuilder(
+                future: FirebaseStorage.instanceFor(
+                        bucket: "gs://bookpoint-23f70.appspot.com")
+                    .ref(doctor['profile_image'])
+                    .getDownloadURL(),
+                builder: (context, urlSnapshot) {
+                  if (urlSnapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+                  return CircleAvatar(
+                    radius: 65.0,
+                    backgroundImage: NetworkImage(urlSnapshot.data as String),
+                    backgroundColor: Colors.white,
+                  );
+                },
               ),
-              softWrap: true,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Config.spaceSmall,
-          SizedBox(
-            width: Config.widthSize * 0.75,
-            child: const Text(
-              'Sarawak General Hospital',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
+              Config.spaceMedium,
+              Text(
+                "Dr ${doctor['doc_name']}",
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              softWrap: true,
-              textAlign: TextAlign.center,
-            ),
+              Config.spaceSmall,
+              SizedBox(
+                width: Config.widthSize * 0.75,
+                child: Text(
+                  doctor['qualifications'],
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 15,
+                  ),
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Config.spaceSmall,
+              SizedBox(
+                width: Config.widthSize * 0.75,
+                child: Text(
+                  doctor['hospital'],
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
 class DetailBody extends StatelessWidget {
-  const DetailBody({Key? key, required this.doctor}) : super(key: key);
-  final Map<dynamic, dynamic> doctor;
+  const DetailBody({Key? key, required this.doctorId}) : super(key: key);
+  final String doctorId;
 
   @override
   Widget build(BuildContext context) {
     Config().init(context);
-    return Container(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Config.spaceSmall,
-          DoctorInfo(
-            patients: doctor['patients'],
-            exp: doctor['experience'],
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('doctor_bio')
+          .doc(doctorId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final doctor = snapshot.data!.data() as Map<String, dynamic>;
+
+        return Container(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Config.spaceSmall,
+              DoctorInfo(
+                doctorId: doctor['doc_id'],
+                patients: doctor['no_of_patients'],
+                exp: doctor['years_of_experience'],
+              ),
+              Config.spaceMedium,
+              const Text(
+                'About Doctor',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+              ),
+              Config.spaceSmall,
+              Text(
+                'Dr. ${doctor['doc_name']} is an experienced ${doctor['doc_type']} Specialist at ${doctor['hospital']}, graduated since ${doctor['graduation_year']}, and completed training at ${doctor['training_hospital']}.',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
+                softWrap: true,
+                textAlign: TextAlign.justify,
+              )
+            ],
           ),
-          Config.spaceMedium,
-          const Text(
-            'About Doctor',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-          ),
-          Config.spaceSmall,
-          Text(
-            'Dr. ${doctor['doctor_name']} is an experienced ${doctor['category']} Specialist at Sarawak, graduated since 2008, and completed his/her training at Sungai Buloh General Hospital.',
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              height: 1.5,
-            ),
-            softWrap: true,
-            textAlign: TextAlign.justify,
-          )
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
 class DoctorInfo extends StatelessWidget {
-  const DoctorInfo({Key? key, required this.patients, required this.exp})
+  const DoctorInfo({Key? key, required this.patients, required this.exp, required this.doctorId})
       : super(key: key);
 
   final int patients;
   final int exp;
+  final String doctorId;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        InfoCard(
-          label: 'Patients',
-          value: '$patients',
-        ),
-        const SizedBox(
-          width: 15,
-        ),
-        InfoCard(
-          label: 'Experiences',
-          value: '$exp years',
-        ),
-        const SizedBox(
-          width: 15,
-        ),
-        const InfoCard(
-          label: 'Rating',
-          value: '4.6',
-        ),
-      ],
-    );
+    Config().init(context);
+    return StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('doctor_bio')
+            .doc(doctorId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final doctor = snapshot.data!.data() as Map<String, dynamic>;
+          return Row(
+            children: <Widget>[
+              InfoCard(
+                label: 'Patients',
+                value: doctor['no_of_patients'].toString(),
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              InfoCard(
+                label: 'Experience',
+                value: doctor['years_of_experience'].toString(),
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              InfoCard(
+                label: 'Rating',
+                value: doctor['years_of_experience'].toString(),
+              ),
+            ],
+          );
+        });
   }
 }
 
