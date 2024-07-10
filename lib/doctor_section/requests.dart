@@ -232,44 +232,53 @@ class _RequestsPageState extends State<RequestsPage> {
    List<Map<String, dynamic>> _upcoming = [];
   List<Map<String, dynamic>> _completed = [];
   List<Map<String, dynamic>> _canceled = [];
+  //bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _fetchAppointments();
+   /// fetchData();
   }
+  
 
   Future<void> _fetchAppointments() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      String doctorId = widget.doctor['doc_id'] as String;
-      if (doctorId != null) {
-       print('Fetching appointments for doctor: $doctorId');
+      
+      //String doctorId = widget.doctor['doc_id'] as String;
 
-
+    
+      // print('Fetching appointments for doctor: $doctor');
+       DocumentSnapshot<Map<String, dynamic>> doctorSnapshot = await FirebaseFirestore.instance
+    .collection('Users')
+    .doc(user.uid) // Assuming doctorId is the document ID in the users collection
+    .get();
+String doctorName = doctorSnapshot.data()?['name'] ?? '';
+print('Fetching appointments for doctor: $doctorName');
 try{
       
       QuerySnapshot<Map<String, dynamic>> requestsSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doc_id', isEqualTo: doctorId)
+          .where('doc_name', isEqualTo: doctorName)
           .where('status', isEqualTo: 'pending')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> upcomingSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doc_id', isEqualTo: doctorId)
+          .where('doc_id', isEqualTo: doctorName)
           .where('status', isEqualTo: 'approved')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> completedSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doc_id', isEqualTo: doctorId)
+          .where('doc_name', isEqualTo: doctorName)
           .where('status', isEqualTo: 'completed')
           .get();
 
       QuerySnapshot<Map<String, dynamic>> canceledSnapshot = await FirebaseFirestore.instance
           .collection('appointments')
-          .where('doc_id', isEqualTo: doctorId)
+          .where('doc_name', isEqualTo: doctorName)
           .where('status', isEqualTo: 'canceled')
           .get();
 
@@ -290,10 +299,10 @@ try{
 } else {
         print("Doctor ID is null.");
       }
-    }else {
-    print("No authenticated user found.");
+    
+   // print("No authenticated user found.");
 
-  }
+  
   }
   Map<String, dynamic> _mapFirestoreDocumentToAppointment(
     DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -311,7 +320,7 @@ try{
   return {
     'booking_id': doc.id,
     'doc_id': data['doc_id'] ?? '',
-    //'doc_name': data['doc_name'] ?? '',
+    'doc_name': data['doc_name'] ?? '',
     'patient_id': data['patient_id'] ?? '',
     'date': formattedDate,
     'time': formattedTime,

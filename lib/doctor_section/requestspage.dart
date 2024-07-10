@@ -2,67 +2,214 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
-//import 'dart:convert';
 
-//import '../providers/dio_provider.dart';
 import '../utils/config.dart';
 
-class AppointmentPage extends StatefulWidget {
-  const AppointmentPage({Key? key}) : super(key: key);
+class RequestDoctor extends StatefulWidget {
+  const RequestDoctor({super.key});
 
   @override
-  State<AppointmentPage> createState() => _AppointmentPageState();
+  State<RequestDoctor> createState() => _RequestDoctorState();
 }
+enum FilterStatus{
+      Pending,
+      Approved,
+      Completed,
+      }
 
-enum FilterStatus { Upcoming, complete }
-
-class _AppointmentPageState extends State<AppointmentPage> {
-  FilterStatus status = FilterStatus.Upcoming;
-  Alignment _alignment = Alignment.centerLeft;
-  Alignment _alignmentRight = Alignment.centerRight;
+class _RequestDoctorState extends State<RequestDoctor> {
+  FilterStatus status = FilterStatus.Pending;
+  Alignment _alignment=Alignment.centerLeft;
+  //Alignment _alignmentR = Alignment.centerRight;
   List<Map<String, dynamic>> schedules = [];
   bool isLoading = true;
+  
 
-  Future<void> getAppointments() async {
+Future<String?> getDoctorIdByName(String doctorName) async {
+  try {
+    final QuerySnapshot doctorSnapshot = await FirebaseFirestore.instance
+        .collection('doctors')
+        .where('name', isEqualTo: doctorName)
+        .get();
+    if (doctorSnapshot.docs.isNotEmpty) {
+    
+      return doctorSnapshot.docs.first.id;
+    } else {
+      return null; // No matching doctor found
+    }
+  } catch (e) {
+    print(e);
+    return null; // Error occurred
+  }
+}
+
+
+ /* Future<void> getAppointments() async {
     setState(() {
       isLoading = true;
     });
-
-    try {
-      final User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final QuerySnapshot appointmentSnapshot = await FirebaseFirestore
-            .instance
-            .collection('appointments')
-            .where('patient_id', isEqualTo: user.uid)
-            .get();
-
-        setState(() {
+/*
+try {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Assuming you have a way to get the doctor's name using the user's ID
+      // This could be from the user's profile or another method
+      final String? doctorName = await getDoctorNameByUserId(user.uid);
+      if (doctorName != null) {
+        final String? doctorId = await getDoctorIdByName(doctorName);
+        if (doctorId != null) {
+          final QuerySnapshot appointmentSnapshot = await FirebaseFirestore.instance
+              .collection('appointments')
+              .where('doc_id', isEqualTo: doctorId)
+              .get();
           schedules = appointmentSnapshot.docs
               .map((doc) => doc.data() as Map<String, dynamic>)
               .toList();
-          isLoading = false;
-        });
+        } else {
+          print("Doctor not found");
+        }
       } else {
-        setState(() {
-          schedules = [];
-          isLoading = false;
-        });
+        print("Doctor name not found");
       }
-    } catch (e) {
-      print('Error fetching appointments: $e');
+    }
+  } catch (e) {
+    print(e);
+  } finally {setState(() {
+      isLoading = false;
+    }
+    );
+  
+    }*/
+     try {
+      // Step 1: Get Current User ID
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception("User not logged in");
+      }
+
+      // Step 2: Get Doctor's Name
+      // This step assumes there's a 'users' collection with a document for each user
+      // that includes the doctor's name or ID. Adjust according to your database structure.
+      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+      final doctorName = userDoc.data()?['name'];
+      if (doctorName == null) {
+        throw Exception("Doctor name not found for user");
+      }
+
+      // Step 3: Get Doctor's ID
+      final doctorId = await getDoctorIdByName(doctorName);
+      if (doctorId == null) {
+        throw Exception("Doctor not found");
+      }
+      final appointmentsSnapshot = await FirebaseFirestore.instance
+          .collection('appointments')
+          .where('doc_id', isEqualTo: doctorId)
+          .get();
+
+      final appointments = appointmentsSnapshot.docs
+          .map((doc) => doc.data())
+          .toList();
+
       setState(() {
-        schedules = [];
+        schedules = appointments;
+        isLoading = false;
+      });
+    } catch (e) {
+      print(e);
+      setState(() {
         isLoading = false;
       });
     }
-  }
+    
 
-  @override
+  }*/
+
+  Future<List<Map<String, dynamic>>> fetchAppointmentsForUserDoctor(String userId) async {
+  try {
+    // Step 1: Fetch Doctor's Name from User's Document
+    final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+    if (!userDoc.exists) {
+      print("User document does not exist.");
+      return [];
+    }
+    final doctorName = userDoc.data()?['name'];
+    if (doctorName == null) {
+      print("Doctor name not found in user's document.");
+      return [];
+    }else{
+      print(doctorName);
+    }
+
+    // Step 2: Find Doctor's ID Using Doctor's Name
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('Doctors')
+        .where('doc_name', isEqualTo: doctorName)
+        .get();
+    if (querySnapshot.docs.isEmpty) {
+      print("Doctor not found.");
+      return [];
+    }
+    final doctorId = querySnapshot.docs.first.id; // Assuming unique doctor names
+
+    // Step 3: Fetch Appointments for the Doctor
+    final appointmentsSnapshot = await FirebaseFirestore.instance
+        .collection('appointments')
+        .where('doc_name', isEqualTo: doctorName)
+        .get();
+
+      print("Running...");
+    return appointmentsSnapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
+  } catch (e) {
+    print("Error fetching appointments: $e");
+    return [];
+  }
+}
+
+  Future<String?> getDoctorNameByUserId(String userId) async {
+    try {
+    
+    final DocumentSnapshot userDoc = await FirebaseFirestore
+    .instance
+    .collection('Users')
+    .doc(userId)
+    .get();
+    if (userDoc.exists) {
+      // Assuming the user's document contains a 'name' field
+      return userDoc['name'];
+    } else {
+      print("User document does not exist.");
+      return null;
+    }
+  } catch (e) {
+    print("Error fetching user name: $e");
+    return null;
+  }
+  
+}
+void updateAlignment(FilterStatus status) {
+  setState(() {
+    switch (status) {
+      case FilterStatus.Pending:
+        _alignment = Alignment.centerLeft;
+        break;
+      case FilterStatus.Approved:
+        _alignment = Alignment.center;
+        break;
+      case FilterStatus.Completed:
+        _alignment = Alignment.centerRight;
+        break;
+    }
+  });
+}
+
+@override
   void initState() {
     super.initState();
-    getAppointments();
+    //getDoctorIdByName(doctorName);
+    fetchAppointmentsForUserDoctor(FirebaseAuth.instance.currentUser!.uid);
+    updateAlignment( FilterStatus.Pending);
   }
 
   @override
@@ -72,17 +219,20 @@ class _AppointmentPageState extends State<AppointmentPage> {
       FilterStatus scheduleStatus;
       switch (statusStr) {
         case 'pending':
-          scheduleStatus = FilterStatus.Upcoming;
+          scheduleStatus = FilterStatus.Pending;
+          break;
+        case 'approved':
+          scheduleStatus = FilterStatus.Approved;
           break;
         case 'complete':
-          scheduleStatus = FilterStatus.complete;
+          scheduleStatus = FilterStatus.Completed;
           break;
+
         default:
-          scheduleStatus = FilterStatus.Upcoming;
+          scheduleStatus = FilterStatus.Approved;
       }
       return scheduleStatus == status;
     }).toList();
-
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
@@ -254,24 +404,31 @@ class _AppointmentPageState extends State<AppointmentPage> {
     );
   }
 }
-
 Alignment _getAlignment(FilterStatus filterStatus) {
   switch (filterStatus) {
-    case FilterStatus.Upcoming:
+    case FilterStatus.Pending:
       return Alignment.centerLeft;
-    case FilterStatus.complete:
+    case FilterStatus.Approved:
+      return Alignment.center;
+    case FilterStatus.Completed:
       return Alignment.centerRight;
+    
   }
 }
-
 Alignment _getTextAlignment(FilterStatus filterStatus) {
   switch (filterStatus) {
-    case FilterStatus.Upcoming:
+    case FilterStatus.Pending:
       return Alignment.centerLeft;
-    case FilterStatus.complete:
-      return Alignment.centerRight;
+    case FilterStatus.Approved:
+      return Alignment.center;
+    case FilterStatus.Completed:
+      return Alignment.center;
+    default:  
+    return Alignment.centerLeft;
   }
+  
 }
+
 
 String _formatTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
@@ -279,19 +436,17 @@ String _formatTimestamp(dynamic timestamp) {
   }
   return 'Invalid Date';
 }
-
-String _getDayFromTimestamp(dynamic timestamp) {
-  if (timestamp is Timestamp) {
-    return DateFormat('EEEE').format(timestamp.toDate());
-  }
-  return 'Invalid Day';
-}
-
 String _getTimeFromTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
     return DateFormat('h:mm a').format(timestamp.toDate());
   }
   return 'Invalid Time';
+}
+String _getDayFromTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('EEEE').format(timestamp.toDate());
+  }
+  return 'Invalid Day';
 }
 
 class ScheduleCard extends StatelessWidget {
