@@ -1,10 +1,11 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
 import '../screens/doctor_details.dart';
 import '../utils/config.dart';
 
-class DoctorCard extends StatelessWidget {
+class DoctorCard extends StatefulWidget {
   const DoctorCard({
     Key? key,
     required this.doctor,
@@ -13,6 +14,41 @@ class DoctorCard extends StatelessWidget {
 
   final Map<String, dynamic> doctor;
   final bool isFav;
+
+  @override
+  _DoctorCardState createState() => _DoctorCardState();
+}
+
+class _DoctorCardState extends State<DoctorCard> {
+  String? imageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImage();
+  }
+
+  Future<void> _loadImage() async {
+    if (widget.doctor['profile_image'] != null) {
+      final ref = FirebaseStorage.instance.ref(widget.doctor['profile_image']);
+      try {
+        final url = await ref.getDownloadURL();
+        setState(() {
+          imageUrl = url;
+        });
+      } catch (e) {
+        print('Failed to load image: $e');
+        // Handle error loading image, set default image
+        setState(() {
+          imageUrl = 'assets/default.jpg'; // Use local asset path
+        });
+      }
+    } else {
+      setState(() {
+        imageUrl = 'assets/default.jpg'; // Use local asset path
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,27 +64,28 @@ class DoctorCard extends StatelessWidget {
             children: [
               SizedBox(
                 width: Config.widthSize * 0.33,
-                child: Image.network(
-                  "http://127.0.0.1:8000${doctor['doctor_profile']}",
-                  fit: BoxFit.fill,
-                ),
+                child: imageUrl != null
+                    ? Image.network(
+                        imageUrl!,
+                        fit: BoxFit.fill,
+                      )
+                    : const Center(child: CircularProgressIndicator()),
               ),
               Flexible(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        "Dr ${doctor['doctor_name']}",
+                        "Dr ${widget.doctor['doc_name']}",
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        "${doctor['category']}",
+                        "${widget.doctor['doc_type']}",
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.normal,
@@ -57,27 +94,19 @@ class DoctorCard extends StatelessWidget {
                       const Spacer(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
-                        children: const <Widget>[
-                          Icon(
+                        children: <Widget>[
+                          const Icon(
                             Icons.star_border,
                             color: Colors.yellow,
                             size: 16,
                           ),
-                          Spacer(
-                            flex: 1,
-                          ),
-                          Text('4.5'),
-                          Spacer(
-                            flex: 1,
-                          ),
-                          Text('Reviews'),
-                          Spacer(
-                            flex: 1,
-                          ),
-                          Text('(20)'),
-                          Spacer(
-                            flex: 7,
-                          ),
+                          const Spacer(flex: 1),
+                          Text(widget.doctor['rating']?.toString() ?? '4.5'),
+                          const Spacer(flex: 1),
+                          const Text('Reviews'),
+                          const Spacer(flex: 1),
+                          Text('(${widget.doctor['reviews']?.toString() ?? '20'})'),
+                          const Spacer(flex: 7),
                         ],
                       ),
                     ],
@@ -88,11 +117,11 @@ class DoctorCard extends StatelessWidget {
           ),
         ),
         onTap: () {
-          //pass the details to detail page
+          // Pass the details to detail page
           MyApp.navigatorKey.currentState!.push(MaterialPageRoute(
               builder: (_) => DoctorDetails(
-                    doctor: doctor,
-                    isFav: isFav,
+                    doctor: widget.doctor,
+                    isFav: widget.isFav,
                   )));
         },
       ),
