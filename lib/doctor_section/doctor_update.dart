@@ -48,6 +48,58 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  @override
+void initState() {
+  super.initState();
+  _fetchUserData();
+  _saveProfile();
+}
+
+  Future<void> _fetchUserData() async {
+    await Future.delayed(Duration(seconds: 2));
+    if (!mounted) return;
+  User? user = _auth.currentUser;
+  if (user != null) {
+    DocumentSnapshot userDoc = await FirebaseFirestore
+    .instance
+    .collection('Users')
+    .doc(user.uid)
+    .get();
+    //DocumentSnapshot userData = await _firestore.collection('users').doc(user.uid).get();
+    String userName = userDoc['name'] ?? '';
+    QuerySnapshot doctorDocs = await FirebaseFirestore
+        .instance
+        .collection('Doctors')
+        .where('doc_name', isEqualTo: userName)
+        .get();
+        Timestamp birthdateTimestamp = userDoc['DOB'];
+        DateTime birthdate = birthdateTimestamp.toDate();
+         String birthdateString = DateFormat('yyyy-MM-dd').format(birthdate);
+        Timestamp yocTimestamp = doctorDocs.docs.first['yoc'];
+        DateTime yoc = yocTimestamp.toDate();
+          String yocString = DateFormat('yyyy-MM-dd').format(yoc);
+        if (doctorDocs.docs.isNotEmpty) {
+      // Assuming there's only one doctor with this name
+      DocumentSnapshot doctorData = doctorDocs.docs.first;
+      _fillForm(userDoc.data() as Map<String, dynamic>, doctorData.data() as Map<String, dynamic>,birthdateString: birthdateString, yocString: yocString);
+    } else {
+      // Handle case where no matching doctor is found
+      _fillForm(userDoc.data() as Map<String, dynamic>, {});
+    }
+    //_fillForm(userData);
+  }
+}
+void _fillForm(Map<String, dynamic> userDoc,Map<String, dynamic> doctorData, {String birthdateString = '', String yocString = ''}) {
+  _nameController.text = doctorData['doc_name'] ?? '';
+  _dobController.text = birthdateString;
+  _genderController.text = userDoc['gender'] ?? '';
+  _emailController.text = userDoc['email'] ?? '';
+  _userType = userDoc['userType'] ?? 'Doctor';
+  _categoryController.text = doctorData['doc_type'] ?? '';
+  _yocController.text = yocString; // Assuming 'YOC' is the field in your DB
+  _locationController.text = doctorData['location'] ?? '';
+}
+
   Future<void> _saveProfile() async {
     if (_formKey.currentState!.validate()) {
       try {
@@ -57,18 +109,18 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           DateTime yoc=DateFormat('MM/dd/yyyy').parse(_yocController.text);  // Parsing the date
 
           Map<String, dynamic> userData = {
-            'name': _nameController.text,
+            'doc_name': _nameController.text,
             'DOB': _dobController.text,
             'gender': _genderController.text,
             'email': _emailController.text,
             'userType': _userType,
-            'yoc':_yocController.text,
-            'category':_categoryController.text,
+            'yoc': yoc,
+            'doc_type':_categoryController.text,
             'location':_locationController.text,
           };
 
           await _firestore.collection('Users').doc(user.uid).set({
-            'name': _nameController.text,
+            'username': _nameController.text,
             'DOB': dob,
             'gender': _genderController.text,
             'email': _emailController.text,
