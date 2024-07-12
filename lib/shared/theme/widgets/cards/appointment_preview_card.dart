@@ -36,18 +36,6 @@ class AppointmentPreviewCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 20),
-                  // Expanded(
-                  //   child: ElevatedButton(
-                  //     style: ElevatedButton.styleFrom(
-                  //       backgroundColor: Colors.blue,
-                  //     ),
-                  //     child: const Text(
-                  //       'Completed',
-                  //       style: TextStyle(color: Colors.white),
-                  //     ),
-                  //     onPressed: (){},
-                  //     ),
-                  // ),
                 ],
               ),
             ],
@@ -84,7 +72,6 @@ class ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     // Check if the appointment data contains a date
     if (appointment['date'] == null) {
