@@ -1,11 +1,8 @@
 import 'package:book_point/components/button.dart';
 import 'package:book_point/components/custom_appbar.dart';
 import 'package:book_point/main.dart';
-import 'package:book_point/models/booking_datetime_converted.dart';
-import 'package:book_point/providers/dio_provider.dart';
 import 'package:book_point/utils/config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -175,8 +172,8 @@ class _BookingPageState extends State<BookingPage> {
                     return;
                   }
 
-                  final getDate = DateConverted.getDate(_currentDay);
-                  final getTime = DateConverted.getTime(_currentIndex!);
+                  // final getDate = DateConverted.getDate(_currentDay);
+                  // final getTime = DateConverted.getTime(_currentIndex!);
                   String? uid = await getStoredUID();
                   String? userName = await getUserName(uid!);
 
