@@ -1,22 +1,9 @@
 import 'package:book_point/doctor_section/doctor_home.dart';
 import 'package:book_point/doctor_section/doctor_profile.dart';
 import 'package:book_point/doctor_section/requests.dart';
-import 'package:book_point/doctor_section/requestspage.dart';
-//import 'package:book_point/shared/theme/widgets/bottom_nav_bars/doctor_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-//import 'package:book_point/screens/UserProfilePage.dart';
-//import 'package:book_point/screens/home_page.dart';
-//import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-//import 'screens/appointment_page.dart';
-//import 'screens/fav_page.dart';
-//import 'screens/UserProfilePage.dart';
-
-
-
-//import 'doctor_section/doctor_home.dart';
 
 class DoctorMainLayout extends StatefulWidget {
   const DoctorMainLayout({super.key});
