@@ -9,7 +9,6 @@ class DoctorNavbar extends StatefulWidget {
 }
 
 class _DoctorNavbarState extends State<DoctorNavbar> {
-  int _currentIndex=0;
 
   @override
   Widget build(BuildContext context) {
