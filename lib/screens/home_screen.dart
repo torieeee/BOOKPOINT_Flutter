@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
-import '../shared/theme/widgets/bottom_nav_bars/main_nav_bar.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';import '../shared/theme/widgets/titles/section_title.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
 import '../src/doctor_category.dart';
