@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../utils/config.dart';
 
 class RequestDoctor extends StatefulWidget {
@@ -11,205 +10,120 @@ class RequestDoctor extends StatefulWidget {
   @override
   State<RequestDoctor> createState() => _RequestDoctorState();
 }
-enum FilterStatus{
-      Pending,
-      Approved,
-      Completed,
-      }
+
+enum FilterStatus {
+  Pending,
+  Approved,
+  Completed,
+}
 
 class _RequestDoctorState extends State<RequestDoctor> {
   FilterStatus status = FilterStatus.Pending;
-  Alignment _alignment=Alignment.centerLeft;
-  //Alignment _alignmentR = Alignment.centerRight;
+  Alignment _alignment = Alignment.centerLeft;
   List<Map<String, dynamic>> schedules = [];
   bool isLoading = true;
-  
 
-Future<String?> getDoctorIdByName(String doctorName) async {
-  try {
-    final QuerySnapshot doctorSnapshot = await FirebaseFirestore.instance
-        .collection('doctors')
-        .where('name', isEqualTo: doctorName)
-        .get();
-    if (doctorSnapshot.docs.isNotEmpty) {
-    
-      return doctorSnapshot.docs.first.id;
-    } else {
-      return null; // No matching doctor found
-    }
-  } catch (e) {
-    print(e);
-    return null; // Error occurred
-  }
-}
-
-
- /* Future<void> getAppointments() async {
-    setState(() {
-      isLoading = true;
-    });
-/*
-try {
-    final User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Assuming you have a way to get the doctor's name using the user's ID
-      // This could be from the user's profile or another method
-      final String? doctorName = await getDoctorNameByUserId(user.uid);
-      if (doctorName != null) {
-        final String? doctorId = await getDoctorIdByName(doctorName);
-        if (doctorId != null) {
-          final QuerySnapshot appointmentSnapshot = await FirebaseFirestore.instance
-              .collection('appointments')
-              .where('doc_id', isEqualTo: doctorId)
-              .get();
-          schedules = appointmentSnapshot.docs
-              .map((doc) => doc.data() as Map<String, dynamic>)
-              .toList();
-        } else {
-          print("Doctor not found");
-        }
-      } else {
-        print("Doctor name not found");
-      }
-    }
-  } catch (e) {
-    print(e);
-  } finally {setState(() {
-      isLoading = false;
-    }
-    );
-  
-    }*/
-     try {
-      // Step 1: Get Current User ID
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        throw Exception("User not logged in");
-      }
-
-      // Step 2: Get Doctor's Name
-      // This step assumes there's a 'users' collection with a document for each user
-      // that includes the doctor's name or ID. Adjust according to your database structure.
-      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
-      final doctorName = userDoc.data()?['name'];
-      if (doctorName == null) {
-        throw Exception("Doctor name not found for user");
-      }
-
-      // Step 3: Get Doctor's ID
-      final doctorId = await getDoctorIdByName(doctorName);
-      if (doctorId == null) {
-        throw Exception("Doctor not found");
-      }
-      final appointmentsSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doc_id', isEqualTo: doctorId)
+  Future<String?> getDoctorIdByName(String doctorName) async {
+    try {
+      final QuerySnapshot doctorSnapshot = await FirebaseFirestore.instance
+          .collection('doctors')
+          .where('name', isEqualTo: doctorName)
           .get();
-
-      final appointments = appointmentsSnapshot.docs
-          .map((doc) => doc.data())
-          .toList();
-
-      setState(() {
-        schedules = appointments;
-        isLoading = false;
-      });
+      if (doctorSnapshot.docs.isNotEmpty) {
+        return doctorSnapshot.docs.first.id;
+      } else {
+        return null; 
+      }
     } catch (e) {
       print(e);
-      setState(() {
-        isLoading = false;
-      });
+      return null; 
     }
-    
+  }
 
-  }*/
+  Future<List<Map<String, dynamic>>> fetchAppointmentsForUserDoctor(
+      String userId) async {
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .get();
+      if (!userDoc.exists) {
+        print("User document does not exist.");
+        return [];
+      }
+      final doctorName = userDoc.data()?['name'];
+      if (doctorName == null) {
+        print("Doctor name not found in user's document.");
+        return [];
+      } else {
+        print(doctorName);
+      }
 
-  Future<List<Map<String, dynamic>>> fetchAppointmentsForUserDoctor(String userId) async {
-  try {
-    // Step 1: Fetch Doctor's Name from User's Document
-    final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
-    if (!userDoc.exists) {
-      print("User document does not exist.");
-      return [];
-    }
-    final doctorName = userDoc.data()?['name'];
-    if (doctorName == null) {
-      print("Doctor name not found in user's document.");
-      return [];
-    }else{
-      print(doctorName);
-    }
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Doctors')
+          .where('doc_name', isEqualTo: doctorName)
+          .get();
+      if (querySnapshot.docs.isEmpty) {
+        print("Doctor not found.");
+        return [];
+      }
 
-    // Step 2: Find Doctor's ID Using Doctor's Name
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('Doctors')
-        .where('doc_name', isEqualTo: doctorName)
-        .get();
-    if (querySnapshot.docs.isEmpty) {
-      print("Doctor not found.");
-      return [];
-    }
-    final doctorId = querySnapshot.docs.first.id; // Assuming unique doctor names
-
-    // Step 3: Fetch Appointments for the Doctor
-    final appointmentsSnapshot = await FirebaseFirestore.instance
-        .collection('appointments')
-        .where('doc_name', isEqualTo: doctorName)
-        .get();
+      final appointmentsSnapshot = await FirebaseFirestore.instance
+          .collection('appointments')
+          .where('doc_name', isEqualTo: doctorName)
+          .get();
 
       print("Running...");
-    return appointmentsSnapshot.docs
-        .map((doc) => doc.data() as Map<String, dynamic>)
-        .toList();
-  } catch (e) {
-    print("Error fetching appointments: $e");
-    return [];
+      return appointmentsSnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+    } catch (e) {
+      print("Error fetching appointments: $e");
+      return [];
+    }
   }
-}
 
   Future<String?> getDoctorNameByUserId(String userId) async {
     try {
-    
-    final DocumentSnapshot userDoc = await FirebaseFirestore
-    .instance
-    .collection('Users')
-    .doc(userId)
-    .get();
-    if (userDoc.exists) {
-      // Assuming the user's document contains a 'name' field
-      return userDoc['name'];
-    } else {
-      print("User document does not exist.");
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .get();
+      if (userDoc.exists) {
+        // Assuming the user's document contains a 'name' field
+        return userDoc['name'];
+      } else {
+        print("User document does not exist.");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user name: $e");
       return null;
     }
-  } catch (e) {
-    print("Error fetching user name: $e");
-    return null;
   }
-  
-}
-void updateAlignment(FilterStatus status) {
-  setState(() {
-    switch (status) {
-      case FilterStatus.Pending:
-        _alignment = Alignment.centerLeft;
-        break;
-      case FilterStatus.Approved:
-        _alignment = Alignment.center;
-        break;
-      case FilterStatus.Completed:
-        _alignment = Alignment.centerRight;
-        break;
-    }
-  });
-}
 
-@override
+  void updateAlignment(FilterStatus status) {
+    setState(() {
+      switch (status) {
+        case FilterStatus.Pending:
+          _alignment = Alignment.centerLeft;
+          break;
+        case FilterStatus.Approved:
+          _alignment = Alignment.center;
+          break;
+        case FilterStatus.Completed:
+          _alignment = Alignment.centerRight;
+          break;
+      }
+    });
+  }
+
+  @override
   void initState() {
     super.initState();
     //getDoctorIdByName(doctorName);
     fetchAppointmentsForUserDoctor(FirebaseAuth.instance.currentUser!.uid);
-    updateAlignment( FilterStatus.Pending);
+    updateAlignment(FilterStatus.Pending);
   }
 
   @override
@@ -404,6 +318,7 @@ void updateAlignment(FilterStatus status) {
     );
   }
 }
+
 Alignment _getAlignment(FilterStatus filterStatus) {
   switch (filterStatus) {
     case FilterStatus.Pending:
@@ -412,9 +327,9 @@ Alignment _getAlignment(FilterStatus filterStatus) {
       return Alignment.center;
     case FilterStatus.Completed:
       return Alignment.centerRight;
-    
   }
 }
+
 Alignment _getTextAlignment(FilterStatus filterStatus) {
   switch (filterStatus) {
     case FilterStatus.Pending:
@@ -423,12 +338,10 @@ Alignment _getTextAlignment(FilterStatus filterStatus) {
       return Alignment.center;
     case FilterStatus.Completed:
       return Alignment.center;
-    default:  
-    return Alignment.centerLeft;
+    default:
+      return Alignment.centerLeft;
   }
-  
 }
-
 
 String _formatTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
@@ -436,12 +349,14 @@ String _formatTimestamp(dynamic timestamp) {
   }
   return 'Invalid Date';
 }
+
 String _getTimeFromTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
     return DateFormat('h:mm a').format(timestamp.toDate());
   }
   return 'Invalid Time';
 }
+
 String _getDayFromTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {
     return DateFormat('EEEE').format(timestamp.toDate());

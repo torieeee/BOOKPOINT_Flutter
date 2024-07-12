@@ -36,7 +36,7 @@ class ViewDoctorProfile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Name: $name', style: const TextStyle(fontSize: 18)),
-            Text('DOB: ${dob.toLocal()}'.split(' ')[0], style: const TextStyle(fontSize: 18)),
+            Text('DOB: ${dob.toLocal()}'.split('')[0], style: const TextStyle(fontSize: 18)),
             Text('Gender: $gender', style: const TextStyle(fontSize: 18)),
             Text('Email: $email', style: const TextStyle(fontSize: 18)),
             Text('User Type: $userType', style: const TextStyle(fontSize: 18)),
