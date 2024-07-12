@@ -1,16 +1,12 @@
-//import 'dart:ui';
-//import 'package:book_point/screens/UserProfilePage.dart';
-//import 'package:book_point/screens/appointment_page.dart';
 import 'package:book_point/shared/theme/widgets/cards/appointment_preview_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
-import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';import '../shared/theme/widgets/titles/section_title.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
+import '../shared/theme/widgets/titles/section_title.dart';
 import '../src/doctor_category.dart';
-//import 'booking_page.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
