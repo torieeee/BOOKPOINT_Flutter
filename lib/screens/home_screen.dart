@@ -22,8 +22,6 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //Map<String, dynamic> user = {};
-    //Map<String, dynamic> doctor = {};
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
