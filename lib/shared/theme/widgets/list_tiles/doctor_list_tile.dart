@@ -92,8 +92,5 @@ Stream<List<DoctorModel>> _readData() {
       querySnapshot.docs.map((e) => DoctorModel.fromSnapshot(e)).toList());
 }
 
-void _createData() {
-  final userCollection = FirebaseFirestore.instance.collection("Doctors");
-}
 
 
