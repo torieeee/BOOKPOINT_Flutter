@@ -16,16 +16,7 @@ class Authentication extends StatefulWidget {
 class _AuthenticationState extends State<Authentication> {
   bool isSignIn = true;
   
-
- /* @override
-  void initState(){
-    Future.delayed(
-     const Duration(seconds: 3),(){
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>LoginForm() ) , (route)=>)
-     }
-    );
-  }*/
-   @override
+  @override
   Widget build(BuildContext context) {
      Config().init(context);
     //build login text field
