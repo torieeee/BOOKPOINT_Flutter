@@ -2,7 +2,6 @@ import 'package:book_point/components/login_form.dart';
 import 'package:book_point/components/sign_up_form.dart';
 import 'package:book_point/utils/text.dart';
 import 'package:flutter/material.dart';
-
 import '../utils/config.dart';
 
 class Authentication extends StatefulWidget {
