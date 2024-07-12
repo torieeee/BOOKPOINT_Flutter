@@ -1,21 +1,11 @@
-//import 'dart:convert';
-
 import 'package:book_point/components/button.dart';
 import 'package:book_point/main.dart';
 import 'package:book_point/models/auth_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:book_point/providers/dio_provider.dart';
-//import 'package:book_point/screens/Authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:providers:database_connection.dart';
-import '../providers/database_connection.dart';
-//import 'package:book_point/main.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../utils/config.dart';
 
 class LoginForm extends StatefulWidget {
@@ -26,32 +16,15 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  final AuthModel _auth = AuthModel();
   final _formKey = GlobalKey<FormState>();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passController = TextEditingController();
- // bool _isSigningIn = false;
   bool obsecurePass = true;
-  // late DatabaseHelper _dbHelper;
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   _dbHelper = DatabaseHelper(
-  //     host: 'localhost',
-  //     port: 3306,
-  //     user: 'root',
-  //     password: '',
-  //     databaseName: 'book_point',
-  //   );
-  //   _dbHelper.openConnection();
-  // }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passController.dispose();
-    // _dbHelper.closeConnection(); // Close database connection
     super.dispose();
   }
 
@@ -100,9 +73,7 @@ class _LoginFormState extends State<LoginForm> {
                         : const Icon(
                             Icons.visibility_outlined,
                             color: Config.primaryColor,
-                          )
-                          )
-                          ),
+                          ))),
           ),
           Config.spaceSmall,
           Consumer<AuthModel>(
@@ -132,7 +103,7 @@ class _LoginFormState extends State<LoginForm> {
                           // Navigate based on user type
                           if (userType == 'Doctor') {
                             MyApp.navigatorKey.currentState!
-                                .pushNamed('doctor',arguments:userDoc.data());
+                                .pushNamed('doctor', arguments: userDoc.data());
                           } else {
                             MyApp.navigatorKey.currentState!.pushNamed('main');
                           }
