@@ -2,8 +2,6 @@ import 'package:book_point/screens/doctor_details.dart';
 import 'package:book_point/screens/home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../../../screens/booking_page.dart';
-import '../../../../src/doctor.dart';
 
 class DoctorListTile extends StatelessWidget {
   const DoctorListTile({
