@@ -16,7 +16,6 @@ enum FilterStatus { Upcoming, complete }
 class _AppointmentPageState extends State<AppointmentPage> {
   FilterStatus status = FilterStatus.Upcoming;
   Alignment _alignment = Alignment.centerLeft;
-  Alignment _alignmentRight = Alignment.centerRight;
   List<Map<String, dynamic>> schedules = [];
   bool isLoading = true;
 
