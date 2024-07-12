@@ -121,7 +121,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    '${_calculateAge()} Years Old | $_gender',
+                    '${_calculateAge()} Years Old'
+                    ' | Email: $_email',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
@@ -257,12 +258,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   String _calculateAge() {
-    DateTime now = DateTime.now();
-    int age = now.year - _dob.year;
-    if (now.month < _dob.month ||
-        (now.month == _dob.month && now.day < _dob.day)) {
+  DateTime currentDate = DateTime.now();
+  int age = currentDate.year - _dob.year;
+  int month1 = currentDate.month;
+  int month2 = _dob.month;
+  if (month2 > month1) {
+    age--;
+  } else if (month1 == month2) {
+    int day1 = currentDate.day;
+    int day2 = _dob.day;
+    if (day2 > day1) {
       age--;
     }
-    return age.toString();
   }
+  return age.toString();
+}
 }
