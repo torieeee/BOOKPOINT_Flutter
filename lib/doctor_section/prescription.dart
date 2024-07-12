@@ -41,7 +41,7 @@ class _PrescriptionFormState extends State<PrescriptionForm> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final prescribe = Provider.of<Prescribe>(context, listen: false);
       _nameController.text = widget.patient['patient'] ?? '';
       _emailController.text = widget.patient['email'] ?? ''; 
