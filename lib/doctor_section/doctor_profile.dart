@@ -8,7 +8,6 @@ import 'package:book_point/main.dart';
 
 class DoctorUserPage extends StatefulWidget {
   @override
-  // ignore: library_private_types_in_public_api
   _DoctorUserPageState createState() => _DoctorUserPageState();
 }
 
@@ -23,10 +22,8 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
   late String _category;
   late String _location;
   late User? _firebaseUser;
-  //Map<String, dynamic> _user = {}; 
-  final Map<String, dynamic> _appointment = {}; 
-  //final List <dynamic> _favList = []; 
- final Set _favDoc = {};
+  final Map<String, dynamic> _appointment = {};  
+  final Set _favDoc = {};
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
