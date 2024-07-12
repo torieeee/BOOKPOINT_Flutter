@@ -72,6 +72,7 @@ flutter:
 
   uses-material-design: true
   assets:
+    - assets/default.jpg
     - assets/success.json
     - lib/screens/icons/doctor_picture.jpeg
 

@@ -5,7 +5,7 @@ import '../main.dart';
 import '../screens/doctor_details.dart';
 import '../utils/config.dart';
 
-class DoctorCard extends StatefulWidget {
+class DoctorCard extends StatelessWidget {
   const DoctorCard({
     Key? key,
     required this.doctor,
@@ -14,41 +14,6 @@ class DoctorCard extends StatefulWidget {
 
   final Map<String, dynamic> doctor;
   final bool isFav;
-
-  @override
-  _DoctorCardState createState() => _DoctorCardState();
-}
-
-class _DoctorCardState extends State<DoctorCard> {
-  String? imageUrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadImage();
-  }
-
-  Future<void> _loadImage() async {
-    if (widget.doctor['profile_image'] != null) {
-      final ref = FirebaseStorage.instance.ref(widget.doctor['profile_image']);
-      try {
-        final url = await ref.getDownloadURL();
-        setState(() {
-          imageUrl = url;
-        });
-      } catch (e) {
-        print('Failed to load image: $e');
-        // Handle error loading image, set default image
-        setState(() {
-          imageUrl = 'assets/default.jpg'; // Use local asset path
-        });
-      }
-    } else {
-      setState(() {
-        imageUrl = 'assets/default.jpg'; // Use local asset path
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +29,7 @@ class _DoctorCardState extends State<DoctorCard> {
             children: [
               SizedBox(
                 width: Config.widthSize * 0.33,
-                child: imageUrl != null
-                    ? Image.network(
-                        imageUrl!,
-                        fit: BoxFit.fill,
-                      )
-                    : const Center(child: CircularProgressIndicator()),
+                child: _buildDoctorImage(),
               ),
               Flexible(
                 child: Padding(
@@ -78,14 +38,14 @@ class _DoctorCardState extends State<DoctorCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        "Dr ${widget.doctor['doc_name']}",
+                        "Dr ${doctor['doc_name']}",
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        "${widget.doctor['doc_type']}",
+                        "${doctor['doc_type']}",
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.normal,
@@ -101,11 +61,11 @@ class _DoctorCardState extends State<DoctorCard> {
                             size: 16,
                           ),
                           const Spacer(flex: 1),
-                          Text(widget.doctor['rating']?.toString() ?? '4.5'),
+                          Text(doctor['rating']?.toString() ?? '4.5'),
                           const Spacer(flex: 1),
                           const Text('Reviews'),
                           const Spacer(flex: 1),
-                          Text('(${widget.doctor['reviews']?.toString() ?? '20'})'),
+                          Text('(${doctor['reviews']?.toString() ?? '20'})'),
                           const Spacer(flex: 7),
                         ],
                       ),
@@ -117,14 +77,59 @@ class _DoctorCardState extends State<DoctorCard> {
           ),
         ),
         onTap: () {
-          // Pass the details to detail page
           MyApp.navigatorKey.currentState!.push(MaterialPageRoute(
               builder: (_) => DoctorDetails(
-                    doctor: widget.doctor,
-                    isFav: widget.isFav,
+                    doctor: doctor,
+                    isFav: isFav,
                   )));
         },
       ),
+    );
+  }
+
+  Widget _buildDoctorImage() {
+    // if (doctor['profile_image'] == null) {
+    //   return Image.asset(
+    //     'assets/default.jpg',
+    //     fit: BoxFit.cover,
+    //   );
+    // }
+    doctor['profile_image'] = 'profile_image/test.jpg';
+    return FutureBuilder(
+      future: FirebaseStorage.instanceFor(bucket: "gs://bookpoint-23f70.appspot.com")
+          .ref(doctor['profile_image'])
+          .getDownloadURL(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Image.asset(
+            'assets/default.jpg',
+            fit: BoxFit.cover,
+          );
+        }
+        return Image.network(
+          snapshot.data as String,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              'assets/default.jpg',
+              fit: BoxFit.cover,
+            );
+          },
+        );
+      },
     );
   }
 }
