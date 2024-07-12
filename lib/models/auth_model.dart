@@ -279,6 +279,7 @@ class AuthModel extends ChangeNotifier {
           .update({
             'emailVerified': true,
           });
+          
 
           String userType = userDoc['userType'];
           _isLogin=true;

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-//import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/config.dart';
 import 'profile_page.dart';
-import '../models/auth_model.dart';
-import 'package:book_point/main.dart'; // Import your update profile page here
+import 'package:book_point/main.dart';
 
 class UserProfilePage extends StatefulWidget {
   @override
-  // ignore: library_private_types_in_public_api
   _UserProfilePageState createState() => _UserProfilePageState();
 }
 
@@ -20,12 +17,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late String _gender;
   late String _email;
   late String _userType;
-  // ignore: unused_field
-  late User? _firebaseUser;
-  //Map<String, dynamic> _user = {};
-  Map<String, dynamic> _appointment = {};
-  //final List <dynamic> _favList = [];
-  final Set _favDoc = {};
+  late String _genderType;
+  bool _isLoading = true;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -33,50 +26,73 @@ class _UserProfilePageState extends State<UserProfilePage> {
   @override
   void initState() {
     super.initState();
-    _initializeVariables();
     fetchUserData();
   }
 
-  void _initializeVariables() {
-    _userId = '';
-    _name = '';
-    _dob = DateTime.now();
-    _gender = '';
-    _email = '';
-    _userType = '';
-  }
-
   Future<void> fetchUserData() async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      DocumentSnapshot<Map<String, dynamic>> snapshot =
-          await _firestore.collection('users').doc(user.uid).get();
+    setState(() {
+      _isLoading = true;
+    });
 
-      if (snapshot.exists) {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        Map<String, dynamic> userData = await fetchUserDataFromFirestore(user.uid);
+
         setState(() {
           _userId = user.uid;
-          _name = snapshot.data()?['name'] ?? '';
-          _dob = (snapshot.data()?['DOB'] as Timestamp).toDate();
-          _gender = snapshot.data()?['gender'] ?? '';
-          _email = snapshot.data()?['email'] ?? '';
-          _userType = snapshot.data()?['userType'] ?? '';
+          _name = userData['username'];
+          _dob = userData['DOB'];
+          _gender = userData['gender'];
+          _email = userData['email'];
+          _userType = userData['userType'];
+          _genderType = userData['gender'];
+          _isLoading = false;
         });
+      } else {
+        throw Exception('No user logged in');
       }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load profile: $e')),
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchUserDataFromFirestore(String userId) async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await _firestore.collection('Users').doc(userId).get();
+
+    if (snapshot.exists) {
+      Map<String, dynamic> userData = snapshot.data() ?? {};
+      
+      // Ensure all required fields are present
+      userData['userId'] = userId;
+      userData['username'] = userData['username'] ?? '';
+      userData['DOB'] = (userData['DOB'] as Timestamp?)?.toDate() ?? DateTime.now();
+      userData['gender'] = userData['gender'] ?? '';
+      userData['email'] = userData['email'] ?? '';
+      userData['userType'] = userData['userType'] ?? 'Patient';
+
+      return userData;
+    } else {
+      throw Exception('User not found');
     }
   }
 
   @override
-  void dispose() {
-    _firebaseUser = null;
-    _appointment;
-    _favDoc.clear();
-    MyApp.navigatorKey.currentState!.pushNamed('/');
-    //notifyListeners();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text('User Profile')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Profile'),
@@ -93,7 +109,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   const SizedBox(height: 110),
                   const CircleAvatar(
                     radius: 65.0,
-                    backgroundImage: AssetImage('assets/profile1.jpg'),
                     backgroundColor: Colors.white,
                   ),
                   const SizedBox(height: 10),
@@ -130,7 +145,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       padding: const EdgeInsets.all(10),
                       child: Column(
                         children: [
-                          const Text(
+                         const Text(
                             'Profile',
                             style: TextStyle(
                               fontSize: 17,
@@ -192,6 +207,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                       gender: _gender,
                                       email: _email,
                                       userType: _userType,
+                                      genderType: _genderType,
                                     ),
                                   ),
                                 ).then((_) {
@@ -216,12 +232,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             title: TextButton(
                               onPressed: () async {
                                 await FirebaseAuth.instance.signOut();
-                                _firebaseUser = null;
-                                _appointment;
-                                _favDoc.clear();
-                                //_fav.clear();
                                 MyApp.navigatorKey.currentState!.pushNamed('/');
-                                //notifyListeners();
                               },
                               child: const Text(
                                 "Logout",
