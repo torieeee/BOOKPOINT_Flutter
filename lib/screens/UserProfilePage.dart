@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/config.dart';
-import 'profile_page.dart'; 
+import 'profile_page.dart';
 import '../models/auth_model.dart';
-import 'package:book_point/main.dart';// Import your update profile page here
+import 'package:book_point/main.dart'; // Import your update profile page here
 
 class UserProfilePage extends StatefulWidget {
   @override
@@ -22,10 +22,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
   late String _userType;
   // ignore: unused_field
   late User? _firebaseUser;
-  //Map<String, dynamic> _user = {}; 
-  Map<String, dynamic> _appointment = {}; 
-  //final List <dynamic> _favList = []; 
- final Set _favDoc = {};
+  //Map<String, dynamic> _user = {};
+  Map<String, dynamic> _appointment = {};
+  //final List <dynamic> _favList = [];
+  final Set _favDoc = {};
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -36,6 +36,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _initializeVariables();
     fetchUserData();
   }
+
   void _initializeVariables() {
     _userId = '';
     _name = '';
@@ -43,7 +44,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _gender = '';
     _email = '';
     _userType = '';
-    
   }
 
   Future<void> fetchUserData() async {
@@ -65,16 +65,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-@override
-void dispose() {
-  
-  _firebaseUser = null;
-  _appointment ;
-  _favDoc.clear();
-  MyApp.navigatorKey.currentState!.pushNamed('/');
-  //notifyListeners();
-  super.dispose();
-}
+  @override
+  void dispose() {
+    _firebaseUser = null;
+    _appointment;
+    _favDoc.clear();
+    MyApp.navigatorKey.currentState!.pushNamed('/');
+    //notifyListeners();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,7 +99,7 @@ void dispose() {
                   const SizedBox(height: 10),
                   Text(
                     _name,
-                    style:const  TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                     ),
@@ -122,10 +122,10 @@ void dispose() {
               color: Colors.grey[200],
               child: Center(
                 child: Card(
-                  margin: const EdgeInsets.fromLTRB(0, 45, 0, 0),
-                  child:  SizedBox(
+                  margin: const EdgeInsets.fromLTRB(0, 2, 0, 0),
+                  child: SizedBox(
                     width: 300,
-                    height: 250,
+                    height: 320,
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Column(
@@ -165,7 +165,7 @@ void dispose() {
                             ),
                             title: TextButton(
                               onPressed: () {},
-                              child:const Text(
+                              child: const Text(
                                 "History",
                                 style: TextStyle(
                                   color: Config.primaryColor,
@@ -198,7 +198,7 @@ void dispose() {
                                   fetchUserData(); // Refresh data after returning from update page
                                 });
                               },
-                              child: const  Text(
+                              child: const Text(
                                 "Update Profile",
                                 style: TextStyle(
                                   color: Config.primaryColor,
@@ -214,18 +214,14 @@ void dispose() {
                               size: 35,
                             ),
                             title: TextButton(
-                              onPressed: () async{
-                                
-    await FirebaseAuth.instance.signOut();
-    _firebaseUser = null;
-    _appointment ;
-    _favDoc.clear();
-    //_fav.clear();
-    MyApp.navigatorKey.currentState!.pushNamed('/');
-    //notifyListeners();
-  
-  
-  
+                              onPressed: () async {
+                                await FirebaseAuth.instance.signOut();
+                                _firebaseUser = null;
+                                _appointment;
+                                _favDoc.clear();
+                                //_fav.clear();
+                                MyApp.navigatorKey.currentState!.pushNamed('/');
+                                //notifyListeners();
                               },
                               child: const Text(
                                 "Logout",
