@@ -224,3 +224,4 @@ class AuthModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+//faster authentication
