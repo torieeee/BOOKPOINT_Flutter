@@ -294,5 +294,5 @@ String _calculateExperience() {
 //calculate age
 //calculate experience
 //fetch user data
-//This is the authentication page that is used to store the user ID, name, date
-//It is used by the signup and registration page
+
+

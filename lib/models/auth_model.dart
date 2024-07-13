@@ -225,3 +225,5 @@ class AuthModel extends ChangeNotifier {
   }
 }
 //faster authentication
+//This is the authentication page that is used to store the user ID, name, date
+//It is used by the signup and registration page
