@@ -44,7 +44,8 @@ class AuthModel extends ChangeNotifier {
 
   bool get isLogin => _isLogin;
   User? get firebaseUser => _firebaseUser;
-  //Map<String, dynamic>? get appointment => _appointment;
+  
+
   //List<Map<String, dynamic>> get favDoc => _favDoc;
   Set get fav => _fav;
 
