@@ -242,7 +242,7 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
     _firebaseUser = null;
     _appointment ;
     _favDoc.clear();
-    //_fav.clear();
+
     MyApp.navigatorKey.currentState!.pushNamed('/');
     //notifyListeners();
   
