@@ -21,7 +21,7 @@ class AuthModel extends ChangeNotifier {
   
   Map<String, dynamic> get appointment => _appointment;
 
-  // Getter for favorite list 
+  // Getter for favorite
   List<dynamic> get getFav => _favList.toList();
 
   AuthModel() {
@@ -30,7 +30,7 @@ class AuthModel extends ChangeNotifier {
       if (user == null) {
         _isLogin = false;
         _firebaseUser = null;
-       // _appointment;
+        _appointment;
         //_favDoc.clear();
         //_fav.clear();
       } else {
