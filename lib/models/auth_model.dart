@@ -18,7 +18,7 @@ class AuthModel extends ChangeNotifier {
 
   Map<String, dynamic> get user => _user;
 
-  // Getter for appointment data
+  
   Map<String, dynamic> get appointment => _appointment;
 
   // Getter for favorite list data
