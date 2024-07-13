@@ -30,7 +30,7 @@ class AuthModel extends ChangeNotifier {
       if (user == null) {
         _isLogin = false;
         _firebaseUser = null;
-        _appointment;
+        //_appointment;
         //_favDoc.clear();
         //_fav.clear();
       } else {
