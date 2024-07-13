@@ -21,7 +21,7 @@ class AuthModel extends ChangeNotifier {
   
   Map<String, dynamic> get appointment => _appointment;
 
-  // Getter for favorite list data
+  // Getter for favorite list 
   List<dynamic> get getFav => _favList.toList();
 
   AuthModel() {
