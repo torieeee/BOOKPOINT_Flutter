@@ -35,6 +35,7 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
     fetchUserData();
   }
   void _initializeVariables() {
+    //doctor user variables
     _userId = '';
     _name = '';
     _dob = DateTime.now();
@@ -45,7 +46,7 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
     _category = '';
     _location = '';
   }
-
+//
 
 
 
