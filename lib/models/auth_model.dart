@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AuthModel extends ChangeNotifier {
   String? userId;
   bool _isLogin = false;
-  late User? _firebaseUser; // Firebase User object
+  late User? _firebaseUser; 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Data related to user appointments and favorites
