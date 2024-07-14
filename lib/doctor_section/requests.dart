@@ -1,492 +1,421 @@
-/*import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:book_point/doctor_section/diagnosis_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:book_point/providers/dio_provider.dart';
-import 'package:book_point/utils/config.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../utils/config.dart';
 
-class RequestsPage extends StatefulWidget {
-  const RequestsPage({
-    Key? key,
-    required this.doctor,
-  }) : super(key: key);
-
-  final Map<String, dynamic> doctor;
-  //final Color color;
+class RequestPage extends StatefulWidget {
+  const RequestPage({Key? key}) : super(key: key);
 
   @override
-  State<RequestsPage> createState() => _RequestsPageState();
+  State<RequestPage> createState() => _RequestPageState();
 }
 
-class _RequestsPageState extends State<RequestsPage> {
-  late List<Map<String, dynamic>> _requests = [];
-  late List<Map<String, dynamic>> _upcoming = [];
-  late List<Map<String, dynamic>> _completed = [];
-  late List<Map<String, dynamic>> _canceled = [];
+enum FilterStatus { Upcoming, Approved, Complete }
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchAppointments();
-  }
+class _RequestPageState extends State<RequestPage> {
+  FilterStatus status = FilterStatus.Upcoming;
+  Alignment _alignment = Alignment.centerLeft;
+  List<Map<String, dynamic>> schedules = [];
+  bool isLoading = true;
 
-  Future<void> _fetchAppointments() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      String doctorId = widget.doctor['name'];
+  Future<void> getRequests() async {
+    setState(() {
+      isLoading = true;
+    });
 
-      // Fetch appointments for different statuses
-      QuerySnapshot<Map<String, dynamic>> requestsSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorId)
-          .where('status', isEqualTo: 'requested')
-          .get();
+    try {
+      final User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final QuerySnapshot requestSnapshot = await FirebaseFirestore.instance
+            .collection('Requests')
+            .where('doc_id', isEqualTo: user.uid)
+            .get();
 
-      QuerySnapshot<Map<String, dynamic>> upcomingSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorId)
-          .where('status', isEqualTo: 'approved')
-          .get();
-
-      QuerySnapshot<Map<String, dynamic>> completedSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorId)
-          .where('status', isEqualTo: 'completed')
-          .get();
-
-      QuerySnapshot<Map<String, dynamic>> canceledSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doctor_name', isEqualTo: doctorId)
-          .where('status', isEqualTo: 'canceled')
-          .get();
-
+        setState(() {
+          schedules = requestSnapshot.docs
+              .map((doc) => doc.data() as Map<String, dynamic>)
+              .toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          schedules = [];
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching requests: $e');
       setState(() {
-        _requests = requestsSnapshot.docs.map((doc) => doc.data()).toList();
-        _upcoming = upcomingSnapshot.docs.map((doc) => doc.data()).toList();
-        _completed = completedSnapshot.docs.map((doc) => doc.data()).toList();
-        _canceled = canceledSnapshot.docs.map((doc) => doc.data()).toList();
+        schedules = [];
+        isLoading = false;
       });
     }
   }
 
-  Future<void> _updateAppointmentStatus(String id, String status) async {
-    await FirebaseFirestore.instance.collection('appointments').doc(id).update({'status': status});
-    _fetchAppointments(); // Refresh the list after updating
+  Future<void> approveRequest(String bookingId) async {
+    try {
+      // Update the Requests collection
+      await FirebaseFirestore.instance
+          .collection('Requests')
+          .where('booking_id', isEqualTo: bookingId)
+          .get()
+          .then((querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          doc.reference.update({'status': 'Approved'});
+        }
+      });
+
+      // Update the appointments collection
+      await FirebaseFirestore.instance
+          .collection('appointments')
+          .where('booking_id', isEqualTo: bookingId)
+          .get()
+          .then((querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          doc.reference.update({'status': 'Approved'});
+        }
+      });
+
+      // Refresh the requests list
+      await getRequests();
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request approved successfully')),
+      );
+    } catch (e) {
+      print('Error approving request: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to approve request')),
+      );
+    }
+  }
+
+// Then, modify the Approve button in the ListView.builder:
+
+  @override
+  void initState() {
+    super.initState();
+    getRequests();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Appointments'),
+    List<Map<String, dynamic>> filteredSchedules = schedules.where((schedule) {
+      String statusStr = schedule['status'] as String? ?? 'Pending';
+      FilterStatus scheduleStatus;
+      switch (statusStr) {
+        case 'Pending':
+          scheduleStatus = FilterStatus.Upcoming;
+          break;
+        case 'Approved':
+          scheduleStatus = FilterStatus.Approved;
+          break;
+        case 'Complete':
+          scheduleStatus = FilterStatus.Complete;
+          break;
+        default:
+          scheduleStatus = FilterStatus.Upcoming;
+      }
+      return scheduleStatus == status;
+    }).toList();
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const Text(
+              'Request Schedule',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Config.spaceSmall,
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      //this is the filter tabs
+                      for (FilterStatus filterStatus in FilterStatus.values)
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                status = filterStatus;
+                                _alignment = _getAlignment(filterStatus);
+                              });
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Align(
+                                alignment: _getTextAlignment(filterStatus),
+                                child: Text(
+                                  filterStatus.name,
+                                  style: TextStyle(
+                                    color: status == filterStatus
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontWeight: status == filterStatus
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                AnimatedAlign(
+                  alignment: _alignment,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  child: Container(
+                    width: 100,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Config.primaryColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Text(
+                        status.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Config.spaceSmall,
+            Config.spaceSmall,
+            Config.spaceSmall,
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : filteredSchedules.isEmpty
+                      ? const Center(child: Text('No requests found'))
+                      : ListView.builder(
+                          itemCount: filteredSchedules.length,
+                          itemBuilder: ((context, index) {
+                            var schedule = filteredSchedules[index];
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      schedule['patient_name'] ?? 'No name',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                        'Status: ${schedule['status'] ?? 'No category'}'),
+                                    const SizedBox(height: 15),
+                                    ScheduleCard(
+                                      date: _formatTimestamp(schedule['date']),
+                                      day: _getDayFromTimestamp(
+                                          schedule['date']),
+                                      time: _getTimeFromTimestamp(
+                                          schedule['date']),
+                                    ),
+                                    const SizedBox(
+                                      height: 15,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        // Expanded(
+                                        //   child: OutlinedButton(
+                                        //     onPressed: () {},
+                                        //     child: const Text(
+                                        //       'Cancel',
+                                        //       style: TextStyle(
+                                        //           color: Config.primaryColor),
+                                        //     ),
+                                        //   ),
+                                        // ),
+                                        // const SizedBox(
+                                        //   width: 20,
+                                        // ),
+                                        Expanded(
+                                          child: OutlinedButton(
+                                            style: OutlinedButton.styleFrom(
+                                              backgroundColor:
+                                                  schedule['status'] ==
+                                                          'Approved'
+                                                      ? Colors.green
+                                                      : Config.primaryColor,
+                                            ),
+                                            onPressed: () {
+                                              if (schedule['status'] ==
+                                                  'Approved') {
+                                                // Navigate to diagnosis page
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        DiagnosisPage(
+                                                      patientId: schedule['patient_id'],
+                                                      doctorId: schedule['doc_id'],
+                                                    ),
+                                                  ),
+                                                );
+                                              } else {
+                                                approveRequest(
+                                                    schedule['booking_id']);
+                                              }
+                                            },
+                                            child: Text(
+                                              schedule['status'] == 'Approved'
+                                                  ? 'Diagnose'
+                                                  : 'Approve',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+            ),
+          ],
+        ),
       ),
-      body: ListView(
-        children: [
-          _buildSectionHeader('Requests'),
-          ..._buildAppointmentList(_requests, 'Approve', 'approved'),
+    );
+  }
+}
 
-          _buildSectionHeader('Upcoming'),
-          ..._buildAppointmentList(_upcoming, 'Complete', 'completed', 'Cancel', 'canceled'),
+Alignment _getAlignment(FilterStatus filterStatus) {
+  switch (filterStatus) {
+    case FilterStatus.Upcoming:
+      return Alignment.centerLeft;
+    case FilterStatus.Approved:
+      return Alignment.center;
+    case FilterStatus.Complete:
+      return Alignment.centerRight;
+  }
+}
 
-          _buildSectionHeader('Completed'),
-          ..._buildAppointmentList(_completed),
+Alignment _getTextAlignment(FilterStatus filterStatus) {
+  switch (filterStatus) {
+    case FilterStatus.Upcoming:
+      return Alignment.centerLeft;
+    case FilterStatus.Approved:
+      return Alignment.center;
+    case FilterStatus.Complete:
+      return Alignment.centerRight;
+  }
+}
 
-          _buildSectionHeader('Canceled'),
-          ..._buildAppointmentList(_canceled),
+String _formatTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('yyyy-MM-dd').format(timestamp.toDate());
+  }
+  return 'Invalid Date';
+}
+
+String _getDayFromTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('EEEE').format(timestamp.toDate());
+  }
+  return 'Invalid Day';
+}
+
+String _getTimeFromTimestamp(dynamic timestamp) {
+  if (timestamp is Timestamp) {
+    return DateFormat('h:mm a').format(timestamp.toDate());
+  }
+  return 'Invalid Time';
+}
+
+class ScheduleCard extends StatelessWidget {
+  const ScheduleCard(
+      {Key? key, required this.date, required this.day, required this.time})
+      : super(key: key);
+  final String date;
+  final String day;
+  final String time;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          const Icon(
+            Icons.calendar_today,
+            color: Config.primaryColor,
+            size: 15,
+          ),
+          const SizedBox(
+            width: 5,
+          ),
+          Text(
+            '$day, $date',
+            style: const TextStyle(
+              color: Config.primaryColor,
+            ),
+          ),
+          const SizedBox(
+            width: 20,
+          ),
+          const Icon(
+            Icons.access_alarm,
+            color: Config.primaryColor,
+            size: 17,
+          ),
+          const SizedBox(
+            width: 5,
+          ),
+          Flexible(
+              child: Text(
+            time,
+            style: const TextStyle(
+              color: Config.primaryColor,
+            ),
+          ))
         ],
       ),
     );
   }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Text(
-        title,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  List<Widget> _buildAppointmentList(
-    List<Map<String, dynamic>> appointments,
-    [String primaryButtonText = '',
-    String primaryButtonStatus = '',
-    String secondaryButtonText = '',
-    String secondaryButtonStatus = '']
-  ) {
-    return appointments.map((appointment) {
-      return RequestsCard(
-        appointment: appointment,
-        primaryButtonText: primaryButtonText,
-        primaryButtonStatus: primaryButtonStatus,
-        secondaryButtonText: secondaryButtonText,
-        secondaryButtonStatus: secondaryButtonStatus,
-        onStatusChange: _updateAppointmentStatus,
-      );
-    }).toList();
-  }
-}
-
-class RequestsCard extends StatelessWidget {
-  const RequestsCard({
-    Key? key,
-    required this.appointment,
-    required this.primaryButtonText,
-    required this.primaryButtonStatus,
-    required this.secondaryButtonText,
-    required this.secondaryButtonStatus,
-    required this.onStatusChange,
-  }) : super(key: key);
-
-  final Map<String, dynamic> appointment;
-  final String primaryButtonText;
-  final String primaryButtonStatus;
-  final String secondaryButtonText;
-  final String secondaryButtonStatus;
-  final Function(String id, String status) onStatusChange;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(appointment['patient_image_url']),
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Patient: ${appointment['patient_name']}', style: const TextStyle(fontSize: 16)),
-                    Text('Category: ${appointment['category']}', style: const TextStyle(color: Colors.black)),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, color: Colors.grey, size: 15),
-                const SizedBox(width: 5),
-                Text('${appointment['date']}', style: const TextStyle(color: Colors.grey)),
-                const SizedBox(width: 20),
-                const Icon(Icons.access_alarm, color: Colors.grey, size: 15),
-                const SizedBox(width: 5),
-                Text('${appointment['time']}', style: const TextStyle(color: Colors.grey)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            if (primaryButtonText.isNotEmpty) ...[
-              ElevatedButton(
-                onPressed: () => onStatusChange(appointment['id'], primaryButtonStatus),
-                child: Text(primaryButtonText),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:Config.primaryColor),
-              ),
-            ],
-            if (secondaryButtonText.isNotEmpty) ...[
-              ElevatedButton(
-                onPressed: () => onStatusChange(appointment['id'], secondaryButtonStatus),
-                child: Text(secondaryButtonText),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-*/
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-//import 'package:book_point/utils/config.dart'; 
-import '../shared/theme/widgets/cards/requests_card.dart';
-import 'prescription.dart';
-//import '../shared/theme/widgets/cards/requests_card.dart';
-
-class RequestsPage extends StatefulWidget {
-  const RequestsPage({
-    super.key,
-    required this.doctor,
-  });
-
-  final Map<String, dynamic> doctor;
-
-  @override
-  State<RequestsPage> createState() => _RequestsPageState();
-}
-
-class _RequestsPageState extends State<RequestsPage> {
-   List<Map<String, dynamic>> _requests = [];
-   List<Map<String, dynamic>> _upcoming = [];
-  List<Map<String, dynamic>> _completed = [];
-  List<Map<String, dynamic>> _canceled = [];
-  //bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchAppointments();
-   /// fetchData();
-  }
-  
-
-  Future<void> _fetchAppointments() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      
-      //String doctorId = widget.doctor['doc_id'] as String;
-
-    
-      // print('Fetching appointments for doctor: $doctor');
-       DocumentSnapshot<Map<String, dynamic>> doctorSnapshot = await FirebaseFirestore.instance
-    .collection('Users')
-    .doc(user.uid) // Assuming doctorId is the document ID in the users collection
-    .get();
-String doctorName = doctorSnapshot.data()?['name'] ?? '';
-print('Fetching appointments for doctor: $doctorName');
-try{
-      
-      QuerySnapshot<Map<String, dynamic>> requestsSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doc_name', isEqualTo: doctorName)
-          .where('status', isEqualTo: 'pending')
-          .get();
-
-      QuerySnapshot<Map<String, dynamic>> upcomingSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doc_id', isEqualTo: doctorName)
-          .where('status', isEqualTo: 'approved')
-          .get();
-
-      QuerySnapshot<Map<String, dynamic>> completedSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doc_name', isEqualTo: doctorName)
-          .where('status', isEqualTo: 'completed')
-          .get();
-
-      QuerySnapshot<Map<String, dynamic>> canceledSnapshot = await FirebaseFirestore.instance
-          .collection('appointments')
-          .where('doc_name', isEqualTo: doctorName)
-          .where('status', isEqualTo: 'canceled')
-          .get();
-
-      setState(() {
-        _requests = requestsSnapshot.docs.map((doc) => doc.data()).toList();
-        _upcoming = upcomingSnapshot.docs.map((doc) => doc.data()).toList();
-        _completed = completedSnapshot.docs.map((doc) => doc.data()).toList();
-        _canceled = canceledSnapshot.docs.map((doc) => doc.data()).toList();
-      });
-    
-      print("Requests: $_requests");
-      print("Upcoming: $_upcoming");
-      print("Completed: $_completed");
-      print("Canceled: $_canceled");
-    } catch (e) {
-      print("Error fetching appointments: $e");
-    }
-} else {
-        print("Doctor ID is null.");
-      }
-    
-   // print("No authenticated user found.");
-
-  
-  }
-  Map<String, dynamic> _mapFirestoreDocumentToAppointment(
-    DocumentSnapshot<Map<String, dynamic>> doc) {
-  Map<String, dynamic>? data = doc.data();
-  if (data == null) {
-    return {};
-  }
-  
-  // Safely handle date field
-  Timestamp? timestamp = data['date'] as Timestamp?;
-  DateTime dateTime = timestamp != null ? timestamp.toDate() : DateTime.now();
-  String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
-  String formattedTime = DateFormat('HH:mm').format(dateTime);
-
-  return {
-    'booking_id': doc.id,
-    'doc_id': data['doc_id'] ?? '',
-    'doc_name': data['doc_name'] ?? '',
-    'patient_id': data['patient_id'] ?? '',
-    'date': formattedDate,
-    'time': formattedTime,
-    'status': data['status'] ?? '',
-  };
-  }
-
-  Future<void> _updateAppointmentStatus(String id, String status) async {
-    await FirebaseFirestore.instance.collection('appointments').doc(id).update({'status': status});
-    _fetchAppointments(); // Refresh the list after updating
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Appointments'),
-      ),
-      body: DefaultTabController(
-        length: 4, // Number of tabs
-        child: Column(
-          children: <Widget>[
-            const TabBar(
-              tabs: [
-                Tab(text: 'Requests'),
-                Tab(text: 'Upcoming'),
-                Tab(text: 'Completed'),
-                Tab(text: 'Canceled'),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildAppointmentList(_requests, 'Approve', 'approved'),
-                  _buildAppointmentList(_upcoming, 'Complete', 'completed', 'Cancel', 'canceled'),
-                  _buildAppointmentList(_completed),
-                  _buildAppointmentList(_canceled),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-
-  Widget _buildAppointmentList(
-  List<Map<String, dynamic>> appointments,
-  [String primaryButtonText = '',
-  String primaryButtonStatus = '',
-  String secondaryButtonText = '',
-  String secondaryButtonStatus = '']
-) {
-  return ListView(
-    children: appointments.map((appointment) {
-      return RequestsCard(
-         doctor:{
-          'appointments': {
-            //'day': 'Monday', 
-            'date': appointment['date'],
-            ///'time': '',
-          },
-          'doc_id': appointment['doc_id'],
-          //'doc_name': appointment['doc_name'],
-        },
-        patient: {
-          'patient_id': appointment['patient_id'],
-        },
-        onCompleted: () {
-          _updateAppointmentStatus(appointment['booking_id'], 'completed');
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PrescriptionForm(
-                doctor: appointment['doc_id'],
-                patient: appointment['patient_id'],
-              ),
-            ),
-          );
-        }
-      );
-}).toList(),
-  );
-}
-
-
-/*class RequestsCard extends StatelessWidget {
-  const RequestsCard({
-    Key? key,
-    required this.appointment,
-    required this.primaryButtonText,
-    required this.primaryButtonStatus,
-    required this.secondaryButtonText,
-    required this.secondaryButtonStatus,
-    required this.onStatusChange,
-  }) : super(key: key);
-
-  final Map<String, dynamic> appointment;
-  final String primaryButtonText;
-  final String primaryButtonStatus;
-  final String secondaryButtonText;
-  final String secondaryButtonStatus;
-  final Function(String id, String status) onStatusChange;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(appointment['patient_image_url']),
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Patient: ${appointment['patient_name']}', style: const TextStyle(fontSize: 16)),
-                    Text('Category: ${appointment['category']}', style: const TextStyle(color: Colors.black)),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, color: Colors.grey, size: 15),
-                const SizedBox(width: 5),
-                Text('${appointment['date']}', style: const TextStyle(color: Colors.grey)),
-                const SizedBox(width: 20),
-                const Icon(Icons.access_alarm, color: Colors.grey, size: 15),
-                const SizedBox(width: 5),
-                Text('${appointment['time']}', style: const TextStyle(color: Colors.grey)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            if (primaryButtonText.isNotEmpty) ...[
-              ElevatedButton(
-                onPressed: () => onStatusChange(appointment['id'], primaryButtonStatus),
-                child: Text(primaryButtonText),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Config.primaryColor,
-                ),
-              ),
-            ],
-            if (secondaryButtonText.isNotEmpty) ...[
-              ElevatedButton(
-                onPressed: () => onStatusChange(appointment['id'], secondaryButtonStatus),
-                child: Text(secondaryButtonText),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}*/
-
 }

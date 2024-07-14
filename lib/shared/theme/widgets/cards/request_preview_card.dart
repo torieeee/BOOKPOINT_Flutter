@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
-class AppointmentPreviewCard extends StatelessWidget {
-  final Map<String, dynamic> appointment;
-  const AppointmentPreviewCard({Key? key, required this.appointment})
+class RequestPreviewCard extends StatelessWidget {
+  final Map<String, dynamic> request;
+  const RequestPreviewCard({Key? key, required this.request})
       : super(key: key);
 
   @override
@@ -17,8 +17,8 @@ class AppointmentPreviewCard extends StatelessWidget {
           child: Column(
             children: [
               // Config.spaceSmall,
-              ScheduleCard(appointment: this.appointment),
-              // Config.spaceSmall,
+              ScheduleCard(request: this.request),
+              // Config.spaceSmall, 
             ],
           ),
         ),
@@ -48,14 +48,14 @@ class AppointmentPreviewCard extends StatelessWidget {
 }
 
 class ScheduleCard extends StatelessWidget {
-  const ScheduleCard({Key? key, required this.appointment}) : super(key: key);
-  final Map<String, dynamic> appointment;
+  const ScheduleCard({Key? key, required this.request}) : super(key: key);
+  final Map<String, dynamic> request;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    // Check if the appointment data contains a date
-    if (appointment['date'] == null) {
+    // Check if the request data contains a date
+    if (request['date'] == null) {
       return Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -69,17 +69,17 @@ class ScheduleCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        child: Text('No appointment date available',
+        padding: const EdgeInsets.all(25),
+        child: Text('No request date available',
             style: TextStyle(color: Colors.white)),
       );
     }
 
-    // Parse the date from the appointment data
-    DateTime appointmentDate = (appointment['date'] as Timestamp).toDate();
+    // Parse the date from the request data
+    DateTime requestDate = (request['date'] as Timestamp).toDate();
     String formattedDate =
-        DateFormat('EEEE, MMMM d, y').format(appointmentDate);
-    String formattedTime = DateFormat('h:mm a').format(appointmentDate);
+        DateFormat('EEEE, MMMM d, y').format(requestDate);
+    String formattedTime = DateFormat('h:mm a').format(requestDate);
 
     return Container(
       decoration: BoxDecoration(
@@ -99,7 +99,7 @@ class ScheduleCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            "Doctor Name: ${appointment['doc_name']}",
+            "Patient Name: ${request['patient_name']}",
             style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),

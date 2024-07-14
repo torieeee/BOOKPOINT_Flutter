@@ -194,13 +194,25 @@ class _BookingPageState extends State<BookingPage> {
                       'doc_name': docName,
                       'patient_id': uid,
                       'patient_name': userName,
-                      'status': 'pending',
+                      'status': 'Pending',
+                    });
+
+                    DocumentReference docRefReq = await FirebaseFirestore.instance
+                        .collection('Requests')
+                        .add({
+                      'date': Timestamp.fromDate(appointmentDateTime),
+                      'doc_id': docId,
+                      'doc_name': docName,
+                      'patient_id': uid,
+                      'patient_name': userName,
+                      'status': 'Pending',
                     });
 
                     String bookingId = docRef.id;
                     await docRef.update({'booking_id': bookingId});
+                    await docRefReq.update({'booking_id': bookingId});
                     MyApp.navigatorKey.currentState!
-                        .pushNamed('success_booking', arguments: bookingId);
+                        .pushNamed('success_booking', arguments: {'bookingId': bookingId});
                   } catch (e) {
                     print('Error creating booking: $e');
                     ScaffoldMessenger.of(context).showSnackBar(

@@ -63,13 +63,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> filteredSchedules = schedules.where((schedule) {
-      String statusStr = schedule['status'] as String? ?? 'pending';
+      String statusStr = schedule['status'] as String? ?? 'Pending';
       FilterStatus scheduleStatus;
       switch (statusStr) {
-        case 'pending':
+        case 'Pending':
           scheduleStatus = FilterStatus.Upcoming;
           break;
-        case 'complete':
+        case 'Complete':
           scheduleStatus = FilterStatus.complete;
           break;
         default:

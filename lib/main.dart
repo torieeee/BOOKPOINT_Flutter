@@ -232,7 +232,7 @@ class MyApp extends StatelessWidget {
           'doctor':(context)=>const DoctorMainLayout(),
           '/doctor/requests': (context) {
             final Map<String, dynamic> doctor = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return RequestsPage(doctor: doctor);
+            return const RequestPage();
           }
         },
       ),
