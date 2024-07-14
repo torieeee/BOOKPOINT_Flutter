@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:book_point/utils/config.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId;
@@ -135,6 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     return null;
                   },
                 ),
+                Config.spaceSmall,
                 TextFormField(
                   controller: _dobController,
                   decoration: const InputDecoration(
@@ -151,6 +153,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     return null;
                   },
                 ),
+                Config.spaceSmall,
                 DropdownButtonFormField<String>(
                   value: _genderType,
                   decoration: const InputDecoration(
@@ -176,6 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     return null;
                   },
                 ),
+                Config.spaceSmall,
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email'),
@@ -208,6 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 //     }
                 //   },
                 // ),
+                Config.spaceSmall,
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _saveProfile,

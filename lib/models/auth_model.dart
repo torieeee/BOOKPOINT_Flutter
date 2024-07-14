@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AuthModel extends ChangeNotifier {
   String? userId;
   bool _isLogin = false;
-  late User? _firebaseUser; // Firebase User object
+  late User? _firebaseUser; 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Data related to user appointments and favorites
@@ -18,10 +18,10 @@ class AuthModel extends ChangeNotifier {
 
   Map<String, dynamic> get user => _user;
 
-  // Getter for appointment data
+  
   Map<String, dynamic> get appointment => _appointment;
 
-  // Getter for favorite list data
+  // Getter for favorite
   List<dynamic> get getFav => _favList.toList();
 
   AuthModel() {
@@ -30,7 +30,7 @@ class AuthModel extends ChangeNotifier {
       if (user == null) {
         _isLogin = false;
         _firebaseUser = null;
-       // _appointment;
+        //_appointment;
         //_favDoc.clear();
         //_fav.clear();
       } else {
@@ -44,8 +44,9 @@ class AuthModel extends ChangeNotifier {
 
   bool get isLogin => _isLogin;
   User? get firebaseUser => _firebaseUser;
-  //Map<String, dynamic>? get appointment => _appointment;
-  //List<Map<String, dynamic>> get favDoc => _favDoc;
+  
+
+  
   Set get fav => _fav;
 
   get getFavDoc => null;
@@ -223,3 +224,6 @@ class AuthModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+//faster authentication
+//This is the authentication page that is used to store the user ID, name, date
+//It is used by the signup and registration page

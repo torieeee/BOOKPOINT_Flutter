@@ -22,6 +22,9 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
   late String _email;
   late String _userType;
   late String _genderType;
+  late DateTime _yoc;
+  late String _category;
+  late String _location;
   bool _isLoading = true;
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
@@ -41,6 +44,20 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
     fetchUserData();
   }
 
+  void _initializeVariables() {
+    //doctor user variables
+    _userId = '';
+    _name = '';
+    _dob = DateTime.now();
+    _gender = '';
+    _email = '';
+    _userType = '';
+    _yoc = DateTime.now();
+    _category = '';
+    _location = '';
+  }
+//
+
   Future<void> fetchUserData() async {
     setState(() {
       _isLoading = true;
@@ -49,7 +66,8 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
     try {
       User? user = _auth.currentUser;
       if (user != null) {
-        Map<String, dynamic> userData = await fetchUserDataFromFirestore(user.uid);
+        Map<String, dynamic> userData =
+            await fetchUserDataFromFirestore(user.uid);
 
         setState(() {
           _userId = user.uid;
@@ -81,11 +99,12 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
 
     if (snapshot.exists) {
       Map<String, dynamic> userData = snapshot.data() ?? {};
-      
+
       // Ensure all required fields are present
       userData['userId'] = userId;
       userData['username'] = userData['username'] ?? '';
-      userData['DOB'] = (userData['DOB'] as Timestamp?)?.toDate() ?? DateTime.now();
+      userData['DOB'] =
+          (userData['DOB'] as Timestamp?)?.toDate() ?? DateTime.now();
       userData['gender'] = userData['gender'] ?? '';
       userData['email'] = userData['email'] ?? '';
       userData['userType'] = userData['userType'] ?? 'Patient';
@@ -158,7 +177,7 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
                       padding: const EdgeInsets.all(10),
                       child: Column(
                         children: [
-                         const Text(
+                          const Text(
                             'Profile',
                             style: TextStyle(
                               fontSize: 17,
@@ -246,6 +265,7 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
                               onPressed: () async {
                                 await FirebaseAuth.instance.signOut();
                                 MyApp.navigatorKey.currentState!.pushNamed('/');
+                                //notifyListeners();
                               },
                               child: const Text(
                                 "Logout",
@@ -270,19 +290,34 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
   }
 
   String _calculateAge() {
-  DateTime currentDate = DateTime.now();
-  int age = currentDate.year - _dob.year;
-  int month1 = currentDate.month;
-  int month2 = _dob.month;
-  if (month2 > month1) {
-    age--;
-  } else if (month1 == month2) {
-    int day1 = currentDate.day;
-    int day2 = _dob.day;
-    if (day2 > day1) {
+    DateTime currentDate = DateTime.now();
+    int age = currentDate.year - _dob.year;
+    int month1 = currentDate.month;
+    int month2 = _dob.month;
+    if (month2 > month1) {
       age--;
+    } else if (month1 == month2) {
+      int day1 = currentDate.day;
+      int day2 = _dob.day;
+      if (day2 > day1) {
+        age--;
+      }
     }
+    return age.toString();
   }
-  return age.toString();
+
+  String _calculateExperience() {
+    DateTime now = DateTime.now();
+    int experience = now.year - _yoc.year;
+    if (now.month < _yoc.month ||
+        (now.month == _yoc.month && now.day < _yoc.day)) {
+      experience--;
+    }
+    return experience.toString();
+  }
 }
-}
+//calculate age
+//calculate experience
+//fetch user data
+
+
