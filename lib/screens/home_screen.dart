@@ -7,6 +7,7 @@ import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
 import '../shared/theme/widgets/titles/section_title.dart';
 import '../src/doctor_category.dart';
+import 'appointment_page.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -40,7 +41,7 @@ class HomeView extends StatelessWidget {
             if (FirebaseAuth.instance.currentUser == null) {
               return Text('Please log in to view your profile');
             }
-            
+
             if (snapshot.connectionState == ConnectionState.waiting) {
               return CircularProgressIndicator();
             }
@@ -196,7 +197,9 @@ class _MySchedule extends StatelessWidget {
         SectionTitle(
           title: 'My appointment',
           action: 'See all',
-          onPressed: () => Navigator.of(context).pushNamed('appointment_page'),
+         onPressed: () {
+            Navigator.of(context).pushNamed('appointment_page');
+          },
         ),
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseAuth.instance.currentUser != null
@@ -364,6 +367,7 @@ class DoctorModel {
       'year_of_experience': year_of_experience,
     };
   }
+
   Map<String, dynamic> toMap() {
     return {
       'doc_id': doc_id,
