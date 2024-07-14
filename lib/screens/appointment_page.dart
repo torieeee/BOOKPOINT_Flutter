@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/config.dart';
+import 'invoice_page.dart';
 
 class AppointmentPage extends StatefulWidget {
   const AppointmentPage({Key? key}) : super(key: key);
@@ -11,7 +12,7 @@ class AppointmentPage extends StatefulWidget {
   State<AppointmentPage> createState() => _AppointmentPageState();
 }
 
-enum FilterStatus { Upcoming, complete }
+enum FilterStatus { Upcoming, Approved, Complete, Paid }
 
 class _AppointmentPageState extends State<AppointmentPage> {
   FilterStatus status = FilterStatus.Upcoming;
@@ -54,6 +55,54 @@ class _AppointmentPageState extends State<AppointmentPage> {
     }
   }
 
+  Future<void> _cancelAppointment(String bookingId) async {
+    try {
+      // Show a confirmation dialog
+      bool confirm = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Cancel Appointment"),
+            content:
+                const Text("Are you sure you want to cancel this appointment?"),
+            actions: <Widget>[
+              TextButton(
+                child: const Text("No"),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              TextButton(
+                child: const Text("Yes"),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirm == true) {
+        // Delete the appointment from Firestore
+        await FirebaseFirestore.instance
+            .collection('appointments')
+            .doc(bookingId)
+            .delete();
+
+        // Show a success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Appointment cancelled successfully')),
+        );
+
+        // Refresh the appointments list
+        await getAppointments();
+      }
+    } catch (e) {
+      print('Error cancelling appointment: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Failed to cancel appointment. Please try again.')),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -69,8 +118,14 @@ class _AppointmentPageState extends State<AppointmentPage> {
         case 'Pending':
           scheduleStatus = FilterStatus.Upcoming;
           break;
+        case 'Approved':
+          scheduleStatus = FilterStatus.Approved;
+          break;
         case 'Complete':
-          scheduleStatus = FilterStatus.complete;
+          scheduleStatus = FilterStatus.Complete;
+          break;
+        case 'Paid':
+          scheduleStatus = FilterStatus.Complete;
           break;
         default:
           scheduleStatus = FilterStatus.Upcoming;
@@ -147,7 +202,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     child: Container(
-                      width: 100,
+                      width: MediaQuery.of(context).size.width / 4 -
+                          20, // Subtracting 20 for padding
                       height: 40,
                       decoration: BoxDecoration(
                         color: Config.primaryColor,
@@ -213,30 +269,56 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Expanded(
-                                            child: OutlinedButton(
-                                              onPressed: () {},
-                                              child: const Text(
-                                                'Cancel',
-                                                style: TextStyle(
-                                                    color: Config.primaryColor),
+                                          if (schedule['status'] == 'Pending')
+                                            Expanded(
+                                              child: OutlinedButton(
+                                                onPressed: () =>
+                                                    _cancelAppointment(
+                                                        schedule['booking_id']),
+                                                child: const Text(
+                                                  'Cancel',
+                                                  style: TextStyle(
+                                                      color:
+                                                          Config.primaryColor),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(
-                                            width: 20,
-                                          ),
+                                          if (schedule['status'] == 'Pending')
+                                            const SizedBox(width: 20),
                                           Expanded(
                                             child: OutlinedButton(
                                               style: OutlinedButton.styleFrom(
                                                 backgroundColor:
-                                                    Config.primaryColor,
+                                                    _getButtonColor(
+                                                        schedule['status']),
                                               ),
-                                              onPressed: () {},
-                                              child: const Text(
-                                                'Reschedule',
+                                              onPressed: () {
+                                                if (schedule['status'] ==
+                                                    'Pending') {
+                                                  // Implement reschedule functionality
+                                                } else if (schedule['status'] ==
+                                                    'Complete') {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          InvoicePage(
+                                                              bookingId: schedule[
+                                                                  'booking_id']),
+                                                    ),
+                                                  );
+                                                }
+                                                // No action for 'Approved' status
+                                              },
+                                              child: Text(
+                                                _getButtonText(
+                                                    schedule['status']),
                                                 style: TextStyle(
-                                                    color: Colors.white),
+                                                  color: schedule['status'] ==
+                                                          'Approved'
+                                                      ? Colors.black54
+                                                      : Colors.white,
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -257,22 +339,47 @@ class _AppointmentPageState extends State<AppointmentPage> {
   }
 }
 
+String _getButtonText(String status) {
+  switch (status) {
+    case 'Pending':
+      return 'Reschedule';
+    case 'Approved':
+      return 'Waiting for Diagnosis';
+    case 'Complete':
+      return 'Invoice';
+    default:
+      return '';
+  }
+}
+
+Color _getButtonColor(String status) {
+  switch (status) {
+    case 'Pending':
+      return Config.primaryColor;
+    case 'Approved':
+      return Colors.grey;
+    case 'Complete':
+      return Colors.green;
+    default:
+      return Colors.grey;
+  }
+}
+
 Alignment _getAlignment(FilterStatus filterStatus) {
   switch (filterStatus) {
     case FilterStatus.Upcoming:
       return Alignment.centerLeft;
-    case FilterStatus.complete:
+    case FilterStatus.Approved:
+      return Alignment(-0.33, 0.0);
+    case FilterStatus.Complete:
+      return Alignment(0.33, 0.0);
+    case FilterStatus.Paid:
       return Alignment.centerRight;
   }
 }
 
 Alignment _getTextAlignment(FilterStatus filterStatus) {
-  switch (filterStatus) {
-    case FilterStatus.Upcoming:
-      return Alignment.centerLeft;
-    case FilterStatus.complete:
-      return Alignment.centerRight;
-  }
+  return Alignment.center; // Center all text within each tab
 }
 
 String _formatTimestamp(dynamic timestamp) {
