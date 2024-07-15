@@ -9,6 +9,7 @@ import '../shared/theme/widgets/titles/section_title.dart';
 import '../src/doctor_category.dart';
 import '../utils/config.dart';
 import 'appointment_page.dart';
+import 'searchPage.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -121,16 +122,27 @@ class _HomeViewState extends State<HomeView> {
                     decoration: InputDecoration(
                       hintText: 'Search for doctors...',
                       prefixIcon: const Icon(Icons.search),
-                      suffixIcon: Container(
-                        margin: const EdgeInsets.all(4.0),
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: colorScheme.onSurfaceVariant,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: const Icon(Icons.filter_alt_outlined),
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.arrow_forward),
+                        onPressed: () {
+                          // Navigate to search page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SearchPage()),
+                          );
+                        },
                       ),
                     ),
+                    onFieldSubmitted: (value) {
+                      // Navigate to search page with the search query
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                SearchPage(initialQuery: value)),
+                      );
+                    },
                   ),
                 ],
               );

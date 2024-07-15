@@ -203,7 +203,7 @@ class MyApp extends StatelessWidget {
         title: 'Bookpoint',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          textTheme: GoogleFonts.kulimParkTextTheme(
+          textTheme: GoogleFonts.spaceGroteskTextTheme(
             Theme.of(context).textTheme,
           ),
           inputDecorationTheme: const InputDecorationTheme(
