@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
-import 'home_screen.dart';
+import '../components/doctor_card.dart';
+
 
 class SearchPage extends StatefulWidget {
   final String? initialQuery;
@@ -14,13 +14,14 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   late TextEditingController _searchController;
-  List<DoctorModel> _searchResults = [];
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.initialQuery);
-    if (widget.initialQuery != null) {
+    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
       _performSearch(widget.initialQuery!);
     }
   }
@@ -31,47 +32,57 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  void _performSearch(String query) {
-    FirebaseFirestore.instance
-        .collection('Doctors')
-        .where('doc_name', isGreaterThanOrEqualTo: query)
-        .where('doc_name', isLessThan: query + 'z')
-        .get()
-        .then((querySnapshot) {
-      setState(() {
-        _searchResults = querySnapshot.docs
-            .map((doc) => DoctorModel.fromSnapshot(doc))
-            .toList();
-      });
+  Future<void> _performSearch(String query) async {
+    setState(() {
+      _isLoading = true;
     });
 
-    // Search for doctor types
-    FirebaseFirestore.instance
-        .collection('Doctors')
-        .where('doc_type', isGreaterThanOrEqualTo: query)
-        .where('doc_type', isLessThan: query + 'z')
-        .get()
-        .then((querySnapshot) {
-      setState(() {
-        _searchResults.addAll(querySnapshot.docs
-            .map((doc) => DoctorModel.fromSnapshot(doc))
-            .toList());
-      });
-    });
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Doctors')
+          .where('doc_type', isEqualTo: query)
+          .get();
 
-    // Search for hospitals (assuming there's a 'hospital' field in the Doctor document)
-    FirebaseFirestore.instance
-        .collection('Doctors')
-        .where('hospital', isGreaterThanOrEqualTo: query)
-        .where('hospital', isLessThan: query + 'z')
-        .get()
-        .then((querySnapshot) {
+      if (querySnapshot.docs.isEmpty) {
+        // If no exact match for doc_type, perform a more general search
+        final generalQuerySnapshot = await FirebaseFirestore.instance
+            .collection('Doctors')
+            .where('doc_name', isGreaterThanOrEqualTo: query.toLowerCase())
+            .where('doc_name', isLessThan: query.toLowerCase() + 'z')
+            .get();
+
+        final doctorTypeSnapshot = await FirebaseFirestore.instance
+            .collection('Doctors')
+            .where('doc_type', isGreaterThanOrEqualTo: query.toLowerCase())
+            .where('doc_type', isLessThan: query.toLowerCase() + 'z')
+            .get();
+
+        final hospitalSnapshot = await FirebaseFirestore.instance
+            .collection('Doctors')
+            .where('hospital', isGreaterThanOrEqualTo: query.toLowerCase())
+            .where('hospital', isLessThan: query.toLowerCase() + 'z')
+            .get();
+
+        setState(() {
+          _searchResults = [
+            ...generalQuerySnapshot.docs.map((doc) => doc.data()),
+            ...doctorTypeSnapshot.docs.map((doc) => doc.data()),
+            ...hospitalSnapshot.docs.map((doc) => doc.data()),
+          ];
+        });
+      } else {
+        setState(() {
+          _searchResults = querySnapshot.docs.map((doc) => doc.data()).toList();
+        });
+      }
+
+      _isLoading = false;
+    } catch (e) {
+      print('Error performing search: $e');
       setState(() {
-        _searchResults.addAll(querySnapshot.docs
-            .map((doc) => DoctorModel.fromSnapshot(doc))
-            .toList());
+        _isLoading = false;
       });
-    });
+    }
   }
 
   @override
@@ -101,12 +112,19 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _searchResults.length,
-              itemBuilder: (context, index) {
-                return DoctorListTile(doctor: _searchResults[index]);
-              },
-            ),
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : _searchResults.isEmpty
+                    ? Center(child: Text('No results found'))
+                    : ListView.builder(
+                        itemCount: _searchResults.length,
+                        itemBuilder: (context, index) {
+                          return DoctorCard(
+                            doctor: _searchResults[index],
+                            isFav: false,
+                          );
+                        },
+                      ),
           ),
         ],
       ),

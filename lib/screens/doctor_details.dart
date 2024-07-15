@@ -20,138 +20,128 @@ class DoctorDetails extends StatefulWidget {
 }
 
 class _DoctorDetailsState extends State<DoctorDetails> {
-  Map<String, dynamic> doctor = {};
+  late Map<String, dynamic> doctor;
   bool isFav = false;
-
-  void checkFavoriteStatus() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('Favorites')
-          .doc(user.uid)
-          .get();
-
-      if (userDoc.exists) {
-        List<dynamic> favorites = userDoc.data()?['Favorites'] ?? [];
-        setState(() {
-          isFav = favorites.any((fav) => fav['doc_id'] == doctor['doc_id']);
-        });
-      }
-    }
-  }
 
   @override
   void initState() {
-    doctor = widget.doctor;
-    isFav = widget.isFav;
-    checkFavoriteStatus();
     super.initState();
+    doctor = widget.doctor;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: FirebaseAuth.instance.currentUser != null
-            ? FirebaseFirestore.instance
-                .collection('Favorites')
-                .doc(FirebaseAuth.instance.currentUser!.uid)
-                .get()
-            : null,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
+    return StreamBuilder<DocumentSnapshot?>(
+      stream: FirebaseAuth.instance.currentUser != null
+          ? FirebaseFirestore.instance
+              .collection('Favorites')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .snapshots()
+          : Stream.value(null),
+      builder: (context, AsyncSnapshot<DocumentSnapshot?> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
 
-          if (snapshot.hasData && snapshot.data!.exists) {
-            List<dynamic> favorites = snapshot.data!.data()?['Favorites'] ?? [];
-            isFav = favorites.any((fav) => fav['doc_id'] == doctor['doc_id']);
-          }
-          return Scaffold(
-            appBar: CustomAppBar(
-              appTitle: 'Doctor Details',
-              icon: const FaIcon(Icons.arrow_back_ios),
-              actions: [
-                IconButton(
-                  onPressed: () async {
-                    final user = FirebaseAuth.instance.currentUser;
-                    if (user != null) {
-                      final userDoc = FirebaseFirestore.instance
-                          .collection('Favorites')
-                          .doc(user.uid);
+        if (snapshot.hasData &&
+            snapshot.data != null &&
+            snapshot.data!.exists) {
+          List<dynamic> favorites = snapshot.data!.get('Favorites') ?? [];
+          isFav = favorites.any((fav) => fav['doc_id'] == doctor['doc_id']);
+        } else {
+          isFav = false;
+        }
 
-                      await FirebaseFirestore.instance
-                          .runTransaction((transaction) async {
-                        final snapshot = await transaction.get(userDoc);
+        return Scaffold(
+          appBar: CustomAppBar(
+            appTitle: 'Doctor Details',
+            icon: const FaIcon(Icons.arrow_back_ios),
+            actions: [
+              IconButton(
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    final userDoc = FirebaseFirestore.instance
+                        .collection('Favorites')
+                        .doc(user.uid);
 
-                        if (!snapshot.exists) {
-                          transaction.set(userDoc, {'Favorites': []});
-                        }
+                    await FirebaseFirestore.instance
+                        .runTransaction((transaction) async {
+                      final snapshot = await transaction.get(userDoc);
 
-                        List<dynamic> favorites =
-                            snapshot.data()?['Favorites'] ?? [];
+                      if (!snapshot.exists) {
+                        transaction.set(userDoc, {'Favorites': []});
+                      }
 
-                        if (favorites
-                            .any((fav) => fav['doc_id'] == doctor['doc_id'])) {
-                          favorites.removeWhere(
-                              (fav) => fav['doc_id'] == doctor['doc_id']);
-                        } else {
-                          favorites.add({
-                            'doc_id': doctor['doc_id'],
-                            'name': doctor['doc_name'],
-                            'speciality': doctor['doc_type'],
-                            'added_at': DateTime.now(),
-                          });
-                        }
-                        transaction.update(userDoc, {'Favorites': favorites});
-                        // Update local state
-                        setState(() {
-                          isFav = favorites
-                              .any((fav) => fav['doc_id'] == doctor['doc_id']);
+                      List<dynamic> favorites =
+                          List.from(snapshot.data()?['Favorites'] ?? []);
+
+                      int index = favorites.indexWhere(
+                          (fav) => fav['doc_id'] == doctor['doc_id']);
+                      if (index != -1) {
+                        // Doctor is already in favorites, remove them
+                        favorites.removeAt(index);
+                      } else {
+                        // Doctor is not in favorites, add them
+                        favorites.add({
+                          'doc_id': doctor['doc_id'],
+                          'name': doctor['doc_name'],
+                          'speciality': doctor['doc_type'],
+                          'added_at': DateTime.now(),
                         });
+                      }
 
-                        // Update AuthModel
-                        Provider.of<AuthModel>(context, listen: false)
-                            .setFavList(Set.from(favorites));
+                      transaction.update(userDoc, {'Favorites': favorites});
+
+                      // Update local state
+                      setState(() {
+                        isFav = !isFav;
                       });
-                    }
-                  },
-                  icon: FaIcon(
-                    isFav ? Icons.favorite_rounded : Icons.favorite_outline,
-                    color: Colors.red,
+
+                      // Update AuthModel
+                      Provider.of<AuthModel>(context, listen: false)
+                          .setFavList(Set.from(favorites));
+                    });
+                  }
+                },
+                icon: FaIcon(
+                  isFav ? Icons.favorite_rounded : Icons.favorite_outline,
+                  color: Colors.red,
+                ),
+              )
+            ],
+          ),
+          body: SafeArea(
+            child: Column(
+              children: <Widget>[
+                AboutDoctor(
+                  doctorId: doctor['doc_id'],
+                ),
+                DetailBody(
+                  doctorId: doctor['doc_id'],
+                ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Button(
+                    width: double.infinity,
+                    title: 'Book Appointment',
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('booking_page',
+                          arguments: {
+                            "doc_id": doctor['doc_id'],
+                            "doc_name": doctor['doc_name']
+                          });
+                    },
+                    disable: false,
                   ),
-                )
+                ),
               ],
             ),
-            body: SafeArea(
-              child: Column(
-                children: <Widget>[
-                  AboutDoctor(
-                    doctorId: doctor['doc_id'],
-                  ),
-                  DetailBody(
-                    doctorId: doctor['doc_id'],
-                  ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Button(
-                      width: double.infinity,
-                      title: 'Book Appointment',
-                      onPressed: () {
-                        Navigator.of(context).pushNamed('booking_page',
-                            arguments: {
-                              "doc_id": doctor['doc_id'],
-                              "doc_name": doctor['doc_name']
-                            });
-                      },
-                      disable: false,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -358,7 +348,7 @@ class InfoCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
-          color: Config.primaryColor,
+          color: Color(0xFF427D7D),
         ),
         padding: const EdgeInsets.symmetric(
           vertical: 15,

@@ -125,7 +125,6 @@ class _HomeViewState extends State<HomeView> {
                       suffixIcon: IconButton(
                         icon: Icon(Icons.arrow_forward),
                         onPressed: () {
-                          // Navigate to search page
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -148,13 +147,13 @@ class _HomeViewState extends State<HomeView> {
               );
             },
           ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.notifications_outlined),
-            ),
-            const SizedBox(width: 8.0),
-          ],
+          // actions: [
+          //   IconButton(
+          //     onPressed: () {},
+          //     icon: const Icon(Icons.notifications_outlined),
+          //   ),
+          //   const SizedBox(width: 8.0),
+          // ],
         ),
         body: const SingleChildScrollView(
           padding: EdgeInsets.all(8.0),
@@ -331,9 +330,19 @@ class _DoctorCategories extends StatelessWidget {
               .take(5)
               .map<Widget>(
                 (category) => Expanded(
-                  child: CircleAvatarWithTextLabel(
-                    icon: category.icon,
-                    label: category.name,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SearchPage(initialQuery: category.name),
+                        ),
+                      );
+                    },
+                    child: CircleAvatarWithTextLabel(
+                      icon: category.icon,
+                      label: category.name,
+                    ),
                   ),
                 ),
               )

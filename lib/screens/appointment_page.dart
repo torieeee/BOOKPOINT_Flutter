@@ -136,7 +136,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Appointment Schedule'),
-        backgroundColor: Config.primaryColor,
+        backgroundColor: Color(0xFF427D7D),
       ),
       body: SafeArea(
         child: Padding(
@@ -206,7 +206,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           20, // Subtracting 20 for padding
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Config.primaryColor,
+                        color: Color(0xFF427D7D),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Center(
@@ -270,20 +270,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           if (schedule['status'] == 'Pending')
-                                            Expanded(
-                                              child: OutlinedButton(
-                                                onPressed: () =>
-                                                    _cancelAppointment(
-                                                        schedule['booking_id']),
-                                                child: const Text(
-                                                  'Cancel',
-                                                  style: TextStyle(
-                                                      color:
-                                                          Config.primaryColor),
-                                                ),
-                                              ),
-                                            ),
-                                          if (schedule['status'] == 'Pending')
                                             const SizedBox(width: 20),
                                           Expanded(
                                             child: OutlinedButton(
@@ -295,7 +281,20 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                               onPressed: () {
                                                 if (schedule['status'] ==
                                                     'Pending') {
-                                                  // Implement reschedule functionality
+                                                  Expanded(
+                                                    child: OutlinedButton(
+                                                      onPressed: () =>
+                                                          _cancelAppointment(
+                                                              schedule[
+                                                                  'booking_id']),
+                                                      child: const Text(
+                                                        '',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF427D7D)),
+                                                      ),
+                                                    ),
+                                                  );
                                                 } else if (schedule['status'] ==
                                                     'Complete') {
                                                   Navigator.push(
@@ -307,7 +306,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                                                   'booking_id']),
                                                     ),
                                                   );
-                                                  } else if (schedule['status'] ==
+                                                } else if (schedule['status'] ==
                                                     'Paid') {
                                                   Navigator.push(
                                                     context,
@@ -353,7 +352,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
 String _getButtonText(String status) {
   switch (status) {
     case 'Pending':
-      return 'Reschedule';
+      return 'Cancel';
     case 'Approved':
       return 'Waiting for Diagnosis';
     case 'Complete':
@@ -368,13 +367,13 @@ String _getButtonText(String status) {
 Color _getButtonColor(String status) {
   switch (status) {
     case 'Pending':
-      return Config.primaryColor;
+      return Color(0xFF9A2B43);
     case 'Approved':
       return Colors.grey;
     case 'Complete':
-      return Colors.green;
-      case 'Paid':
-      return Color(0xFF9A2B43);
+      return Color(0xFF3A855E);
+    case 'Paid':
+      return Color(0xFF427D7D);
     default:
       return Colors.grey;
   }
@@ -441,7 +440,7 @@ class ScheduleCard extends StatelessWidget {
         children: <Widget>[
           const Icon(
             Icons.calendar_today,
-            color: Config.primaryColor,
+            color: Color(0xFF427D7D),
             size: 15,
           ),
           const SizedBox(
@@ -450,7 +449,7 @@ class ScheduleCard extends StatelessWidget {
           Text(
             '$day, $date',
             style: const TextStyle(
-              color: Config.primaryColor,
+              color: Color(0xFF427D7D),
             ),
           ),
           const SizedBox(
@@ -458,7 +457,7 @@ class ScheduleCard extends StatelessWidget {
           ),
           const Icon(
             Icons.access_alarm,
-            color: Config.primaryColor,
+            color: Color(0xFF427D7D),
             size: 17,
           ),
           const SizedBox(
@@ -468,7 +467,7 @@ class ScheduleCard extends StatelessWidget {
               child: Text(
             time,
             style: const TextStyle(
-              color: Config.primaryColor,
+              color: Color(0xFF427D7D),
             ),
           ))
         ],

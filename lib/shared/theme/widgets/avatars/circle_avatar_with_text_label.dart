@@ -20,7 +20,7 @@ class CircleAvatarWithTextLabel extends StatelessWidget{
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundColor: colorScheme.primary,
+          backgroundColor: Color(0xFF427D7D),
           foregroundColor: colorScheme.onPrimary,
           child: Icon(icon),
         ),

@@ -57,12 +57,25 @@ class _FavPageState extends State<FavPage> {
   return Stream.value([]);
 }
 
+Future<void> removeDoctorFromFavorites(String doctorId) async {
+  final user = _auth.currentUser;
+  if (user != null) {
+    try {
+      await _firestore.collection('Favorites').doc(user.uid).update({
+        'Favorites': FieldValue.arrayRemove([{'doc_id': doctorId}])
+      });
+      print('Doctor removed from favorites: $doctorId');
+    } catch (e) {
+      print('Error removing doctor from favorites: $e');
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
+        padding: const EdgeInsets.only(left: 20, top: 20, right: 20,),
         child: Column(
           children: [
             const Text(
@@ -73,7 +86,7 @@ class _FavPageState extends State<FavPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
             Expanded(
               child: StreamBuilder<List<Doctor>>(
                 stream: getFavoriteDoctors(),
