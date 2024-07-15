@@ -16,6 +16,10 @@ class _SearchPageState extends State<SearchPage> {
   late TextEditingController _searchController;
   List<Map<String, dynamic>> _searchResults = [];
   bool _isLoading = false;
+  String _errorMessage = '';
+
+  
+  
 
   @override
   void initState() {
@@ -33,60 +37,57 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _performSearch(String query) async {
+  setState(() {
+    _isLoading = true;
+    _errorMessage = '';
+    _searchResults = [];
+  });
+
+  try {
+    print('Performing search with query: $query'); // Debug print
+
+    // Fetch all doctors
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('Doctors')
+        .get();
+
+    print('Total doctors fetched: ${querySnapshot.docs.length}'); // Debug print
+
+    // Filter doctors locally
+    _searchResults = querySnapshot.docs
+        .map((doc) => doc.data())
+        .where((data) {
+          final docName = (data['doc_name'] ?? '').toString().toLowerCase();
+          final docType = (data['doc_type'] ?? '').toString().toLowerCase();
+          final hospital = (data['hospital'] ?? '').toString().toLowerCase();
+          final lowercaseQuery = query.toLowerCase();
+
+          return docName.contains(lowercaseQuery) ||
+              docType.contains(lowercaseQuery) ||
+              hospital.contains(lowercaseQuery);
+        })
+        .toList();
+
     setState(() {
-      _isLoading = true;
+      _isLoading = false;
     });
 
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('Doctors')
-          .where('doc_type', isEqualTo: query)
-          .get();
+    print('Filtered search results: ${_searchResults.length}'); // Debug print
+    _searchResults.forEach((result) {
+      print('Doctor: ${result['doc_name']}, Type: ${result['doc_type']}, Hospital: ${result['hospital']}');
+    });
 
-      if (querySnapshot.docs.isEmpty) {
-        // If no exact match for doc_type, perform a more general search
-        final generalQuerySnapshot = await FirebaseFirestore.instance
-            .collection('Doctors')
-            .where('doc_name', isGreaterThanOrEqualTo: query.toLowerCase())
-            .where('doc_name', isLessThan: query.toLowerCase() + 'z')
-            .get();
-
-        final doctorTypeSnapshot = await FirebaseFirestore.instance
-            .collection('Doctors')
-            .where('doc_type', isGreaterThanOrEqualTo: query.toLowerCase())
-            .where('doc_type', isLessThan: query.toLowerCase() + 'z')
-            .get();
-
-        final hospitalSnapshot = await FirebaseFirestore.instance
-            .collection('Doctors')
-            .where('hospital', isGreaterThanOrEqualTo: query.toLowerCase())
-            .where('hospital', isLessThan: query.toLowerCase() + 'z')
-            .get();
-
-        setState(() {
-          _searchResults = [
-            ...generalQuerySnapshot.docs.map((doc) => doc.data()),
-            ...doctorTypeSnapshot.docs.map((doc) => doc.data()),
-            ...hospitalSnapshot.docs.map((doc) => doc.data()),
-          ];
-        });
-      } else {
-        setState(() {
-          _searchResults = querySnapshot.docs.map((doc) => doc.data()).toList();
-        });
-      }
-
+  } catch (e) {
+    print('Error performing search: $e');
+    setState(() {
       _isLoading = false;
-    } catch (e) {
-      print('Error performing search: $e');
-      setState(() {
-        _isLoading = false;
-      });
-    }
+      _errorMessage = 'An error occurred while searching. Please try again.';
+    });
   }
-
+}
   @override
   Widget build(BuildContext context) {
+    print('Building SearchPage. Results count: ${_searchResults.length}');
     return Scaffold(
       appBar: AppBar(
         title: Text('Search Results'),

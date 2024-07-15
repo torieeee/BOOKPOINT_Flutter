@@ -36,7 +36,6 @@ class _AuthenticationState extends State<Authentication> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Config.spaceSmall,
                 Text(
                   isSignIn
                     ? AppText.enText['signIn_text']!
@@ -49,7 +48,6 @@ class _AuthenticationState extends State<Authentication> {
                 Config.spaceSmall,
                 //login
                 isSignIn ? LoginForm():SignUpForm(),
-                Config.spaceSmall,
                 isSignIn
                 ?Center(
                   child: TextButton(

@@ -30,6 +30,24 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   DateTime? _lastPressedAt;
 
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _navigateToSearchPage() {
+    final query = _searchController.text;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchPage(initialQuery: query),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -118,30 +136,17 @@ class _HomeViewState extends State<HomeView> {
                   // ),
                   const SizedBox(height: 5.0),
                   TextFormField(
+                    controller: _searchController,
                     style: GoogleFonts.spaceGrotesk(),
                     decoration: InputDecoration(
                       hintText: 'Search for doctors...',
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: IconButton(
-                        icon: Icon(Icons.arrow_forward),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchPage()),
-                          );
-                        },
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: _navigateToSearchPage,
                       ),
                     ),
-                    onFieldSubmitted: (value) {
-                      // Navigate to search page with the search query
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                SearchPage(initialQuery: value)),
-                      );
-                    },
+                    onFieldSubmitted: (_) => _navigateToSearchPage(),
                   ),
                 ],
               );
@@ -335,7 +340,8 @@ class _DoctorCategories extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SearchPage(initialQuery: category.name),
+                          builder: (context) =>
+                              SearchPage(initialQuery: category.name),
                         ),
                       );
                     },
