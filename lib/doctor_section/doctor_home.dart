@@ -29,6 +29,7 @@ class DoctorView extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           toolbarHeight: 144,
           backgroundColor: const Color(0xFFFFFFFF),
           title: StreamBuilder<DocumentSnapshot>(
@@ -63,48 +64,47 @@ class DoctorView extends StatelessWidget {
                   const SizedBox(width: 8.0),
                   Text(
                     'Welcome',
-                    style: GoogleFonts.sora(
+                    style: GoogleFonts.kulimPark(
                       textStyle: textTheme.bodyMedium,
                     ),
                   ),
                   Text(
                     userName,
-                    style: GoogleFonts.sora(
+                    style: GoogleFonts.kulimPark(
                       textStyle: textTheme.bodyLarge!
                           .copyWith(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                   ),
-                  const SizedBox(height: 4.0),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on,
-                        color: colorScheme.secondary,
-                      ),
-                      const SizedBox(width: 4.0),
-                      Text('Nairobi, Kenya',
-                          style: GoogleFonts.sora(
-                            textStyle: textTheme.bodySmall,
-                          )),
-                      const SizedBox(height: 4.0),
-                      Icon(
-                        Icons.expand_more,
-                        color: colorScheme.secondary,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16.0),
+                  // const SizedBox(height: 4.0),
+                  // Row(
+                  //   children: [
+                  //     Icon(
+                  //       Icons.location_on,
+                  //       color: colorScheme.secondary,
+                  //     ),
+                  //     const SizedBox(width: 4.0),
+                  //     Text('Nairobi, Kenya',
+                  //         style: GoogleFonts.sora(
+                  //           textStyle: textTheme.bodySmall,
+                  //         )),
+                  //     const SizedBox(height: 4.0),
+                  //     Icon(
+                  //       Icons.expand_more,
+                  //       color: colorScheme.secondary,
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               );
             },
           ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.notifications_outlined),
-            ),
-            const SizedBox(width: 8.0),
-          ],
+          // actions: [
+          //   IconButton(
+          //     onPressed: () {},
+          //     icon: const Icon(Icons.notifications_outlined),
+          //   ),
+          //   const SizedBox(width: 8.0),
+          // ],
         ),
         body: const SingleChildScrollView(
           padding: EdgeInsets.all(16.0),
@@ -185,9 +185,10 @@ class _MyRequests extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'No requests yet',
-                          style: textTheme.bodyMedium!.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.kulimPark(
+                            textStyle: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
                           ),
                         ),
                       ),
@@ -284,10 +285,7 @@ class _MyPrescriptions extends StatelessWidget {
                             child: Center(
                               child: Text(
                                 'No prescription yet',
-                                style: textTheme.bodyMedium!.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: GoogleFonts.kulimPark(),
                               ),
                             ),
                           ),
@@ -304,7 +302,10 @@ class _MyPrescriptions extends StatelessWidget {
                     );
                   } else {
                     return const Center(
-                        child: Text('No prescription data available'));
+                        child: Text('No prescription data available',
+
+                        ),
+                      );
                   }
                 },
               );
@@ -313,6 +314,7 @@ class _MyPrescriptions extends StatelessWidget {
     );
   }
 }
+
 class AnalyticsSection extends StatelessWidget {
   const AnalyticsSection({Key? key}) : super(key: key);
 
@@ -333,7 +335,8 @@ class AnalyticsSection extends StatelessWidget {
 
         // Process data for charts
         Map<String, int> dailyRequests = processDailyRequests(requests);
-        Map<String, int> statusDistribution = processStatusDistribution(requests);
+        Map<String, int> statusDistribution =
+            processStatusDistribution(requests);
         List<int> weeklyRequests = processWeeklyRequests(requests);
 
         return Column(
@@ -343,51 +346,6 @@ class AnalyticsSection extends StatelessWidget {
               'Analytics',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            // SizedBox(height: 20),
-            // Text(
-            //   'Daily Requests',
-            //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            // ),
-            // SizedBox(height: 10),
-            // Container(
-            //   height: 200,
-            //   child: LineChart(
-            //     LineChartData(
-            //       gridData: FlGridData(show: true),
-            //       titlesData: FlTitlesData(
-            //         bottomTitles: AxisTitles(
-            //           sideTitles: SideTitles(
-            //             showTitles: true,
-            //             getTitlesWidget: (value, meta) {
-            //               List<String> dates = dailyRequests.keys.toList();
-            //               if (value.toInt() >= 0 && value.toInt() < dates.length) {
-            //                 return Text(dates[value.toInt()].substring(5)); // Show only MM-dd
-            //               }
-            //               return Text('');
-            //             },
-            //           ),
-            //         ),
-            //         leftTitles: AxisTitles(
-            //           sideTitles: SideTitles(showTitles: true),
-            //         ),
-            //       ),
-            //       borderData: FlBorderData(show: true),
-            //       lineBarsData: [
-            //         LineChartBarData(
-            //           spots: dailyRequests.entries
-            //               .map((e) => FlSpot(dailyRequests.keys.toList().indexOf(e.key).toDouble(), e.value.toDouble()))
-            //               .toList(),
-            //           isCurved: true,
-            //           color: Colors.blue,
-            //           barWidth: 4,
-            //           isStrokeCapRound: true,
-            //           dotData: FlDotData(show: true),
-            //           belowBarData: BarAreaData(show: false),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
             SizedBox(height: 20),
             Text(
               'Request Status Distribution',
@@ -398,58 +356,76 @@ class AnalyticsSection extends StatelessWidget {
               height: 200,
               child: PieChart(
                 PieChartData(
-                  sections: statusDistribution.entries.map((e) => 
-                    PieChartSectionData(
-                      color: getColorForStatus(e.key),
-                      value: e.value.toDouble(),
-                      title: '${e.key}\n${(e.value / requests.length * 100).toStringAsFixed(1)}%',
-                      radius: 100,
-                      titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-                    )
-                  ).toList(),
+                  sections: statusDistribution.entries
+                      .map((e) => PieChartSectionData(
+                            color: getColorForStatus(e.key),
+                            value: e.value.toDouble(),
+                            title:
+                                '${e.key}\n${(e.value / requests.length * 100).toStringAsFixed(1)}%',
+                            radius: 100,
+                            titleStyle: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ))
+                      .toList(),
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              'Weekly Requests',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Container(
-              height: 200,
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: weeklyRequests.reduce((a, b) => a > b ? a : b).toDouble(),
-                  barTouchData: BarTouchData(enabled: false),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                          if (value.toInt() >= 0 && value.toInt() < days.length) {
-                            return Text(days[value.toInt()]);
-                          }
-                          return Text('');
-                        },
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: true),
-                    ),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barGroups: List.generate(7, (index) => 
-                    BarChartGroupData(
-                      x: index,
-                      barRods: [BarChartRodData(toY: weeklyRequests[index].toDouble(), color: Colors.blue)],
-                    )
-                  ),
-                ),
-              ),
-            ),
+            // SizedBox(height: 20),
+            // Text(
+            //   'Weekly Requests',
+            //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // ),
+            // SizedBox(height: 10),
+            // Container(
+            //   height: 200,
+            //   child: BarChart(
+            //     BarChartData(
+            //       alignment: BarChartAlignment.spaceAround,
+            //       maxY:
+            //           weeklyRequests.reduce((a, b) => a > b ? a : b).toDouble(),
+            //       barTouchData: BarTouchData(enabled: false),
+            //       titlesData: FlTitlesData(
+            //         bottomTitles: AxisTitles(
+            //           sideTitles: SideTitles(
+            //             showTitles: true,
+            //             getTitlesWidget: (value, meta) {
+            //               const days = [
+            //                 'Mon',
+            //                 'Tue',
+            //                 'Wed',
+            //                 'Thu',
+            //                 'Fri',
+            //                 'Sat',
+            //                 'Sun'
+            //               ];
+            //               if (value.toInt() >= 0 &&
+            //                   value.toInt() < days.length) {
+            //                 return Text(days[value.toInt()]);
+            //               }
+            //               return Text('');
+            //             },
+            //           ),
+            //         ),
+            //         leftTitles: AxisTitles(
+            //           sideTitles: SideTitles(showTitles: true),
+            //         ),
+            //       ),
+            //       borderData: FlBorderData(show: false),
+            //       barGroups: List.generate(
+            //           7,
+            //           (index) => BarChartGroupData(
+            //                 x: index,
+            //                 barRods: [
+            //                   BarChartRodData(
+            //                       toY: weeklyRequests[index].toDouble(),
+            //                       color: Colors.blue)
+            //                 ],
+            //               )),
+            //     ),
+            //   ),
+            // ),
           ],
         );
       },
@@ -463,10 +439,12 @@ class AnalyticsSection extends StatelessWidget {
       String dateString = DateFormat('dd-MM-yyyy').format(date);
       dailyRequests[dateString] = (dailyRequests[dateString] ?? 0) + 1;
     }
-    return Map.fromEntries(dailyRequests.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+    return Map.fromEntries(
+        dailyRequests.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
   }
 
-  Map<String, int> processStatusDistribution(List<QueryDocumentSnapshot> requests) {
+  Map<String, int> processStatusDistribution(
+      List<QueryDocumentSnapshot> requests) {
     Map<String, int> statusDistribution = {};
     for (var request in requests) {
       String status = request['status'] ?? 'Unknown';
@@ -482,7 +460,7 @@ class AnalyticsSection extends StatelessWidget {
       int dayOfWeek = date.weekday - 1; // 0 for Monday, 6 for Sunday
       weeklyRequests[dayOfWeek]++;
     }
-    print(weeklyRequests); 
+    print(weeklyRequests);
     return weeklyRequests;
   }
 

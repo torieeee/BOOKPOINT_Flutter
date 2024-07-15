@@ -125,7 +125,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
           scheduleStatus = FilterStatus.Complete;
           break;
         case 'Paid':
-          scheduleStatus = FilterStatus.Complete;
+          scheduleStatus = FilterStatus.Paid;
           break;
         default:
           scheduleStatus = FilterStatus.Upcoming;
@@ -307,6 +307,17 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                                                   'booking_id']),
                                                     ),
                                                   );
+                                                  } else if (schedule['status'] ==
+                                                    'Paid') {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          InvoicePage(
+                                                              bookingId: schedule[
+                                                                  'booking_id']),
+                                                    ),
+                                                  );
                                                 }
                                                 // No action for 'Approved' status
                                               },
@@ -347,6 +358,8 @@ String _getButtonText(String status) {
       return 'Waiting for Diagnosis';
     case 'Complete':
       return 'Invoice';
+    case 'Paid':
+      return 'Paid Invoice';
     default:
       return '';
   }
@@ -360,6 +373,8 @@ Color _getButtonColor(String status) {
       return Colors.grey;
     case 'Complete':
       return Colors.green;
+      case 'Paid':
+      return Color(0xFF9A2B43);
     default:
       return Colors.grey;
   }

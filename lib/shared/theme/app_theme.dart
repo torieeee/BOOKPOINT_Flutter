@@ -46,8 +46,8 @@ class AppTheme{
   static TextTheme get _textTheme{
     const textTheme = TextTheme();
 
-    final bodyFont = GoogleFonts.soraTextTheme(textTheme);
-    final headingFont = GoogleFonts.spaceGroteskTextTheme(textTheme);
+    final bodyFont = GoogleFonts.kulimParkTextTheme(textTheme);
+    final headingFont = GoogleFonts.kulimParkTextTheme(textTheme);
 
     return bodyFont.copyWith(
       displayLarge: headingFont.displayLarge, 

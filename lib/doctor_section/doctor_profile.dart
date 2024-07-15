@@ -126,6 +126,7 @@ class _DoctorUserPageState extends State<DoctorUserPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('User Profile'),
       ),
       body: Column(

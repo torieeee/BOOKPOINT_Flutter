@@ -7,6 +7,7 @@ import '../shared/theme/widgets/avatars/circle_avatar_with_text_label.dart';
 import '../shared/theme/widgets/list_tiles/doctor_list_tile.dart';
 import '../shared/theme/widgets/titles/section_title.dart';
 import '../src/doctor_category.dart';
+import '../utils/config.dart';
 import 'appointment_page.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -18,117 +19,140 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  _HomeViewState createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  DateTime? _lastPressedAt;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 144,
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: StreamBuilder<DocumentSnapshot>(
-          stream: FirebaseAuth.instance.currentUser != null
-              ? FirebaseFirestore.instance
-                  .collection('Patients')
-                  .doc(FirebaseAuth.instance.currentUser!.uid)
-                  .snapshots()
-              : null,
-          builder: (context, snapshot) {
-            if (FirebaseAuth.instance.currentUser == null) {
-              return Text('Please log in to view your profile');
-            }
+    return WillPopScope(
+      onWillPop: () async {
+        if (_lastPressedAt == null ||
+            DateTime.now().difference(_lastPressedAt!) > Duration(seconds: 2)) {
+          // First tap or more than 2 seconds since last tap
+          _lastPressedAt = DateTime.now();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Press back again to exit')),
+          );
+          return false;
+        }
+        return true; // Exit the app
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: 144,
+          backgroundColor: const Color(0xFFFFFFFF),
+          title: StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseAuth.instance.currentUser != null
+                ? FirebaseFirestore.instance
+                    .collection('Patients')
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .snapshots()
+                : null,
+            builder: (context, snapshot) {
+              if (FirebaseAuth.instance.currentUser == null) {
+                return Text('Please log in to view your profile');
+              }
 
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              }
 
-            String userName = 'Guest';
-            if (snapshot.hasData && snapshot.data!.exists) {
-              userName = snapshot.data!.get('patient_name') ?? 'Guest';
-            }
+              String userName = 'Guest';
+              if (snapshot.hasData && snapshot.data!.exists) {
+                userName = snapshot.data!.get('patient_name') ?? 'Guest';
+              }
 
-            if (userName.isEmpty) {
-              return CircularProgressIndicator();
-            }
+              if (userName.isEmpty) {
+                return CircularProgressIndicator();
+              }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(width: 8.0),
-                Text(
-                  'Welcome',
-                  style: GoogleFonts.sora(
-                    textStyle: textTheme.bodyMedium,
-                  ),
-                ),
-                Text(
-                  userName,
-                  style: GoogleFonts.sora(
-                    textStyle: textTheme.bodyLarge!
-                        .copyWith(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                ),
-                const SizedBox(height: 4.0),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      color: colorScheme.secondary,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Config.spaceSmall,
+                  const SizedBox(width: 8.0),
+                  Text(
+                    'Welcome',
+                    style: GoogleFonts.sora(
+                      textStyle: textTheme.bodyMedium,
                     ),
-                    const SizedBox(width: 4.0),
-                    Text('Nairobi, Kenya',
-                        style: GoogleFonts.sora(
-                          textStyle: textTheme.bodySmall,
-                        )),
-                    const SizedBox(height: 4.0),
-                    Icon(
-                      Icons.expand_more,
-                      color: colorScheme.secondary,
+                  ),
+                  Text(
+                    userName,
+                    style: GoogleFonts.sora(
+                      textStyle: textTheme.bodyLarge!
+                          .copyWith(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  style: GoogleFonts.spaceGrotesk(),
-                  decoration: InputDecoration(
-                    hintText: 'Search for doctors...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: Container(
-                      margin: const EdgeInsets.all(4.0),
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: colorScheme.onSurfaceVariant,
-                        borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  const SizedBox(height: 4.0),
+                  // Row(
+                  //   children: [
+                  //     Icon(
+                  //       Icons.location_on,
+                  //       color: colorScheme.secondary,
+                  //     ),
+                  //     const SizedBox(width: 4.0),
+                  //     Text('Nairobi, Kenya',
+                  //         style: GoogleFonts.sora(
+                  //           textStyle: textTheme.bodySmall,
+                  //         )),
+                  //     const SizedBox(height: 4.0),
+                  //     // Icon(
+                  //     //   Icons.expand_more,
+                  //     //   color: colorScheme.secondary,
+                  //     // ),
+                  //   ],
+                  // ),
+                  const SizedBox(height: 5.0),
+                  TextFormField(
+                    style: GoogleFonts.spaceGrotesk(),
+                    decoration: InputDecoration(
+                      hintText: 'Search for doctors...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: Container(
+                        margin: const EdgeInsets.all(4.0),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: colorScheme.onSurfaceVariant,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: const Icon(Icons.filter_alt_outlined),
                       ),
-                      child: const Icon(Icons.filter_alt_outlined),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_outlined),
+                ],
+              );
+            },
           ),
-          const SizedBox(width: 8.0),
-        ],
-      ),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            _DoctorCategories(),
-            _MySchedule(),
-            _NearbyDoctors(),
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.notifications_outlined),
+            ),
+            const SizedBox(width: 8.0),
           ],
+        ),
+        body: const SingleChildScrollView(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              _DoctorCategories(),
+              _MySchedule(),
+              _NearbyDoctors(),
+            ],
+          ),
         ),
       ),
     );
@@ -197,7 +221,7 @@ class _MySchedule extends StatelessWidget {
         SectionTitle(
           title: 'My appointment',
           action: 'See all',
-         onPressed: () {
+          onPressed: () {
             Navigator.of(context).pushNamed('appointment_page');
           },
         ),
@@ -249,9 +273,11 @@ class _MySchedule extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'No appointment yet',
-                          style: textTheme.bodyMedium!.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.kulimPark(
+                            textStyle: textTheme.bodyMedium!.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

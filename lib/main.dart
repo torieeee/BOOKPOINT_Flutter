@@ -140,6 +140,7 @@ import 'package:book_point/utils/config.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'main_layout.dart';
 import 'screens/booking_page.dart';
@@ -202,6 +203,9 @@ class MyApp extends StatelessWidget {
         title: 'Bookpoint',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
+          textTheme: GoogleFonts.kulimParkTextTheme(
+            Theme.of(context).textTheme,
+          ),
           inputDecorationTheme: const InputDecorationTheme(
             focusColor: Config.primaryColor,
             border: Config.outlinedBorder,

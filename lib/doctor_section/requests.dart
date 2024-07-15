@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../screens/invoice_page.dart';
 import '../utils/config.dart';
 
 class RequestPage extends StatefulWidget {
@@ -233,7 +234,8 @@ class _RequestPageState extends State<RequestPage> {
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     child: Container(
-                      width: MediaQuery.of(context).size.width / 4 - 20,  // Subtracting 20 for padding
+                      width: MediaQuery.of(context).size.width / 4 -
+                          20, // Subtracting 20 for padding
                       height: 40,
                       decoration: BoxDecoration(
                         color: Config.primaryColor,
@@ -300,28 +302,18 @@ class _RequestPageState extends State<RequestPage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          // Expanded(
-                                          //   child: OutlinedButton(
-                                          //     onPressed: () {},
-                                          //     child: const Text(
-                                          //       'Cancel',
-                                          //       style: TextStyle(
-                                          //           color: Config.primaryColor),
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                          // const SizedBox(
-                                          //   width: 20,
-                                          // ),
                                           Expanded(
                                             child: OutlinedButton(
                                               style: OutlinedButton.styleFrom(
-                                                backgroundColor:
-                                                    schedule['status'] ==
-                                                            'Approved'
-                                                        ? Colors.green
+                                                backgroundColor: schedule[
+                                                            'status'] ==
+                                                        'Approved'
+                                                    ? Colors.green
+                                                    : schedule['status'] ==
+                                                            'Complete'
+                                                        ? Colors.blue
                                                         : schedule['status'] ==
-                                                                'Complete'
+                                                                'Paid'
                                                             ? Colors.grey
                                                             : Config
                                                                 .primaryColor,
@@ -346,11 +338,25 @@ class _RequestPageState extends State<RequestPage> {
                                                   );
                                                 } else if (schedule['status'] ==
                                                     'Complete') {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            'Currently waiting for user Payment')),
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          InvoicePage(
+                                                              bookingId: schedule[
+                                                                  'booking_id']),
+                                                    ),
+                                                  );
+                                                } else if (schedule['status'] ==
+                                                    'Paid') {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          InvoicePage(
+                                                              bookingId: schedule[
+                                                                  'booking_id']),
+                                                    ),
                                                   );
                                                 } else {
                                                   approveRequest(
@@ -362,17 +368,41 @@ class _RequestPageState extends State<RequestPage> {
                                                     ? 'Diagnose'
                                                     : schedule['status'] ==
                                                             'Complete'
-                                                        ? 'Awaiting Payment'
-                                                        : 'Approve',
+                                                        ? 'View Invoice'
+                                                        : schedule['status'] ==
+                                                                'Paid'
+                                                            ? 'Paid Invoice'
+                                                            : 'Approve',
                                                 style: TextStyle(
                                                   color: schedule['status'] ==
-                                                          'Complete'
+                                                          'Paid'
                                                       ? Colors.black54
                                                       : Colors.white,
                                                 ),
                                               ),
                                             ),
                                           ),
+                                          if (schedule['status'] ==
+                                              'Complete') ...[
+                                            SizedBox(width: 10),
+                                            Expanded(
+                                              child: OutlinedButton(
+                                                style: OutlinedButton.styleFrom(
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                                onPressed: () {
+                                                  approvePayment(
+                                                      schedule['booking_id']);
+                                                },
+                                                child: Text(
+                                                  'Approve Payment',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ],
