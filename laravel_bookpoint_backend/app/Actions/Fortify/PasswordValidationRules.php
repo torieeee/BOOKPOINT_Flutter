@@ -8,6 +8,7 @@ trait PasswordValidationRules
 {
     /**
      * Get the validation rules used to validate passwords.
+     * The password must be a string and must be confirmed.
      *
      * @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>
      */
