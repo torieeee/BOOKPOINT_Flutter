@@ -13,6 +13,7 @@ class ResetUserPassword implements ResetsUserPasswords
 
     /**
      * Validate and reset the user's forgotten password.
+     * It sends the request to the user's email address to anable the process of resetting the password.
      *
      * @param  array<string, string>  $input
      */
