@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../screens/invoice_page.dart';
 import '../utils/config.dart';
 
 class RequestPage extends StatefulWidget {
@@ -12,7 +13,7 @@ class RequestPage extends StatefulWidget {
   State<RequestPage> createState() => _RequestPageState();
 }
 
-enum FilterStatus { Upcoming, Approved, Complete }
+enum FilterStatus { Upcoming, Approved, Complete, Paid }
 
 class _RequestPageState extends State<RequestPage> {
   FilterStatus status = FilterStatus.Upcoming;
@@ -93,6 +94,44 @@ class _RequestPageState extends State<RequestPage> {
     }
   }
 
+  Future<void> approvePayment(String bookingId) async {
+    try {
+      // Update the Requests collection
+      await FirebaseFirestore.instance
+          .collection('Requests')
+          .where('booking_id', isEqualTo: bookingId)
+          .get()
+          .then((querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          doc.reference.update({'status': 'Paid'});
+        }
+      });
+
+      // Update the appointments collection
+      await FirebaseFirestore.instance
+          .collection('appointments')
+          .where('booking_id', isEqualTo: bookingId)
+          .get()
+          .then((querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          doc.reference.update({'status': 'Paid'});
+        }
+      });
+
+      // Refresh the requests list
+      await getRequests();
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment approved successfully')),
+      );
+    } catch (e) {
+      print('Error approving payment: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to approve payement')),
+      );
+    }
+  }
 // Then, modify the Approve button in the ListView.builder:
 
   @override
@@ -115,6 +154,9 @@ class _RequestPageState extends State<RequestPage> {
           break;
         case 'Complete':
           scheduleStatus = FilterStatus.Complete;
+          break;
+        case 'Paid':
+          scheduleStatus = FilterStatus.Paid;
           break;
         default:
           scheduleStatus = FilterStatus.Upcoming;
@@ -192,7 +234,8 @@ class _RequestPageState extends State<RequestPage> {
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     child: Container(
-                      width: 100,
+                      width: MediaQuery.of(context).size.width / 4 -
+                          20, // Subtracting 20 for padding
                       height: 40,
                       decoration: BoxDecoration(
                         color: Config.primaryColor,
@@ -259,28 +302,18 @@ class _RequestPageState extends State<RequestPage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          // Expanded(
-                                          //   child: OutlinedButton(
-                                          //     onPressed: () {},
-                                          //     child: const Text(
-                                          //       'Cancel',
-                                          //       style: TextStyle(
-                                          //           color: Config.primaryColor),
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                          // const SizedBox(
-                                          //   width: 20,
-                                          // ),
                                           Expanded(
                                             child: OutlinedButton(
                                               style: OutlinedButton.styleFrom(
-                                                backgroundColor:
-                                                    schedule['status'] ==
-                                                            'Approved'
-                                                        ? Colors.green
+                                                backgroundColor: schedule[
+                                                            'status'] ==
+                                                        'Approved'
+                                                    ? Colors.green
+                                                    : schedule['status'] ==
+                                                            'Complete'
+                                                        ? Colors.blue
                                                         : schedule['status'] ==
-                                                                'Complete'
+                                                                'Paid'
                                                             ? Colors.grey
                                                             : Config
                                                                 .primaryColor,
@@ -305,11 +338,25 @@ class _RequestPageState extends State<RequestPage> {
                                                   );
                                                 } else if (schedule['status'] ==
                                                     'Complete') {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            'Currently waiting for user Payment')),
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          InvoicePage(
+                                                              bookingId: schedule[
+                                                                  'booking_id']),
+                                                    ),
+                                                  );
+                                                } else if (schedule['status'] ==
+                                                    'Paid') {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          InvoicePage(
+                                                              bookingId: schedule[
+                                                                  'booking_id']),
+                                                    ),
                                                   );
                                                 } else {
                                                   approveRequest(
@@ -321,17 +368,41 @@ class _RequestPageState extends State<RequestPage> {
                                                     ? 'Diagnose'
                                                     : schedule['status'] ==
                                                             'Complete'
-                                                        ? 'Awaiting Payment'
-                                                        : 'Approve',
+                                                        ? 'View Invoice'
+                                                        : schedule['status'] ==
+                                                                'Paid'
+                                                            ? 'Paid Invoice'
+                                                            : 'Approve',
                                                 style: TextStyle(
                                                   color: schedule['status'] ==
-                                                          'Complete'
+                                                          'Paid'
                                                       ? Colors.black54
                                                       : Colors.white,
                                                 ),
                                               ),
                                             ),
                                           ),
+                                          if (schedule['status'] ==
+                                              'Complete') ...[
+                                            SizedBox(width: 10),
+                                            Expanded(
+                                              child: OutlinedButton(
+                                                style: OutlinedButton.styleFrom(
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                                onPressed: () {
+                                                  approvePayment(
+                                                      schedule['booking_id']);
+                                                },
+                                                child: Text(
+                                                  'Approve Payment',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ],
@@ -354,22 +425,30 @@ Alignment _getAlignment(FilterStatus filterStatus) {
     case FilterStatus.Upcoming:
       return Alignment.centerLeft;
     case FilterStatus.Approved:
-      return Alignment.center;
+      return Alignment(-0.33, 0.0);
     case FilterStatus.Complete:
+      return Alignment(0.33, 0.0);
+    case FilterStatus.Paid:
       return Alignment.centerRight;
   }
 }
 
 Alignment _getTextAlignment(FilterStatus filterStatus) {
-  switch (filterStatus) {
-    case FilterStatus.Upcoming:
-      return Alignment.centerLeft;
-    case FilterStatus.Approved:
-      return Alignment.center;
-    case FilterStatus.Complete:
-      return Alignment.centerRight;
-  }
+  return Alignment.center; // Center all text within each tab
 }
+
+// Alignment _getTextAlignment(FilterStatus filterStatus) {
+//   switch (filterStatus) {
+//     case FilterStatus.Upcoming:
+//       return Alignment.topLeft;
+//     case FilterStatus.Approved:
+//       return Alignment.centerLeft;
+//     case FilterStatus.Complete:
+//       return Alignment.centerRight;
+//     case FilterStatus.Paid:
+//       return Alignment.topRight;
+//   }
+// }
 
 String _formatTimestamp(dynamic timestamp) {
   if (timestamp is Timestamp) {

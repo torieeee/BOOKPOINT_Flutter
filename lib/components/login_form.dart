@@ -38,27 +38,27 @@ class _LoginFormState extends State<LoginForm> {
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            cursorColor: Config.primaryColor,
+            cursorColor: Color(0xFF427D7D),
             decoration: const InputDecoration(
               hintText: 'Email Address',
               labelText: 'Email',
               alignLabelWithHint: true,
               prefixIcon: Icon(Icons.email_outlined),
-              prefixIconColor: Config.primaryColor,
+              prefixIconColor: Color(0xFF427D7D),
             ),
           ),
           Config.spaceSmall,
           TextFormField(
             controller: _passController,
             keyboardType: TextInputType.visiblePassword,
-            cursorColor: Config.primaryColor,
+            cursorColor: Color(0xFF427D7D),
             obscureText: obsecurePass,
             decoration: InputDecoration(
                 hintText: 'Password',
                 labelText: 'Password',
                 alignLabelWithHint: true,
                 prefixIcon: const Icon(Icons.lock_outline),
-                prefixIconColor: Config.primaryColor,
+                prefixIconColor: Color(0xFF427D7D),
                 suffixIcon: IconButton(
                     onPressed: () {
                       setState(() {
@@ -72,7 +72,7 @@ class _LoginFormState extends State<LoginForm> {
                           )
                         : const Icon(
                             Icons.visibility_outlined,
-                            color: Config.primaryColor,
+                            color: Color(0xFF427D7D),
                           ))),
           ),
           Config.spaceSmall,

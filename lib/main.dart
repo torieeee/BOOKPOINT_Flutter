@@ -140,6 +140,7 @@ import 'package:book_point/utils/config.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'main_layout.dart';
 import 'screens/booking_page.dart';
@@ -202,18 +203,21 @@ class MyApp extends StatelessWidget {
         title: 'Bookpoint',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
+          textTheme: GoogleFonts.spaceGroteskTextTheme(
+            Theme.of(context).textTheme,
+          ),
           inputDecorationTheme: const InputDecorationTheme(
-            focusColor: Config.primaryColor,
+            focusColor: Color(0xFF427D7D),
             border: Config.outlinedBorder,
             focusedBorder: Config.focusBorder,
             errorBorder: Config.errorBorder,
             enabledBorder: Config.outlinedBorder,
-            floatingLabelStyle: TextStyle(color: Config.primaryColor),
+            floatingLabelStyle: TextStyle(color: Color(0xFF427D7D)),
             prefixIconColor: Colors.black38,
           ),
           scaffoldBackgroundColor: Colors.white,
           bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            backgroundColor: Config.primaryColor,
+            backgroundColor: Color(0xFF427D7D),
             selectedItemColor: Colors.white,
             showSelectedLabels: true,
             showUnselectedLabels: false,

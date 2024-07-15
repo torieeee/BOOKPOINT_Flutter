@@ -20,7 +20,7 @@ class DoctorCard extends StatelessWidget {
     Config().init(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      height: 150,
+      height: 180,
       child: GestureDetector(
         child: Card(
           elevation: 5,

@@ -20,7 +20,7 @@ class AppTheme{
   static ColorScheme get _colorScheme{
     return const ColorScheme(
           brightness: Brightness.light,
-          primary: Color(0xff909cdf) ,
+          primary: Color.fromARGB(255, 143, 156, 225) ,
           onPrimary: Color(0xffFFFFFF), 
           primaryContainer:Color(0xfff2f3fb),
           onPrimaryContainer: Color(0xff000000),
@@ -46,8 +46,8 @@ class AppTheme{
   static TextTheme get _textTheme{
     const textTheme = TextTheme();
 
-    final bodyFont = GoogleFonts.soraTextTheme(textTheme);
-    final headingFont = GoogleFonts.spaceGroteskTextTheme(textTheme);
+    final bodyFont = GoogleFonts.kulimParkTextTheme(textTheme);
+    final headingFont = GoogleFonts.kulimParkTextTheme(textTheme);
 
     return bodyFont.copyWith(
       displayLarge: headingFont.displayLarge, 

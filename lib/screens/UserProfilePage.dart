@@ -95,6 +95,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('User Profile'),
       ),
       body: Column(
@@ -103,7 +104,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             flex: 4,
             child: Container(
               width: double.infinity,
-              color: Config.primaryColor,
+              color: Color(0xFF427D7D),
               child: Column(
                 children: <Widget>[
                   const SizedBox(height: 110),
@@ -176,7 +177,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           ListTile(
                             leading: Icon(
                               Icons.history,
-                              color: Colors.yellowAccent[400],
+                              color: Color(0xFFEC017E),
                               size: 35,
                             ),
                             title: TextButton(
@@ -184,7 +185,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               child: const Text(
                                 "History",
                                 style: TextStyle(
-                                  color: Config.primaryColor,
+                                  color: Color(0xFF427D7D),
                                   fontSize: 15,
                                 ),
                               ),
@@ -238,7 +239,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               child: const Text(
                                 "Logout",
                                 style: TextStyle(
-                                  color: Config.primaryColor,
+                                  color: Color(0xFF427D7D),
                                   fontSize: 15,
                                 ),
                               ),

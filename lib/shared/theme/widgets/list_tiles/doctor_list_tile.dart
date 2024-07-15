@@ -72,13 +72,21 @@ class DoctorListTile extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DoctorDetails(doctor: doctor.toMap(), isFav: false),
+              builder: (context) =>
+                  DoctorDetails(doctor: doctor.toMap(), isFav: false),
               settings: RouteSettings(
-                arguments: {'doc_id': doctor.doc_id,'doc_name':doctor.doc_name},
+                arguments: {
+                  'doc_id': doctor.doc_id,
+                  'doc_name': doctor.doc_name
+                },
               ),
             ),
           );
         },
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all<Color>(
+              Color(0xFF427D7D)), // Change the color here
+        ),
         child: const Text('Book Now'),
       ),
     );
@@ -91,6 +99,3 @@ Stream<List<DoctorModel>> _readData() {
   return userCollection.snapshots().map((querySnapshot) =>
       querySnapshot.docs.map((e) => DoctorModel.fromSnapshot(e)).toList());
 }
-
-
-
