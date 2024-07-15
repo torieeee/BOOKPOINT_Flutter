@@ -15,6 +15,7 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * Validate and create a newly registered user.
      * This is  the process of creating a new user in the database.
+     * They may need to accept the terms and conditions if the feature is enabled.
      *
      * @param  array<string, string>  $input
      */
