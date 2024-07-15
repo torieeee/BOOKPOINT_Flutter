@@ -17,6 +17,7 @@ class CreateNewUser implements CreatesNewUsers
      * This is  the process of creating a new user in the database.
      * They may need to accept the terms and conditions if the feature is enabled.
      * The user's password is hashed before being stored in the database.
+     * User roles will be selected later
      *
      * @param  array<string, string>  $input
      */
